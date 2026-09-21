@@ -1,0 +1,11 @@
+# Fim de linha normalizado no repositório (LF) e nativo na cópia de trabalho.
+* text=auto
+
+# Scripts do Windows precisam de CRLF para rodar em qualquer situação.
+*.bat text eol=crlf
+
+# Binários: não normalizar nem tentar mostrar diferença de texto.
+*.png binary
+*.ico binary
+*.pdf binary
+*.docx binary

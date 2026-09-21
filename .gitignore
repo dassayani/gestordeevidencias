@@ -1,0 +1,31 @@
+# Ambiente virtual e dependências instaladas
+venv/
+.venv/
+
+# Saída do empacotamento (PyInstaller)
+build/
+dist/
+*.spec
+
+# Bytecode
+__pycache__/
+*.py[cod]
+
+# Preferências e log da instalação local: apontam para pastas desta máquina
+config.json
+erros.log
+
+# Resultado de execução dos testes (relatórios, PDFs e imagens gerados)
+tests/_saida/
+
+# Ferramentas de editor
+.claude/
+.vscode/
+.idea/
+
+# Capturas e documentos, caso alguém aponte a pasta para dentro do projeto.
+# Evidência pode conter dado de cliente e não deve ir para o repositório.
+Capturas/
+PDF/
+DOCX/
+*.raw.png

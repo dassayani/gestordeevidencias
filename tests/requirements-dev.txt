@@ -1,0 +1,5 @@
+# Dependências só de teste — não entram no executável.
+# Instale com: venv\Scripts\python.exe -m pip install -r tests\requirements-dev.txt
+robotframework>=7.0
+pymupdf>=1.24          # lê o texto do PDF gerado para conferir o conteúdo
+pyflakes>=3.0          # verificação estática usada antes de empacotar

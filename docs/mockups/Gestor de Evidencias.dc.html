@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  body { margin:0; background:#E9EEF2; font-family:"Segoe UI Variable Text","Segoe UI",system-ui,sans-serif; color:#17262E; -webkit-font-smoothing:antialiased; }
+  a { color:#0B7285; text-decoration:none; border-bottom:1px solid #A8CBD4; }
+  a:hover { color:#08606f; border-bottom-color:#0B7285; }
+</style>
+</helmet>
+
+<section style="padding:56px 64px 96px;display:flex;flex-direction:column;gap:28px">
+  <div style="display:flex;align-items:baseline;gap:16px;flex-wrap:wrap">
+    <div style="font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#7B909C;font-weight:600">Turno 1</div>
+    <div style="font-size:26px;font-weight:600;letter-spacing:-.01em">Gestor de Evidências — aplicativo e saída em PDF</div>
+    <div style="font-size:14px;color:#5C7280">Windows 11 · densidade confortável · telas <a href="#1a">1a</a>–<a href="#1e">1e</a>, layouts de documento <a href="#1f">1f</a>–<a href="#1h">1h</a></div>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;gap:48px;align-items:flex-start">
+
+    <div id="1a" style="display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="font-size:12px;font-weight:700;color:#ffffff;background:#17262E;border-radius:6px;padding:3px 8px;letter-spacing:.04em">1a</div>
+        <div style="font-size:15px;font-weight:600">Área de trabalho lateral</div>
+        <div style="font-size:13px;color:#7B909C">ancorada à direita da tela</div>
+      </div>
+      <div style="width:392px;height:824px;background:#FBFDFE;border:1px solid #D3DCE2;border-radius:12px;box-shadow:0 18px 50px rgba(20,40,55,.16);display:flex;flex-direction:column;overflow:hidden">
+        <div style="height:46px;flex:none;background:#F1F6F8;border-bottom:1px solid #E1E8EC;display:flex;align-items:center;gap:10px;padding:0 12px">
+          <div style="width:24px;height:24px;border-radius:6px;background:#0B7285;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center">GE</div>
+          <div style="flex:1;font-size:13px;font-weight:600">Gestor de Evidências</div>
+          <div style="display:flex;gap:2px;color:#6B8190;font-size:12px">
+            <div style="width:26px;height:26px;border-radius:5px;display:flex;align-items:center;justify-content:center">⚙</div>
+            <div style="width:26px;height:26px;border-radius:5px;display:flex;align-items:center;justify-content:center">─</div>
+            <div style="width:26px;height:26px;border-radius:5px;display:flex;align-items:center;justify-content:center">✕</div>
+          </div>
+        </div>
+
+        <div style="flex:none;padding:14px 14px 10px;display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;align-items:center;gap:8px;height:34px;border:1px solid #DCE4E9;background:#fff;border-radius:8px;padding:0 10px">
+            <div style="color:#9AADB8;font-size:13px">⌕</div>
+            <div style="font-size:13px;color:#9AADB8">Buscar por título, tag ou data</div>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <div style="font-size:12px;font-weight:600;color:#ffffff;background:#0B7285;border-radius:99px;padding:5px 11px">Hoje · 12</div>
+            <div style="font-size:12px;color:#4A5F6B;background:#EDF2F5;border:1px solid #E1E8EC;border-radius:99px;padding:5px 11px">Marcadas</div>
+            <div style="font-size:12px;color:#4A5F6B;background:#EDF2F5;border:1px solid #E1E8EC;border-radius:99px;padding:5px 11px">Editadas</div>
+            <div style="font-size:12px;color:#4A5F6B;background:#EDF2F5;border:1px solid #E1E8EC;border-radius:99px;padding:5px 11px">Tudo</div>
+          </div>
+        </div>
+
+        <div style="flex:1;min-height:0;overflow:hidden;padding:0 14px;display:flex;flex-direction:column;gap:10px">
+          <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#8EA2AD">Hoje, 16 de setembro</div>
+
+          <div style="display:flex;gap:11px;padding:9px;border:1.5px solid #0B7285;background:#F0F8FA;border-radius:10px;align-items:center">
+            <div style="position:relative;width:118px;height:74px;flex:none;border-radius:6px;overflow:hidden;border:1px solid #D9E2E7;background:#fff">
+              <dc-import name="Shot" hint-size="100%,100%"></dc-import>
+              <div style="position:absolute;top:4px;left:4px;width:18px;height:18px;border-radius:50%;background:#0B7285;color:#fff;font-size:11px;display:flex;align-items:center;justify-content:center;font-weight:700">✓</div>
+            </div>
+            <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:5px">
+              <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Login — erro de validação</div>
+              <div style="font-size:11.5px;color:#7B909C">14:32 · 1920×1080 · editada</div>
+              <div style="display:flex;gap:5px">
+                <div style="font-size:10.5px;font-weight:600;color:#0B7285;background:#DFEFF3;border-radius:4px;padding:2px 6px">QA-114</div>
+                <div style="font-size:10.5px;font-weight:600;color:#0A7A5A;background:#E2F5EE;border-radius:4px;padding:2px 6px">3 anotações</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:11px;padding:9px;border:1.5px solid #0B7285;background:#F0F8FA;border-radius:10px;align-items:center">
+            <div style="position:relative;width:118px;height:74px;flex:none;border-radius:6px;overflow:hidden;border:1px solid #D9E2E7;background:#fff">
+              <dc-import name="Shot" hint-size="100%,100%"></dc-import>
+              <div style="position:absolute;top:4px;left:4px;width:18px;height:18px;border-radius:50%;background:#0B7285;color:#fff;font-size:11px;display:flex;align-items:center;justify-content:center;font-weight:700">✓</div>
+            </div>
+            <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:5px">
+              <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Formulário de cadastro</div>
+              <div style="font-size:11.5px;color:#7B909C">14:28 · 1920×1080</div>
+              <div style="display:flex;gap:5px">
+                <div style="font-size:10.5px;font-weight:600;color:#0B7285;background:#DFEFF3;border-radius:4px;padding:2px 6px">QA-114</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:11px;padding:9px;border:1.5px solid #0B7285;background:#F0F8FA;border-radius:10px;align-items:center">
+            <div style="position:relative;width:118px;height:74px;flex:none;border-radius:6px;overflow:hidden;border:1px solid #D9E2E7;background:#fff">
+              <dc-import name="Shot" hint-size="100%,100%"></dc-import>
+              <div style="position:absolute;top:4px;left:4px;width:18px;height:18px;border-radius:50%;background:#0B7285;color:#fff;font-size:11px;display:flex;align-items:center;justify-content:center;font-weight:700">✓</div>
+            </div>
+            <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:5px">
+              <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Confirmação de e-mail</div>
+              <div style="font-size:11.5px;color:#7B909C">14:21 · 1440×900 · editada</div>
+              <div style="display:flex;gap:5px">
+                <div style="font-size:10.5px;font-weight:600;color:#0A7A5A;background:#E2F5EE;border-radius:4px;padding:2px 6px">1 anotação</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:11px;padding:9px;border:1px solid #E4EAEE;background:#fff;border-radius:10px;align-items:center">
+            <div style="position:relative;width:118px;height:74px;flex:none;border-radius:6px;overflow:hidden;border:1px solid #E4EAEE;background:#fff">
+              <dc-import name="Shot" hint-size="100%,100%"></dc-import>
+              <div style="position:absolute;top:4px;left:4px;width:18px;height:18px;border-radius:50%;border:1.5px solid #C3D0D8;background:rgba(255,255,255,.85)"></div>
+            </div>
+            <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:5px">
+              <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Dashboard — filtro por data</div>
+              <div style="font-size:11.5px;color:#7B909C">13:57 · 1920×1080</div>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:11px;padding:9px;border:1px solid #E4EAEE;background:#fff;border-radius:10px;align-items:center">
+            <div style="position:relative;width:118px;height:74px;flex:none;border-radius:6px;overflow:hidden;border:1px solid #E4EAEE;background:#fff">
+              <dc-import name="Shot" hint-size="100%,100%"></dc-import>
+              <div style="position:absolute;top:4px;left:4px;width:18px;height:18px;border-radius:50%;border:1.5px solid #C3D0D8;background:rgba(255,255,255,.85)"></div>
+            </div>
+            <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:5px">
+              <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Relatório exportado</div>
+              <div style="font-size:11.5px;color:#7B909C">13:44 · 1920×1080</div>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:8px;font-size:11.5px;color:#93A6B1;padding:2px 0 6px">
+            <div style="flex:1;height:1px;background:#E4EAEE"></div>
+            duplo clique para editar
+            <div style="flex:1;height:1px;background:#E4EAEE"></div>
+          </div>
+        </div>
+
+        <div style="flex:none;border-top:1px solid #E1E8EC;background:#F7FAFB;padding:12px 14px;display:flex;flex-direction:column;gap:9px">
+          <div style="display:flex;align-items:center;justify-content:space-between;font-size:12.5px">
+            <div style="font-weight:600;color:#0B7285">3 capturas selecionadas</div>
+            <div style="color:#7B909C">Limpar</div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <div style="flex:1;height:40px;border-radius:8px;background:#0B7285;color:#fff;font-size:13.5px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 2px 6px rgba(11,114,133,.28)">Criar documento →</div>
+            <div style="width:40px;height:40px;border-radius:8px;border:1px solid #D3DCE2;background:#fff;display:flex;align-items:center;justify-content:center;color:#4A5F6B;font-size:15px">⇧</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="1b" style="display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="font-size:12px;font-weight:700;color:#ffffff;background:#17262E;border-radius:6px;padding:3px 8px;letter-spacing:.04em">1b</div>
+        <div style="font-size:15px;font-weight:600">Editor de anotações</div>
+        <div style="font-size:13px;color:#7B909C">abre com duplo clique na captura</div>
+      </div>
+      <div style="width:1280px;height:824px;background:#FBFDFE;border:1px solid #D3DCE2;border-radius:12px;box-shadow:0 18px 50px rgba(20,40,55,.16);display:flex;flex-direction:column;overflow:hidden">
+        <div style="height:42px;flex:none;background:#F1F6F8;border-bottom:1px solid #E1E8EC;display:flex;align-items:center;padding:0 0 0 14px">
+          <div style="width:18px;height:18px;border-radius:5px;background:#0B7285;color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-right:10px">GE</div>
+          <div style="font-size:12.5px;color:#4A5F6B">Login — erro de validação<span style="color:#9AADB8"> · captura-14-32-08.png</span></div>
+          <div style="flex:1"></div>
+          <div style="display:flex;color:#6B8190;font-size:12px">
+            <div style="width:46px;height:42px;display:flex;align-items:center;justify-content:center">─</div>
+            <div style="width:46px;height:42px;display:flex;align-items:center;justify-content:center">☐</div>
+            <div style="width:46px;height:42px;display:flex;align-items:center;justify-content:center">✕</div>
+          </div>
+        </div>
+
+        <div style="height:52px;flex:none;border-bottom:1px solid #E5EAEE;background:#FFFFFF;display:flex;align-items:center;gap:14px;padding:0 16px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="font-size:12px;color:#6B8190">Cor</div>
+            <div style="display:flex;gap:5px">
+              <div style="width:22px;height:22px;border-radius:5px;background:#E8590C;box-shadow:0 0 0 2px #fff,0 0 0 3.5px #E8590C"></div>
+              <div style="width:22px;height:22px;border-radius:5px;background:#0B7285"></div>
+              <div style="width:22px;height:22px;border-radius:5px;background:#0CA678"></div>
+              <div style="width:22px;height:22px;border-radius:5px;background:#FFC53D"></div>
+              <div style="width:22px;height:22px;border-radius:5px;background:#17262E"></div>
+            </div>
+          </div>
+          <div style="width:1px;height:24px;background:#E5EAEE"></div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="font-size:12px;color:#6B8190">Espessura</div>
+            <div style="width:110px;height:4px;border-radius:99px;background:#E1E8EC;position:relative">
+              <div style="position:absolute;left:0;top:0;height:4px;width:46%;border-radius:99px;background:#0B7285"></div>
+              <div style="position:absolute;left:46%;top:-6px;width:16px;height:16px;border-radius:50%;background:#fff;border:1.5px solid #0B7285;margin-left:-8px"></div>
+            </div>
+            <div style="font-size:12px;color:#17262E;font-weight:600">4 px</div>
+          </div>
+          <div style="width:1px;height:24px;background:#E5EAEE"></div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <div style="font-size:12px;color:#6B8190">Estilo</div>
+            <div style="font-size:12px;font-weight:600;background:#EDF2F5;border:1px solid #E1E8EC;border-radius:6px;padding:5px 10px">Sólido</div>
+            <div style="font-size:12px;color:#4A5F6B;border-radius:6px;padding:5px 10px">Tracejado</div>
+          </div>
+          <div style="flex:1"></div>
+          <div style="display:flex;gap:6px;align-items:center">
+            <div style="font-size:12.5px;color:#4A5F6B;border:1px solid #D3DCE2;background:#fff;border-radius:7px;padding:7px 12px">↶ Desfazer</div>
+            <div style="font-size:12.5px;color:#9AADB8;border:1px solid #E4EAEE;background:#fff;border-radius:7px;padding:7px 12px">↷ Refazer</div>
+          </div>
+        </div>
+
+        <div style="flex:1;min-height:0;display:flex">
+          <div style="width:68px;flex:none;border-right:1px solid #E5EAEE;background:#F7FAFB;padding:10px 0;display:flex;flex-direction:column;align-items:center;gap:4px">
+            <div style="width:48px;padding:7px 0;border-radius:8px;display:flex;flex-direction:column;align-items:center;gap:3px;color:#4A5F6B">
+              <div style="font-size:16px">↖</div>
+              <sc-if value="{{ showToolLabels }}" hint-placeholder-val="{{ true }}"><div style="font-size:9px;letter-spacing:.02em">Mover</div></sc-if>
+            </div>
+            <div style="width:48px;padding:7px 0;border-radius:8px;display:flex;flex-direction:column;align-items:center;gap:3px;color:#ffffff;background:#0B7285;box-shadow:0 2px 5px rgba(11,114,133,.3)">
+              <div style="font-size:16px">↗</div>
+              <sc-if value="{{ showToolLabels }}" hint-placeholder-val="{{ true }}"><div style="font-size:9px;letter-spacing:.02em">Seta</div></sc-if>
+            </div>
+            <div style="width:48px;padding:7px 0;border-radius:8px;display:flex;flex-direction:column;align-items:center;gap:3px;color:#4A5F6B">
+              <div style="font-size:16px">▭</div>
+              <sc-if value="{{ showToolLabels }}" hint-placeholder-val="{{ true }}"><div style="font-size:9px;letter-spacing:.02em">Quadro</div></sc-if>
+            </div>
+            <div style="width:48px;padding:7px 0;border-radius:8px;display:flex;flex-direction:column;align-items:center;gap:3px;color:#4A5F6B">
+              <div style="font-size:16px">○</div>
+              <sc-if value="{{ showToolLabels }}" hint-placeholder-val="{{ true }}"><div style="font-size:9px;letter-spacing:.02em">Elipse</div></sc-if>
+            </div>
+            <div style="width:48px;padding:7px 0;border-radius:8px;display:flex;flex-direction:column;align-items:center;gap:3px;color:#4A5F6B">
+              <div style="font-size:16px">▮</div>
+              <sc-if value="{{ showToolLabels }}" hint-placeholder-val="{{ true }}"><div style="font-size:9px;letter-spacing:.02em">Marcador</div></sc-if>
+            </div>
+            <div style="width:48px;padding:7px 0;border-radius:8px;display:flex;flex-direction:column;align-items:center;gap:3px;color:#4A5F6B">
+              <div style="font-size:16px;font-weight:700">T</div>
+              <sc-if value="{{ showToolLabels }}" hint-placeholder-val="{{ true }}"><div style="font-size:9px;letter-spacing:.02em">Texto</div></sc-if>
+            </div>
+            <div style="width:48px;padding:7px 0;border-radius:8px;display:flex;flex-direction:column;align-items:center;gap:3px;color:#4A5F6B">
+              <div style="font-size:16px">☺</div>
+              <sc-if value="{{ showToolLabels }}" hint-placeholder-val="{{ true }}"><div style="font-size:9px;letter-spacing:.02em">Emoji</div></sc-if>
+            </div>
+            <div style="width:48px;padding:7px 0;border-radius:8px;display:flex;flex-direction:column;align-items:center;gap:3px;color:#4A5F6B">
+              <div style="font-size:16px">①</div>
+              <sc-if value="{{ showToolLabels }}" hint-placeholder-val="{{ true }}"><div style="font-size:9px;letter-spacing:.02em">Passo</div></sc-if>
+            </div>
+            <div style="width:48px;padding:7px 0;border-radius:8px;display:flex;flex-direction:column;align-items:center;gap:3px;color:#4A5F6B">
+              <div style="font-size:16px">▩</div>
+              <sc-if value="{{ showToolLabels }}" hint-placeholder-val="{{ true }}"><div style="font-size:9px;letter-spacing:.02em">Borrar</div></sc-if>
+            </div>
+            <div style="width:48px;padding:7px 0;border-radius:8px;display:flex;flex-direction:column;align-items:center;gap:3px;color:#4A5F6B">
+              <div style="font-size:16px">⬚</div>
+              <sc-if value="{{ showToolLabels }}" hint-placeholder-val="{{ true }}"><div style="font-size:9px;letter-spacing:.02em">Recorte</div></sc-if>
+            </div>
+            <div style="flex:1"></div>
+            <div style="width:36px;height:1px;background:#E1E8EC;margin:6px 0"></div>
+            <div style="width:48px;padding:7px 0;border-radius:8px;display:flex;flex-direction:column;align-items:center;gap:3px;color:#4A5F6B">
+              <div style="font-size:16px">⌫</div>
+              <sc-if value="{{ showToolLabels }}" hint-placeholder-val="{{ true }}"><div style="font-size:9px;letter-spacing:.02em">Apagar</div></sc-if>
+            </div>
+          </div>
+
+          <div style="flex:1;min-width:0;background:#DEE6EB;display:flex;align-items:center;justify-content:center;padding:28px;position:relative">
+            <div style="width:808px;height:512px;position:relative;background:#fff;border-radius:4px;box-shadow:0 10px 32px rgba(20,40,55,.22)">
+              <dc-import name="Shot" hint-size="100%,100%"></dc-import>
+
+              <div style="position:absolute;left:56px;top:250px;width:236px;height:62px;border:3px solid #E8590C;border-radius:5px"></div>
+              <div style="position:absolute;left:56px;top:318px;font-size:12.5px;font-weight:700;color:#fff;background:#E8590C;border-radius:4px;padding:3px 8px">campo obrigatório</div>
+
+              <div style="position:absolute;left:330px;top:200px;width:150px;height:3px;background:#E8590C;transform:rotate(26deg);transform-origin:left center;border-radius:2px">
+                <div style="position:absolute;right:-1px;top:-6.5px;width:0;height:0;border-left:16px solid #E8590C;border-top:8px solid transparent;border-bottom:8px solid transparent"></div>
+              </div>
+
+              <div style="position:absolute;left:452px;top:148px;background:#FFE08A;border-radius:3px;padding:3px 7px;font-size:13px;color:#3A2E0B;font-weight:500">mensagem não aparece</div>
+
+              <div style="position:absolute;left:660px;top:378px;font-size:34px;line-height:1">🔴</div>
+
+              <div style="position:absolute;left:24px;top:236px;width:26px;height:26px;border-radius:50%;background:#0B7285;color:#fff;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.2)">1</div>
+              <div style="position:absolute;left:414px;top:120px;width:26px;height:26px;border-radius:50%;background:#0B7285;color:#fff;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.2)">2</div>
+
+              <div style="position:absolute;left:52px;top:246px;width:244px;height:70px;pointer-events:none">
+                <div style="position:absolute;left:-4px;top:-4px;width:8px;height:8px;background:#fff;border:1.5px solid #0B7285;border-radius:2px"></div>
+                <div style="position:absolute;right:-4px;top:-4px;width:8px;height:8px;background:#fff;border:1.5px solid #0B7285;border-radius:2px"></div>
+                <div style="position:absolute;left:-4px;bottom:-4px;width:8px;height:8px;background:#fff;border:1.5px solid #0B7285;border-radius:2px"></div>
+                <div style="position:absolute;right:-4px;bottom:-4px;width:8px;height:8px;background:#fff;border:1.5px solid #0B7285;border-radius:2px"></div>
+              </div>
+            </div>
+
+            <div style="position:absolute;left:50%;bottom:16px;transform:translateX(-50%);display:flex;align-items:center;gap:4px;background:#FFFFFF;border:1px solid #DCE4E9;border-radius:10px;padding:5px 8px;box-shadow:0 6px 18px rgba(20,40,55,.14)">
+              <div style="width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#4A5F6B">−</div>
+              <div style="font-size:12.5px;font-weight:600;min-width:46px;text-align:center">100%</div>
+              <div style="width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#4A5F6B">＋</div>
+              <div style="width:1px;height:18px;background:#E5EAEE;margin:0 4px"></div>
+              <div style="font-size:12px;color:#6B8190;padding:0 4px">Ajustar</div>
+            </div>
+          </div>
+
+          <div style="width:272px;flex:none;border-left:1px solid #E5EAEE;background:#FFFFFF;display:flex;flex-direction:column">
+            <div style="padding:14px 14px 10px;border-bottom:1px solid #EDF1F4">
+              <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#8EA2AD;margin-bottom:10px">Anotações</div>
+              <div style="display:flex;flex-direction:column;gap:5px">
+                <div style="display:flex;align-items:center;gap:9px;padding:7px 8px;border-radius:7px;background:#F0F8FA;border:1px solid #CBE4EA">
+                  <div style="width:16px;height:16px;border-radius:4px;background:#E8590C"></div>
+                  <div style="flex:1;font-size:12.5px;font-weight:600">Quadro · campo obrigatório</div>
+                  <div style="font-size:12px;color:#7B909C">👁</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:9px;padding:7px 8px;border-radius:7px">
+                  <div style="width:16px;height:16px;border-radius:4px;background:#E8590C"></div>
+                  <div style="flex:1;font-size:12.5px;color:#4A5F6B">Seta</div>
+                  <div style="font-size:12px;color:#9AADB8">👁</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:9px;padding:7px 8px;border-radius:7px">
+                  <div style="width:16px;height:16px;border-radius:4px;background:#FFE08A"></div>
+                  <div style="flex:1;font-size:12.5px;color:#4A5F6B">Marcador de texto</div>
+                  <div style="font-size:12px;color:#9AADB8">👁</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:9px;padding:7px 8px;border-radius:7px">
+                  <div style="width:16px;height:16px;border-radius:4px;background:#EDF1F4;display:flex;align-items:center;justify-content:center;font-size:10px">🔴</div>
+                  <div style="flex:1;font-size:12.5px;color:#4A5F6B">Emoji</div>
+                  <div style="font-size:12px;color:#9AADB8">👁</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:9px;padding:7px 8px;border-radius:7px">
+                  <div style="width:16px;height:16px;border-radius:4px;background:#0B7285"></div>
+                  <div style="flex:1;font-size:12.5px;color:#4A5F6B">Passos 1–2</div>
+                  <div style="font-size:12px;color:#9AADB8">👁</div>
+                </div>
+              </div>
+            </div>
+
+            <div style="padding:14px;border-bottom:1px solid #EDF1F4;display:flex;flex-direction:column;gap:10px">
+              <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#8EA2AD">Legenda da captura</div>
+              <div style="border:1px solid #DCE4E9;border-radius:8px;background:#FBFDFE;padding:9px 10px;font-size:12.5px;line-height:1.5;color:#17262E;min-height:72px">Ao enviar o formulário sem o CPF, o campo é destacado mas nenhuma mensagem de erro é exibida.</div>
+              <div style="font-size:11px;color:#93A6B1">Usada como título no documento</div>
+            </div>
+
+            <div style="padding:14px;display:flex;flex-direction:column;gap:9px">
+              <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#8EA2AD">Metadados</div>
+              <div style="display:flex;justify-content:space-between;font-size:12.5px"><span style="color:#6B8190">Capturada</span><span style="font-weight:500">16/09 14:32:08</span></div>
+              <div style="display:flex;justify-content:space-between;font-size:12.5px"><span style="color:#6B8190">Dimensões</span><span style="font-weight:500">1920 × 1080</span></div>
+              <div style="display:flex;justify-content:space-between;font-size:12.5px"><span style="color:#6B8190">Origem</span><span style="font-weight:500">Chrome · /cadastro</span></div>
+              <div style="display:flex;justify-content:space-between;font-size:12.5px"><span style="color:#6B8190">Caso</span><span style="font-weight:500;color:#0B7285">QA-114</span></div>
+            </div>
+
+            <div style="flex:1"></div>
+            <div style="padding:14px;border-top:1px solid #EDF1F4;background:#F7FAFB;display:flex;flex-direction:column;gap:8px">
+              <div style="height:40px;border-radius:8px;background:#0B7285;color:#fff;font-size:13.5px;font-weight:600;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(11,114,133,.28)">Gravar edições</div>
+              <div style="display:flex;gap:8px">
+                <div style="flex:1;height:36px;border-radius:8px;border:1px solid #D3DCE2;background:#fff;font-size:12.5px;color:#4A5F6B;display:flex;align-items:center;justify-content:center">Salvar cópia</div>
+                <div style="flex:1;height:36px;border-radius:8px;border:1px solid #D3DCE2;background:#fff;font-size:12.5px;color:#4A5F6B;display:flex;align-items:center;justify-content:center">Copiar</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="height:30px;flex:none;border-top:1px solid #E5EAEE;background:#F1F6F8;display:flex;align-items:center;gap:16px;padding:0 14px;font-size:11.5px;color:#6B8190">
+          <div>Ferramenta: Seta</div>
+          <div>x 412 · y 268</div>
+          <div style="flex:1"></div>
+          <div style="color:#0A7A5A;font-weight:600">Alterações não gravadas</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="1c" style="display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="font-size:12px;font-weight:700;color:#ffffff;background:#17262E;border-radius:6px;padding:3px 8px;letter-spacing:.04em">1c</div>
+        <div style="font-size:15px;font-weight:600">Montar documento</div>
+        <div style="font-size:13px;color:#7B909C">legenda por imagem, ordem arrastável</div>
+      </div>
+      <div style="width:1280px;height:824px;background:#FBFDFE;border:1px solid #D3DCE2;border-radius:12px;box-shadow:0 18px 50px rgba(20,40,55,.16);display:flex;flex-direction:column;overflow:hidden">
+        <div style="height:42px;flex:none;background:#F1F6F8;border-bottom:1px solid #E1E8EC;display:flex;align-items:center;padding:0 0 0 14px">
+          <div style="width:18px;height:18px;border-radius:5px;background:#0B7285;color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-right:10px">GE</div>
+          <div style="font-size:12.5px;color:#4A5F6B">Novo documento<span style="color:#9AADB8"> · 5 capturas</span></div>
+          <div style="flex:1"></div>
+          <div style="display:flex;color:#6B8190;font-size:12px">
+            <div style="width:46px;height:42px;display:flex;align-items:center;justify-content:center">─</div>
+            <div style="width:46px;height:42px;display:flex;align-items:center;justify-content:center">☐</div>
+            <div style="width:46px;height:42px;display:flex;align-items:center;justify-content:center">✕</div>
+          </div>
+        </div>
+
+        <div style="flex:1;min-height:0;display:flex">
+          <div style="width:238px;flex:none;border-right:1px solid #E5EAEE;background:#F7FAFB;display:flex;flex-direction:column">
+            <div style="padding:14px 14px 10px;display:flex;flex-direction:column;gap:3px">
+              <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#8EA2AD">Sequência</div>
+              <div style="font-size:11.5px;color:#93A6B1">arraste para reordenar</div>
+            </div>
+            <div style="flex:1;min-height:0;padding:0 12px;display:flex;flex-direction:column;gap:8px">
+              <div style="display:flex;align-items:center;gap:8px;padding:7px;background:#fff;border:1.5px solid #0B7285;border-radius:9px">
+                <div style="color:#B4C2CB;font-size:13px;letter-spacing:-1px">⠿</div>
+                <div style="width:20px;height:20px;border-radius:5px;background:#0B7285;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center">1</div>
+                <div style="position:relative;width:74px;height:46px;border-radius:5px;overflow:hidden;border:1px solid #D9E2E7;background:#fff"><dc-import name="Shot" hint-size="100%,100%"></dc-import></div>
+                <div style="flex:1;min-width:0;font-size:11.5px;line-height:1.3;color:#17262E;font-weight:600;overflow:hidden">Login</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;padding:7px;background:#fff;border:1px solid #E4EAEE;border-radius:9px">
+                <div style="color:#B4C2CB;font-size:13px;letter-spacing:-1px">⠿</div>
+                <div style="width:20px;height:20px;border-radius:5px;background:#E1E8EC;color:#4A5F6B;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center">2</div>
+                <div style="position:relative;width:74px;height:46px;border-radius:5px;overflow:hidden;border:1px solid #E4EAEE;background:#fff"><dc-import name="Shot" hint-size="100%,100%"></dc-import></div>
+                <div style="flex:1;min-width:0;font-size:11.5px;line-height:1.3;color:#4A5F6B;overflow:hidden">Cadastro</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;padding:7px;background:#fff;border:1px solid #E4EAEE;border-radius:9px">
+                <div style="color:#B4C2CB;font-size:13px;letter-spacing:-1px">⠿</div>
+                <div style="width:20px;height:20px;border-radius:5px;background:#E1E8EC;color:#4A5F6B;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center">3</div>
+                <div style="position:relative;width:74px;height:46px;border-radius:5px;overflow:hidden;border:1px solid #E4EAEE;background:#fff"><dc-import name="Shot" hint-size="100%,100%"></dc-import></div>
+                <div style="flex:1;min-width:0;font-size:11.5px;line-height:1.3;color:#4A5F6B;overflow:hidden">E-mail</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;padding:7px;background:#fff;border:1px solid #E4EAEE;border-radius:9px">
+                <div style="color:#B4C2CB;font-size:13px;letter-spacing:-1px">⠿</div>
+                <div style="width:20px;height:20px;border-radius:5px;background:#E1E8EC;color:#4A5F6B;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center">4</div>
+                <div style="position:relative;width:74px;height:46px;border-radius:5px;overflow:hidden;border:1px solid #E4EAEE;background:#fff"><dc-import name="Shot" hint-size="100%,100%"></dc-import></div>
+                <div style="flex:1;min-width:0;font-size:11.5px;line-height:1.3;color:#4A5F6B;overflow:hidden">Dashboard</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;padding:7px;background:#fff;border:1px solid #E4EAEE;border-radius:9px">
+                <div style="color:#B4C2CB;font-size:13px;letter-spacing:-1px">⠿</div>
+                <div style="width:20px;height:20px;border-radius:5px;background:#E1E8EC;color:#4A5F6B;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center">5</div>
+                <div style="position:relative;width:74px;height:46px;border-radius:5px;overflow:hidden;border:1px solid #E4EAEE;background:#fff"><dc-import name="Shot" hint-size="100%,100%"></dc-import></div>
+                <div style="flex:1;min-width:0;font-size:11.5px;line-height:1.3;color:#4A5F6B;overflow:hidden">Relatório</div>
+              </div>
+              <div style="height:44px;border:1.5px dashed #C7D4DB;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#8EA2AD;gap:6px">＋ Adicionar da área</div>
+            </div>
+          </div>
+
+          <div style="flex:1;min-width:0;background:#EDF1F4;overflow:hidden;padding:22px 26px;display:flex;flex-direction:column;gap:16px">
+            <div style="background:#fff;border:1px solid #E1E8EC;border-radius:11px;padding:16px 18px;display:flex;flex-direction:column;gap:12px">
+              <div style="display:flex;align-items:center;gap:10px">
+                <div style="font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#0B7285">Capa do documento</div>
+                <div style="flex:1;height:1px;background:#EDF1F4"></div>
+              </div>
+              <div style="display:flex;gap:12px">
+                <div style="flex:2;display:flex;flex-direction:column;gap:5px">
+                  <div style="font-size:11.5px;color:#6B8190">Título</div>
+                  <div style="height:36px;border:1px solid #DCE4E9;border-radius:7px;background:#FBFDFE;display:flex;align-items:center;padding:0 10px;font-size:13.5px;font-weight:600">Evidências de teste — Cadastro de usuário</div>
+                </div>
+                <div style="flex:1;display:flex;flex-direction:column;gap:5px">
+                  <div style="font-size:11.5px;color:#6B8190">Caso / projeto</div>
+                  <div style="height:36px;border:1px solid #DCE4E9;border-radius:7px;background:#FBFDFE;display:flex;align-items:center;padding:0 10px;font-size:13.5px">QA-114</div>
+                </div>
+              </div>
+              <div style="display:flex;gap:12px">
+                <div style="flex:1;display:flex;flex-direction:column;gap:5px">
+                  <div style="font-size:11.5px;color:#6B8190">Autor</div>
+                  <div style="height:36px;border:1px solid #DCE4E9;border-radius:7px;background:#FBFDFE;display:flex;align-items:center;padding:0 10px;font-size:13.5px">Marina Alves</div>
+                </div>
+                <div style="flex:1;display:flex;flex-direction:column;gap:5px">
+                  <div style="font-size:11.5px;color:#6B8190">Data</div>
+                  <div style="height:36px;border:1px solid #DCE4E9;border-radius:7px;background:#FBFDFE;display:flex;align-items:center;padding:0 10px;font-size:13.5px">16/09/2026</div>
+                </div>
+                <div style="flex:1;display:flex;flex-direction:column;gap:5px">
+                  <div style="font-size:11.5px;color:#6B8190">Ambiente</div>
+                  <div style="height:36px;border:1px solid #DCE4E9;border-radius:7px;background:#FBFDFE;display:flex;align-items:center;padding:0 10px;font-size:13.5px">Homologação</div>
+                </div>
+              </div>
+            </div>
+
+            <div style="flex:1;min-height:0;display:flex;flex-direction:column;gap:12px">
+              <div style="background:#fff;border:1.5px solid #0B7285;border-radius:11px;padding:14px 16px;display:flex;gap:14px;box-shadow:0 4px 14px rgba(20,40,55,.07)">
+                <div style="width:26px;height:26px;flex:none;border-radius:50%;background:#0B7285;color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center">1</div>
+                <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:9px">
+                  <div style="font-size:11.5px;color:#6B8190">Legenda do passo</div>
+                  <div style="border:1px solid #CBE4EA;border-radius:7px;background:#F7FDFE;padding:9px 11px;font-size:14px;line-height:1.5">Ao enviar o formulário sem o CPF, o campo é destacado mas nenhuma mensagem de erro é exibida.</div>
+                  <div style="display:flex;align-items:center;gap:12px;font-size:11.5px;color:#8EA2AD">
+                    <div>94 / 240 caracteres</div>
+                    <div style="color:#0B7285;font-weight:600">Usar legenda do editor</div>
+                  </div>
+                </div>
+                <div style="position:relative;width:196px;height:124px;flex:none;border-radius:7px;overflow:hidden;border:1px solid #D9E2E7;background:#fff">
+                  <dc-import name="Shot" hint-size="100%,100%"></dc-import>
+                  <div style="position:absolute;left:14px;top:60px;width:58px;height:16px;border:2px solid #E8590C;border-radius:2px"></div>
+                  <div style="position:absolute;right:6px;bottom:6px;font-size:10px;font-weight:600;color:#fff;background:rgba(23,38,46,.72);border-radius:4px;padding:2px 6px">editada</div>
+                </div>
+              </div>
+
+              <div style="background:#fff;border:1px solid #E1E8EC;border-radius:11px;padding:14px 16px;display:flex;gap:14px">
+                <div style="width:26px;height:26px;flex:none;border-radius:50%;background:#E1E8EC;color:#4A5F6B;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center">2</div>
+                <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:9px">
+                  <div style="font-size:11.5px;color:#6B8190">Legenda do passo</div>
+                  <div style="border:1px solid #DCE4E9;border-radius:7px;background:#FBFDFE;padding:9px 11px;font-size:14px;line-height:1.5;color:#17262E">Tela de cadastro preenchida com dados válidos, antes do envio.</div>
+                </div>
+                <div style="position:relative;width:196px;height:124px;flex:none;border-radius:7px;overflow:hidden;border:1px solid #E4EAEE;background:#fff"><dc-import name="Shot" hint-size="100%,100%"></dc-import></div>
+              </div>
+
+              <div style="background:#fff;border:1px solid #E1E8EC;border-radius:11px;padding:14px 16px;display:flex;gap:14px;opacity:.72">
+                <div style="width:26px;height:26px;flex:none;border-radius:50%;background:#E1E8EC;color:#4A5F6B;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center">3</div>
+                <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:9px">
+                  <div style="font-size:11.5px;color:#6B8190">Legenda do passo</div>
+                  <div style="border:1px dashed #DCE4E9;border-radius:7px;background:#FBFDFE;padding:9px 11px;font-size:14px;line-height:1.5;color:#9AADB8">Descreva o que esta captura comprova…</div>
+                </div>
+                <div style="position:relative;width:196px;height:124px;flex:none;border-radius:7px;overflow:hidden;border:1px solid #E4EAEE;background:#fff"><dc-import name="Shot" hint-size="100%,100%"></dc-import></div>
+              </div>
+            </div>
+          </div>
+
+          <div style="width:296px;flex:none;border-left:1px solid #E5EAEE;background:#FFFFFF;display:flex;flex-direction:column">
+            <div style="padding:14px;border-bottom:1px solid #EDF1F4;display:flex;flex-direction:column;gap:9px">
+              <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#8EA2AD">Modelo</div>
+
+              <div style="display:flex;gap:10px;align-items:center;padding:9px;border:1.5px solid #0B7285;background:#F0F8FA;border-radius:9px">
+                <div style="width:44px;height:58px;flex:none;background:#fff;border:1px solid #CBE4EA;border-radius:3px;padding:5px;display:flex;flex-direction:column;gap:3px">
+                  <div style="height:4px;width:70%;background:#0B7285;border-radius:1px"></div>
+                  <div style="flex:1;background:#E6EEF2;border-radius:1px"></div>
+                  <div style="height:3px;width:50%;background:#D9E2E7;border-radius:1px"></div>
+                  <div style="flex:1;background:#E6EEF2;border-radius:1px"></div>
+                </div>
+                <div style="flex:1">
+                  <div style="font-size:13px;font-weight:600">Passo a passo</div>
+                  <div style="font-size:11.5px;color:#6B8190;line-height:1.4">1 imagem por passo, legenda acima</div>
+                </div>
+              </div>
+
+              <div style="display:flex;gap:10px;align-items:center;padding:9px;border:1px solid #E4EAEE;border-radius:9px">
+                <div style="width:44px;height:58px;flex:none;background:#fff;border:1px solid #E4EAEE;border-radius:3px;padding:5px;display:grid;grid-template-columns:1fr 1fr;gap:3px">
+                  <div style="background:#E6EEF2;border-radius:1px"></div>
+                  <div style="background:#E6EEF2;border-radius:1px"></div>
+                  <div style="background:#E6EEF2;border-radius:1px"></div>
+                  <div style="background:#E6EEF2;border-radius:1px"></div>
+                </div>
+                <div style="flex:1">
+                  <div style="font-size:13px;font-weight:600">Ficha de evidência</div>
+                  <div style="font-size:11.5px;color:#6B8190;line-height:1.4">2 por página, com metadados</div>
+                </div>
+              </div>
+
+              <div style="display:flex;gap:10px;align-items:center;padding:9px;border:1px solid #E4EAEE;border-radius:9px">
+                <div style="width:44px;height:58px;flex:none;background:#fff;border:1px solid #E4EAEE;border-radius:3px;display:flex;overflow:hidden">
+                  <div style="width:34%;background:#F1F6F8;border-right:1px solid #E4EAEE"></div>
+                  <div style="flex:1;padding:5px;display:flex;flex-direction:column;gap:3px">
+                    <div style="height:3px;width:80%;background:#D9E2E7;border-radius:1px"></div>
+                    <div style="flex:1;background:#E6EEF2;border-radius:1px"></div>
+                  </div>
+                </div>
+                <div style="flex:1">
+                  <div style="font-size:13px;font-weight:600">Relatório QA</div>
+                  <div style="font-size:11.5px;color:#6B8190;line-height:1.4">coluna lateral com contexto</div>
+                </div>
+              </div>
+            </div>
+
+            <div style="padding:14px;display:flex;flex-direction:column;gap:11px">
+              <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#8EA2AD">Opções</div>
+              <div style="display:flex;align-items:center;gap:10px"><div style="width:38px;height:22px;border-radius:99px;background:#0B7285;padding:3px;display:flex;justify-content:flex-end;flex:none"><div style="width:16px;height:16px;border-radius:50%;background:#fff"></div></div><div style="font-size:13px">Numerar os passos</div></div>
+              <div style="display:flex;align-items:center;gap:10px"><div style="width:38px;height:22px;border-radius:99px;background:#0B7285;padding:3px;display:flex;justify-content:flex-end;flex:none"><div style="width:16px;height:16px;border-radius:50%;background:#fff"></div></div><div style="font-size:13px">Sumário na primeira página</div></div>
+              <div style="display:flex;align-items:center;gap:10px"><div style="width:38px;height:22px;border-radius:99px;background:#CBD5DB;padding:3px;display:flex;justify-content:flex-start;flex:none"><div style="width:16px;height:16px;border-radius:50%;background:#fff"></div></div><div style="font-size:13px">Marca d'água do projeto</div></div>
+              <div style="display:flex;align-items:center;gap:10px"><div style="width:38px;height:22px;border-radius:99px;background:#0B7285;padding:3px;display:flex;justify-content:flex-end;flex:none"><div style="width:16px;height:16px;border-radius:50%;background:#fff"></div></div><div style="font-size:13px">Hora da captura no rodapé</div></div>
+              <div style="height:1px;background:#EDF1F4;margin:3px 0"></div>
+              <div style="display:flex;flex-direction:column;gap:5px">
+                <div style="font-size:11.5px;color:#6B8190">Cor de destaque</div>
+                <div style="display:flex;gap:7px">
+                  <div style="width:26px;height:26px;border-radius:6px;background:#0B7285;box-shadow:0 0 0 2px #fff,0 0 0 3.5px #0B7285"></div>
+                  <div style="width:26px;height:26px;border-radius:6px;background:#0CA678"></div>
+                  <div style="width:26px;height:26px;border-radius:6px;background:#1C7ED6"></div>
+                  <div style="width:26px;height:26px;border-radius:6px;background:#17262E"></div>
+                </div>
+              </div>
+            </div>
+
+            <div style="flex:1"></div>
+            <div style="padding:14px;border-top:1px solid #EDF1F4;background:#F7FAFB;display:flex;flex-direction:column;gap:8px">
+              <div style="font-size:11.5px;color:#6B8190">5 passos · 4 páginas estimadas</div>
+              <div style="height:40px;border-radius:8px;background:#0B7285;color:#fff;font-size:13.5px;font-weight:600;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(11,114,133,.28)">Pré-visualizar documento</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="1d" style="display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="font-size:12px;font-weight:700;color:#ffffff;background:#17262E;border-radius:6px;padding:3px 8px;letter-spacing:.04em">1d</div>
+        <div style="font-size:15px;font-weight:600">Pré-visualização e exportação</div>
+      </div>
+      <div style="width:1280px;height:824px;background:#FBFDFE;border:1px solid #D3DCE2;border-radius:12px;box-shadow:0 18px 50px rgba(20,40,55,.16);display:flex;flex-direction:column;overflow:hidden">
+        <div style="height:42px;flex:none;background:#F1F6F8;border-bottom:1px solid #E1E8EC;display:flex;align-items:center;padding:0 0 0 14px">
+          <div style="width:18px;height:18px;border-radius:5px;background:#0B7285;color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-right:10px">GE</div>
+          <div style="font-size:12.5px;color:#4A5F6B">Evidências de teste — Cadastro de usuário<span style="color:#9AADB8"> · pré-visualização</span></div>
+          <div style="flex:1"></div>
+          <div style="display:flex;color:#6B8190;font-size:12px">
+            <div style="width:46px;height:42px;display:flex;align-items:center;justify-content:center">─</div>
+            <div style="width:46px;height:42px;display:flex;align-items:center;justify-content:center">☐</div>
+            <div style="width:46px;height:42px;display:flex;align-items:center;justify-content:center">✕</div>
+          </div>
+        </div>
+
+        <div style="flex:1;min-height:0;display:flex">
+          <div style="width:126px;flex:none;border-right:1px solid #E5EAEE;background:#F7FAFB;padding:14px 0;display:flex;flex-direction:column;align-items:center;gap:10px">
+            <div style="width:74px;height:104px;background:#fff;border:1.5px solid #0B7285;border-radius:3px;box-shadow:0 2px 8px rgba(20,40,55,.1)"></div>
+            <div style="font-size:11px;color:#0B7285;font-weight:700;margin-top:-6px">1</div>
+            <div style="width:74px;height:104px;background:#fff;border:1px solid #DCE4E9;border-radius:3px"></div>
+            <div style="font-size:11px;color:#8EA2AD;margin-top:-6px">2</div>
+            <div style="width:74px;height:104px;background:#fff;border:1px solid #DCE4E9;border-radius:3px"></div>
+            <div style="font-size:11px;color:#8EA2AD;margin-top:-6px">3</div>
+            <div style="width:74px;height:104px;background:#fff;border:1px solid #DCE4E9;border-radius:3px"></div>
+            <div style="font-size:11px;color:#8EA2AD;margin-top:-6px">4</div>
+          </div>
+
+          <div style="flex:1;min-width:0;background:#DEE6EB;display:flex;align-items:flex-start;justify-content:center;padding:30px;overflow:hidden">
+            <div style="width:560px;background:#fff;box-shadow:0 12px 34px rgba(20,40,55,.2);font-family:'IBM Plex Sans',sans-serif;display:flex;flex-direction:column">
+              <div style="height:8px;background:#0B7285;flex:none"></div>
+              <div style="padding:32px 40px 26px;display:flex;flex-direction:column;gap:22px">
+                <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;border-bottom:1px solid #E4EAEE;padding-bottom:16px">
+                  <div>
+                    <div style="font-family:'Newsreader',serif;font-size:23px;line-height:1.2;color:#17262E">Evidências de teste</div>
+                    <div style="font-family:'Newsreader',serif;font-size:23px;line-height:1.2;color:#0B7285">Cadastro de usuário</div>
+                  </div>
+                  <div style="text-align:right;font-size:9.5px;color:#6B8190;line-height:1.7">
+                    <div style="font-weight:600;color:#17262E">QA-114</div>
+                    <div>16/09/2026</div>
+                    <div>Marina Alves</div>
+                  </div>
+                </div>
+
+                <div style="display:flex;flex-direction:{{ capDir }};gap:10px">
+                  <div style="display:flex;gap:9px;align-items:flex-start">
+                    <div style="width:18px;height:18px;flex:none;border-radius:50%;background:#0B7285;color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:1px">1</div>
+                    <div style="font-size:11px;line-height:1.55;color:#17262E">Ao enviar o formulário sem o CPF, o campo é destacado mas nenhuma mensagem de erro é exibida.</div>
+                  </div>
+                  <div style="position:relative;width:100%;height:188px;border:1px solid #DCE4E9;border-radius:3px;overflow:hidden;background:#fff">
+                    <dc-import name="Shot" hint-size="100%,100%"></dc-import>
+                    <div style="position:absolute;left:12%;top:47%;width:30%;height:13%;border:2px solid #E8590C;border-radius:3px"></div>
+                  </div>
+                </div>
+
+                <div style="display:flex;flex-direction:{{ capDir }};gap:10px">
+                  <div style="display:flex;gap:9px;align-items:flex-start">
+                    <div style="width:18px;height:18px;flex:none;border-radius:50%;background:#0B7285;color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:1px">2</div>
+                    <div style="font-size:11px;line-height:1.55;color:#17262E">Tela de cadastro preenchida com dados válidos, antes do envio.</div>
+                  </div>
+                  <div style="position:relative;width:100%;height:188px;border:1px solid #DCE4E9;border-radius:3px;overflow:hidden;background:#fff"><dc-import name="Shot" hint-size="100%,100%"></dc-import></div>
+                </div>
+              </div>
+              <div style="margin-top:auto;padding:12px 40px 16px;border-top:1px solid #EDF1F4;display:flex;justify-content:space-between;font-size:8.5px;color:#8EA2AD">
+                <div>Gestor de Evidências · Homologação</div>
+                <div>Página 1 de 4</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="width:320px;flex:none;border-left:1px solid #E5EAEE;background:#FFFFFF;display:flex;flex-direction:column">
+            <div style="padding:16px;border-bottom:1px solid #EDF1F4;display:flex;flex-direction:column;gap:11px">
+              <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#8EA2AD">Exportar</div>
+              <div style="display:flex;gap:7px">
+                <div style="flex:1;height:34px;border-radius:7px;background:#0B7285;color:#fff;font-size:12.5px;font-weight:600;display:flex;align-items:center;justify-content:center">PDF</div>
+                <div style="flex:1;height:34px;border-radius:7px;border:1px solid #DCE4E9;color:#4A5F6B;font-size:12.5px;display:flex;align-items:center;justify-content:center">DOCX</div>
+                <div style="flex:1;height:34px;border-radius:7px;border:1px solid #DCE4E9;color:#4A5F6B;font-size:12.5px;display:flex;align-items:center;justify-content:center">PNGs</div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:5px">
+                <div style="font-size:11.5px;color:#6B8190">Papel</div>
+                <div style="height:34px;border:1px solid #DCE4E9;border-radius:7px;background:#FBFDFE;display:flex;align-items:center;justify-content:space-between;padding:0 10px;font-size:13px">A4 · retrato<span style="color:#8EA2AD">⌄</span></div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:5px">
+                <div style="font-size:11.5px;color:#6B8190">Qualidade das imagens</div>
+                <div style="height:34px;border:1px solid #DCE4E9;border-radius:7px;background:#FBFDFE;display:flex;align-items:center;justify-content:space-between;padding:0 10px;font-size:13px">Alta · 300 dpi<span style="color:#8EA2AD">⌄</span></div>
+              </div>
+            </div>
+
+            <div style="padding:16px;border-bottom:1px solid #EDF1F4;display:flex;flex-direction:column;gap:11px">
+              <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#8EA2AD">Incluir</div>
+              <div style="display:flex;align-items:center;gap:10px"><div style="width:38px;height:22px;border-radius:99px;background:#0B7285;padding:3px;display:flex;justify-content:flex-end;flex:none"><div style="width:16px;height:16px;border-radius:50%;background:#fff"></div></div><div style="font-size:13px">Sumário</div></div>
+              <div style="display:flex;align-items:center;gap:10px"><div style="width:38px;height:22px;border-radius:99px;background:#0B7285;padding:3px;display:flex;justify-content:flex-end;flex:none"><div style="width:16px;height:16px;border-radius:50%;background:#fff"></div></div><div style="font-size:13px">Metadados de cada captura</div></div>
+              <div style="display:flex;align-items:center;gap:10px"><div style="width:38px;height:22px;border-radius:99px;background:#CBD5DB;padding:3px;display:flex;justify-content:flex-start;flex:none"><div style="width:16px;height:16px;border-radius:50%;background:#fff"></div></div><div style="font-size:13px">Hash de integridade</div></div>
+              <div style="display:flex;align-items:center;gap:10px"><div style="width:38px;height:22px;border-radius:99px;background:#CBD5DB;padding:3px;display:flex;justify-content:flex-start;flex:none"><div style="width:16px;height:16px;border-radius:50%;background:#fff"></div></div><div style="font-size:13px">Proteger com senha</div></div>
+            </div>
+
+            <div style="padding:16px;display:flex;flex-direction:column;gap:8px">
+              <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#8EA2AD">Destino</div>
+              <div style="display:flex;align-items:center;gap:9px;border:1px solid #DCE4E9;border-radius:7px;background:#FBFDFE;padding:9px 10px">
+                <div style="color:#8EA2AD">🗀</div>
+                <div style="flex:1;font-size:12.5px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">Documentos\Evidências\QA-114</div>
+                <div style="font-size:12px;color:#0B7285;font-weight:600">Alterar</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;margin-top:2px"><div style="width:38px;height:22px;border-radius:99px;background:#0B7285;padding:3px;display:flex;justify-content:flex-end;flex:none"><div style="width:16px;height:16px;border-radius:50%;background:#fff"></div></div><div style="font-size:13px">Abrir após exportar</div></div>
+            </div>
+
+            <div style="flex:1"></div>
+            <div style="padding:16px;border-top:1px solid #EDF1F4;background:#F7FAFB;display:flex;flex-direction:column;gap:8px">
+              <div style="font-size:11.5px;color:#6B8190">4 páginas · estimado 2,1 MB</div>
+              <div style="height:42px;border-radius:8px;background:#0CA678;color:#fff;font-size:14px;font-weight:600;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(12,166,120,.3)">Exportar PDF</div>
+              <div style="height:36px;border-radius:8px;border:1px solid #D3DCE2;background:#fff;font-size:12.5px;color:#4A5F6B;display:flex;align-items:center;justify-content:center">Salvar como modelo</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="height:34px;flex:none;border-top:1px solid #E5EAEE;background:#F1F6F8;display:flex;align-items:center;gap:14px;padding:0 14px;font-size:11.5px;color:#6B8190">
+          <div style="display:flex;align-items:center;gap:8px"><span>‹</span><span style="font-weight:600;color:#17262E">Página 1 de 4</span><span>›</span></div>
+          <div style="flex:1"></div>
+          <div>Modelo: Passo a passo</div>
+          <div>Zoom 92%</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="1e" style="display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="font-size:12px;font-weight:700;color:#ffffff;background:#17262E;border-radius:6px;padding:3px 8px;letter-spacing:.04em">1e</div>
+        <div style="font-size:15px;font-weight:600">Configurações</div>
+      </div>
+      <div style="width:1000px;height:700px;background:#FBFDFE;border:1px solid #D3DCE2;border-radius:12px;box-shadow:0 18px 50px rgba(20,40,55,.16);display:flex;flex-direction:column;overflow:hidden">
+        <div style="height:42px;flex:none;background:#F1F6F8;border-bottom:1px solid #E1E8EC;display:flex;align-items:center;padding:0 0 0 14px">
+          <div style="width:18px;height:18px;border-radius:5px;background:#0B7285;color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-right:10px">GE</div>
+          <div style="font-size:12.5px;color:#4A5F6B">Configurações</div>
+          <div style="flex:1"></div>
+          <div style="display:flex;color:#6B8190;font-size:12px">
+            <div style="width:46px;height:42px;display:flex;align-items:center;justify-content:center">─</div>
+            <div style="width:46px;height:42px;display:flex;align-items:center;justify-content:center">☐</div>
+            <div style="width:46px;height:42px;display:flex;align-items:center;justify-content:center">✕</div>
+          </div>
+        </div>
+        <div style="flex:1;min-height:0;display:flex">
+          <div style="width:216px;flex:none;background:#F7FAFB;border-right:1px solid #E5EAEE;padding:14px 10px;display:flex;flex-direction:column;gap:3px">
+            <div style="display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:7px;background:#E6F2F5;font-size:13.5px;font-weight:600;color:#0B7285"><span>◉</span>Captura</div>
+            <div style="display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:7px;font-size:13.5px;color:#4A5F6B"><span>✎</span>Edição</div>
+            <div style="display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:7px;font-size:13.5px;color:#4A5F6B"><span>▤</span>Documento</div>
+            <div style="display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:7px;font-size:13.5px;color:#4A5F6B"><span>🗀</span>Armazenamento</div>
+            <div style="display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:7px;font-size:13.5px;color:#4A5F6B"><span>⌨</span>Atalhos</div>
+            <div style="flex:1"></div>
+            <div style="padding:11px;border-radius:8px;background:#fff;border:1px solid #E4EAEE;font-size:11.5px;color:#6B8190;line-height:1.5">Versão 2.0 · build 341<div style="color:#0B7285;font-weight:600;margin-top:4px">Verificar atualizações</div></div>
+          </div>
+
+          <div style="flex:1;min-width:0;padding:26px 30px;display:flex;flex-direction:column;gap:20px;overflow:hidden">
+            <div style="font-size:19px;font-weight:600">Captura</div>
+
+            <div style="border:1px solid #E1E8EC;border-radius:10px;background:#fff;overflow:hidden">
+              <div style="display:flex;align-items:center;gap:14px;padding:14px 16px;border-bottom:1px solid #EDF1F4">
+                <div style="flex:1"><div style="font-size:13.5px;font-weight:600">Atalho de captura de área</div><div style="font-size:12px;color:#6B8190">seleciona uma região da tela</div></div>
+                <div style="display:flex;gap:5px">
+                  <div style="font-size:12px;font-weight:600;border:1px solid #DCE4E9;background:#F7FAFB;border-radius:5px;padding:5px 9px">Ctrl</div>
+                  <div style="font-size:12px;font-weight:600;border:1px solid #DCE4E9;background:#F7FAFB;border-radius:5px;padding:5px 9px">Shift</div>
+                  <div style="font-size:12px;font-weight:600;border:1px solid #DCE4E9;background:#F7FAFB;border-radius:5px;padding:5px 9px">S</div>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;gap:14px;padding:14px 16px;border-bottom:1px solid #EDF1F4">
+                <div style="flex:1"><div style="font-size:13.5px;font-weight:600">Atalho de janela ativa</div></div>
+                <div style="display:flex;gap:5px">
+                  <div style="font-size:12px;font-weight:600;border:1px solid #DCE4E9;background:#F7FAFB;border-radius:5px;padding:5px 9px">Ctrl</div>
+                  <div style="font-size:12px;font-weight:600;border:1px solid #DCE4E9;background:#F7FAFB;border-radius:5px;padding:5px 9px">Shift</div>
+                  <div style="font-size:12px;font-weight:600;border:1px solid #DCE4E9;background:#F7FAFB;border-radius:5px;padding:5px 9px">W</div>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;gap:14px;padding:14px 16px;border-bottom:1px solid #EDF1F4">
+                <div style="flex:1"><div style="font-size:13.5px;font-weight:600">Abrir a área lateral ao capturar</div><div style="font-size:12px;color:#6B8190">o painel aparece ancorado à direita</div></div>
+                <div style="width:38px;height:22px;border-radius:99px;background:#0B7285;padding:3px;display:flex;justify-content:flex-end;flex:none"><div style="width:16px;height:16px;border-radius:50%;background:#fff"></div></div>
+              </div>
+              <div style="display:flex;align-items:center;gap:14px;padding:14px 16px;border-bottom:1px solid #EDF1F4">
+                <div style="flex:1"><div style="font-size:13.5px;font-weight:600">Incluir cursor do mouse</div></div>
+                <div style="width:38px;height:22px;border-radius:99px;background:#CBD5DB;padding:3px;display:flex;justify-content:flex-start;flex:none"><div style="width:16px;height:16px;border-radius:50%;background:#fff"></div></div>
+              </div>
+              <div style="display:flex;align-items:center;gap:14px;padding:14px 16px">
+                <div style="flex:1"><div style="font-size:13.5px;font-weight:600">Som ao capturar</div></div>
+                <div style="width:38px;height:22px;border-radius:99px;background:#0B7285;padding:3px;display:flex;justify-content:flex-end;flex:none"><div style="width:16px;height:16px;border-radius:50%;background:#fff"></div></div>
+              </div>
+            </div>
+
+            <div style="font-size:19px;font-weight:600">Nomeação e retenção</div>
+            <div style="border:1px solid #E1E8EC;border-radius:10px;background:#fff;overflow:hidden">
+              <div style="display:flex;align-items:center;gap:14px;padding:14px 16px;border-bottom:1px solid #EDF1F4">
+                <div style="flex:1"><div style="font-size:13.5px;font-weight:600">Padrão de nome</div><div style="font-size:12px;color:#6B8190">captura-{hora}-{caso}.png</div></div>
+                <div style="height:32px;min-width:170px;border:1px solid #DCE4E9;border-radius:7px;background:#FBFDFE;display:flex;align-items:center;justify-content:space-between;padding:0 10px;font-size:12.5px">Hora + caso<span style="color:#8EA2AD">⌄</span></div>
+              </div>
+              <div style="display:flex;align-items:center;gap:14px;padding:14px 16px">
+                <div style="flex:1"><div style="font-size:13.5px;font-weight:600">Limpar capturas não usadas</div><div style="font-size:12px;color:#6B8190">mantém as marcadas e as já exportadas</div></div>
+                <div style="height:32px;min-width:170px;border:1px solid #DCE4E9;border-radius:7px;background:#FBFDFE;display:flex;align-items:center;justify-content:space-between;padding:0 10px;font-size:12.5px">Após 30 dias<span style="color:#8EA2AD">⌄</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div style="display:flex;align-items:baseline;gap:14px;margin-top:20px;flex-wrap:wrap">
+    <div style="font-size:22px;font-weight:600;letter-spacing:-.01em">Três layouts de documento</div>
+    <div style="font-size:14px;color:#5C7280">A4 · legenda acima, imagem abaixo · <a href="#1f">1f</a> passo a passo · <a href="#1g">1g</a> ficha de evidência · <a href="#1h">1h</a> relatório QA</div>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;gap:48px;align-items:flex-start">
+
+    <div id="1f" style="display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="font-size:12px;font-weight:700;color:#ffffff;background:#17262E;border-radius:6px;padding:3px 8px;letter-spacing:.04em">1f</div>
+        <div style="font-size:15px;font-weight:600">Passo a passo</div>
+        <div style="font-size:13px;color:#7B909C">manuais e tutoriais</div>
+      </div>
+      <div style="width:744px;height:1052px;background:#fff;box-shadow:0 14px 40px rgba(20,40,55,.18);font-family:'IBM Plex Sans',sans-serif;display:flex;flex-direction:column;overflow:hidden">
+        <div style="height:10px;background:#0B7285;flex:none"></div>
+        <div style="padding:46px 58px 0;display:flex;flex-direction:column;gap:30px;flex:1;min-height:0">
+          <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px;border-bottom:2px solid #17262E;padding-bottom:18px">
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <div style="font-size:10.5px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#0B7285">Manual de operação</div>
+              <div style="font-family:'Newsreader',serif;font-size:36px;line-height:1.1;color:#17262E">Cadastro de usuário</div>
+            </div>
+            <div style="text-align:right;font-size:11px;color:#6B8190;line-height:1.7;flex:none">
+              <div style="font-weight:600;color:#17262E">Versão 1.3</div>
+              <div>16 set 2026</div>
+              <div>Marina Alves</div>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div style="display:flex;gap:18px;align-items:flex-start">
+              <div style="width:40px;height:40px;flex:none;border-radius:50%;background:#0B7285;color:#fff;font-family:'Newsreader',serif;font-size:21px;display:flex;align-items:center;justify-content:center">1</div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:6px;padding-top:2px">
+                <div style="font-size:17px;font-weight:600;line-height:1.35;color:#17262E">Abra o formulário de cadastro e preencha os dados obrigatórios</div>
+                <div style="font-size:12.5px;line-height:1.6;color:#4A5F6B">Os campos marcados com asterisco impedem o envio enquanto estiverem vazios.</div>
+              </div>
+            </div>
+            <div style="position:relative;width:100%;height:272px;border:1px solid #DCE4E9;background:#fff;overflow:hidden">
+              <dc-import name="Shot" hint-size="100%,100%"></dc-import>
+              <div style="position:absolute;left:11%;top:46%;width:30%;height:13%;border:3px solid #E8590C;border-radius:3px"></div>
+              <div style="position:absolute;left:44%;top:26%;width:120px;height:3px;background:#E8590C;transform:rotate(24deg);transform-origin:left center">
+                <div style="position:absolute;right:-1px;top:-6px;width:0;height:0;border-left:14px solid #E8590C;border-top:7px solid transparent;border-bottom:7px solid transparent"></div>
+              </div>
+            </div>
+            <div style="font-size:10.5px;color:#8EA2AD;display:flex;gap:14px"><span>Figura 1</span><span>16/09/2026 14:32</span><span>Chrome · /cadastro</span></div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div style="display:flex;gap:18px;align-items:flex-start">
+              <div style="width:40px;height:40px;flex:none;border-radius:50%;background:#0B7285;color:#fff;font-family:'Newsreader',serif;font-size:21px;display:flex;align-items:center;justify-content:center">2</div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:6px;padding-top:2px">
+                <div style="font-size:17px;font-weight:600;line-height:1.35;color:#17262E">Confirme o envio e aguarde a mensagem de sucesso</div>
+                <div style="font-size:12.5px;line-height:1.6;color:#4A5F6B">A confirmação também é enviada por e-mail em até cinco minutos.</div>
+              </div>
+            </div>
+            <div style="position:relative;width:100%;height:272px;border:1px solid #DCE4E9;background:#fff;overflow:hidden">
+              <dc-import name="Shot" hint-size="100%,100%"></dc-import>
+              <div style="position:absolute;left:58%;top:62%;background:#FFE08A;padding:3px 8px;font-size:12px;color:#3A2E0B">cadastro concluído</div>
+            </div>
+            <div style="font-size:10.5px;color:#8EA2AD;display:flex;gap:14px"><span>Figura 2</span><span>16/09/2026 14:35</span></div>
+          </div>
+        </div>
+        <div style="padding:16px 58px 26px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid #E4EAEE;font-size:10px;color:#8EA2AD">
+          <div>Gestor de Evidências · Cadastro de usuário</div>
+          <div style="display:flex;align-items:center;gap:8px"><div style="width:16px;height:1px;background:#CBD5DB"></div>2 de 6</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="1g" style="display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="font-size:12px;font-weight:700;color:#ffffff;background:#17262E;border-radius:6px;padding:3px 8px;letter-spacing:.04em">1g</div>
+        <div style="font-size:15px;font-weight:600">Ficha de evidência</div>
+        <div style="font-size:13px;color:#7B909C">2 por página, para bug e auditoria</div>
+      </div>
+      <div style="width:744px;height:1052px;background:#F7FAFB;box-shadow:0 14px 40px rgba(20,40,55,.18);font-family:'IBM Plex Sans',sans-serif;display:flex;flex-direction:column;overflow:hidden">
+        <div style="background:#0B7285;color:#fff;padding:26px 44px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex:none">
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <div style="font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#A8D8E2">Registro de evidências</div>
+            <div style="font-family:'Newsreader',serif;font-size:26px;line-height:1.2">Cadastro de usuário · QA-114</div>
+          </div>
+          <div style="text-align:right;font-size:10.5px;line-height:1.7;color:#CFE8EE">
+            <div>Homologação</div>
+            <div>16 set 2026</div>
+            <div>Marina Alves</div>
+          </div>
+        </div>
+
+        <div style="flex:1;min-height:0;padding:26px 44px;display:flex;flex-direction:column;gap:20px">
+          <div style="background:#fff;border:1px solid #E1E8EC;border-radius:6px;overflow:hidden;flex:1;display:flex;flex-direction:column;min-height:0">
+            <div style="padding:16px 20px 14px;display:flex;gap:14px;align-items:flex-start;border-bottom:1px solid #EDF1F4">
+              <div style="font-size:10px;font-weight:700;color:#0B7285;background:#E6F2F5;border-radius:4px;padding:4px 8px;letter-spacing:.06em;flex:none">EV-01</div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:5px">
+                <div style="font-size:15px;font-weight:600;line-height:1.4;color:#17262E">Envio sem CPF não exibe mensagem de erro</div>
+                <div style="font-size:11.5px;line-height:1.55;color:#4A5F6B">O campo recebe borda de erro, porém o texto de validação não é renderizado abaixo dele.</div>
+              </div>
+              <div style="font-size:10px;font-weight:700;color:#B2280E;background:#FDECE6;border-radius:4px;padding:4px 8px;flex:none">Falha</div>
+            </div>
+            <div style="position:relative;flex:1;min-height:0;margin:16px 20px;border:1px solid #E4EAEE;overflow:hidden;background:#fff">
+              <dc-import name="Shot" hint-size="100%,100%"></dc-import>
+              <div style="position:absolute;left:11%;top:46%;width:30%;height:14%;border:3px solid #E8590C;border-radius:3px"></div>
+              <div style="position:absolute;left:11%;top:62%;font-size:10px;font-weight:700;color:#fff;background:#E8590C;padding:2px 6px">campo obrigatório</div>
+            </div>
+            <div style="padding:0 20px 14px;display:flex;gap:26px;font-size:10px;color:#6B8190">
+              <div><span style="color:#9AADB8">Hora </span>14:32:08</div>
+              <div><span style="color:#9AADB8">Origem </span>Chrome 128 · /cadastro</div>
+              <div><span style="color:#9AADB8">Resolução </span>1920×1080</div>
+            </div>
+          </div>
+
+          <div style="background:#fff;border:1px solid #E1E8EC;border-radius:6px;overflow:hidden;flex:1;display:flex;flex-direction:column;min-height:0">
+            <div style="padding:16px 20px 14px;display:flex;gap:14px;align-items:flex-start;border-bottom:1px solid #EDF1F4">
+              <div style="font-size:10px;font-weight:700;color:#0B7285;background:#E6F2F5;border-radius:4px;padding:4px 8px;letter-spacing:.06em;flex:none">EV-02</div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:5px">
+                <div style="font-size:15px;font-weight:600;line-height:1.4;color:#17262E">Cadastro com dados válidos conclui normalmente</div>
+                <div style="font-size:11.5px;line-height:1.55;color:#4A5F6B">Mensagem de sucesso exibida e registro criado na base de homologação.</div>
+              </div>
+              <div style="font-size:10px;font-weight:700;color:#0A7A5A;background:#E2F5EE;border-radius:4px;padding:4px 8px;flex:none">Aprovado</div>
+            </div>
+            <div style="position:relative;flex:1;min-height:0;margin:16px 20px;border:1px solid #E4EAEE;overflow:hidden;background:#fff">
+              <dc-import name="Shot" hint-size="100%,100%"></dc-import>
+              <div style="position:absolute;left:56%;top:58%;font-size:26px;line-height:1">✅</div>
+            </div>
+            <div style="padding:0 20px 14px;display:flex;gap:26px;font-size:10px;color:#6B8190">
+              <div><span style="color:#9AADB8">Hora </span>14:35:41</div>
+              <div><span style="color:#9AADB8">Origem </span>Chrome 128 · /cadastro/sucesso</div>
+              <div><span style="color:#9AADB8">Resolução </span>1920×1080</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="padding:14px 44px 22px;display:flex;justify-content:space-between;align-items:center;font-size:10px;color:#8EA2AD;flex:none">
+          <div>Gerado por Gestor de Evidências · 16/09/2026 15:02</div>
+          <div>Página 2 de 5</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="1h" style="display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="font-size:12px;font-weight:700;color:#ffffff;background:#17262E;border-radius:6px;padding:3px 8px;letter-spacing:.04em">1h</div>
+        <div style="font-size:15px;font-weight:600">Relatório QA</div>
+        <div style="font-size:13px;color:#7B909C">coluna lateral com contexto do teste</div>
+      </div>
+      <div style="width:744px;height:1052px;background:#fff;box-shadow:0 14px 40px rgba(20,40,55,.18);font-family:'IBM Plex Sans',sans-serif;display:flex;overflow:hidden">
+        <div style="width:206px;flex:none;background:#0F3B45;color:#fff;padding:40px 24px;display:flex;flex-direction:column;gap:26px">
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="width:30px;height:30px;border-radius:7px;background:#0CA678;color:#062B24;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center">GE</div>
+            <div style="font-family:'Newsreader',serif;font-size:21px;line-height:1.25">Relatório de teste</div>
+            <div style="font-size:10.5px;color:#9FC4CC;line-height:1.6">Cadastro de usuário<br>Ciclo 12 · Homologação</div>
+          </div>
+
+          <div style="height:1px;background:rgba(255,255,255,.16)"></div>
+
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <div style="font-size:9.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#7FB0BA">Resumo</div>
+            <div style="display:flex;flex-direction:column;gap:3px"><div style="font-family:'Newsreader',serif;font-size:28px;line-height:1">12</div><div style="font-size:10px;color:#9FC4CC">casos executados</div></div>
+            <div style="display:flex;flex-direction:column;gap:3px"><div style="font-family:'Newsreader',serif;font-size:28px;line-height:1;color:#63E6BE">10</div><div style="font-size:10px;color:#9FC4CC">aprovados</div></div>
+            <div style="display:flex;flex-direction:column;gap:3px"><div style="font-family:'Newsreader',serif;font-size:28px;line-height:1;color:#FFC9A8">2</div><div style="font-size:10px;color:#9FC4CC">com falha</div></div>
+          </div>
+
+          <div style="height:1px;background:rgba(255,255,255,.16)"></div>
+
+          <div style="display:flex;flex-direction:column;gap:9px">
+            <div style="font-size:9.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#7FB0BA">Nesta página</div>
+            <div style="font-size:10.5px;color:#DDEEF1;line-height:1.5">1 · Validação do CPF</div>
+            <div style="font-size:10.5px;color:#9FC4CC;line-height:1.5">2 · Envio bem-sucedido</div>
+          </div>
+
+          <div style="flex:1"></div>
+          <div style="display:flex;flex-direction:column;gap:5px;font-size:9.5px;color:#7FB0BA;line-height:1.6">
+            <div>Marina Alves</div>
+            <div>16 set 2026 · 15:02</div>
+            <div style="word-break:break-all">sha256 4f9c…a12b</div>
+          </div>
+        </div>
+
+        <div style="flex:1;min-width:0;padding:40px 40px 26px;display:flex;flex-direction:column;gap:24px">
+          <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px">
+            <div style="font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#0B7285">Evidências</div>
+            <div style="font-size:10px;color:#9AADB8">QA-114</div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:11px">
+            <div style="display:flex;gap:10px;align-items:flex-start">
+              <div style="font-family:'Newsreader',serif;font-size:24px;line-height:1;color:#0B7285;flex:none">1</div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:5px">
+                <div style="font-size:15px;font-weight:600;line-height:1.35">Validação do CPF não retorna mensagem</div>
+                <div style="font-size:11.5px;line-height:1.6;color:#4A5F6B">Envio sem CPF: o campo recebe destaque de erro, mas o texto de validação não aparece.</div>
+              </div>
+            </div>
+            <div style="position:relative;width:100%;height:230px;border:1px solid #DCE4E9;overflow:hidden;background:#fff">
+              <dc-import name="Shot" hint-size="100%,100%"></dc-import>
+              <div style="position:absolute;left:12%;top:46%;width:32%;height:14%;border:3px solid #E8590C;border-radius:3px"></div>
+            </div>
+            <div style="display:flex;gap:7px;flex-wrap:wrap">
+              <div style="font-size:9.5px;font-weight:700;color:#B2280E;background:#FDECE6;border-radius:3px;padding:3px 7px">Falha</div>
+              <div style="font-size:9.5px;color:#4A5F6B;background:#F1F6F8;border-radius:3px;padding:3px 7px">14:32:08</div>
+              <div style="font-size:9.5px;color:#4A5F6B;background:#F1F6F8;border-radius:3px;padding:3px 7px">Chrome 128</div>
+            </div>
+          </div>
+
+          <div style="height:1px;background:#EDF1F4"></div>
+
+          <div style="display:flex;flex-direction:column;gap:11px">
+            <div style="display:flex;gap:10px;align-items:flex-start">
+              <div style="font-family:'Newsreader',serif;font-size:24px;line-height:1;color:#0B7285;flex:none">2</div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:5px">
+                <div style="font-size:15px;font-weight:600;line-height:1.35">Envio com dados válidos conclui o cadastro</div>
+                <div style="font-size:11.5px;line-height:1.6;color:#4A5F6B">Mensagem de sucesso exibida e registro criado na base de homologação.</div>
+              </div>
+            </div>
+            <div style="position:relative;width:100%;height:230px;border:1px solid #DCE4E9;overflow:hidden;background:#fff">
+              <dc-import name="Shot" hint-size="100%,100%"></dc-import>
+              <div style="position:absolute;left:54%;top:56%;font-size:26px;line-height:1">✅</div>
+            </div>
+            <div style="display:flex;gap:7px;flex-wrap:wrap">
+              <div style="font-size:9.5px;font-weight:700;color:#0A7A5A;background:#E2F5EE;border-radius:3px;padding:3px 7px">Aprovado</div>
+              <div style="font-size:9.5px;color:#4A5F6B;background:#F1F6F8;border-radius:3px;padding:3px 7px">14:35:41</div>
+            </div>
+          </div>
+
+          <div style="flex:1"></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid #EDF1F4;padding-top:12px;font-size:10px;color:#8EA2AD">
+            <div>Documento gerado automaticamente</div>
+            <div>3 / 7</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;showToolLabels&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Editor&quot;},&quot;captionPosition&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Acima da imagem&quot;,&quot;Abaixo da imagem&quot;],&quot;default&quot;:&quot;Acima da imagem&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Documento&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const labels = this.props.showToolLabels ?? true;
+    const pos = this.props.captionPosition ?? "Acima da imagem";
+    return {
+      showToolLabels: labels,
+      capDir: pos === "Abaixo da imagem" ? "column-reverse" : "column"
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+# Dependências de execução do Gestor de Evidências.
+# Instalação:  py -m venv venv && venv\Scripts\pip install -r requirements.txt
+
+pillow==12.1.0
+pywin32==311
+pystray==0.19.5
+screeninfo==0.8.1
+tkinterdnd2==0.6.3
+numpy==2.5.3
+comtypes==1.4.16
+emoji==2.16.0
+fpdf==1.7.2
+python-docx==1.2.0
+
+# Somente para gerar o executável (compilar.bat):
+pyinstaller==6.18.0

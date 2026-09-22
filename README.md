@@ -107,24 +107,26 @@ de dados: a interface, as regras e o armazenamento vivem no mesmo processo, e o
 imagem.
 
 ```
-        Atalho global (RegisterHotKey, thread própria)
+     main.py  (DPI, pastas, instância única)
                         │
                         ▼
    ┌─────────────────────────────────────────────┐
-   │  Interface (Tkinter)                        │
-   │  workspace · editor · document_builder      │
-   │  export_preview · configuracoes · widgets   │
+   │  gestor.ui                                  │
+   │  workspace · seletor · editor · widgets     │
+   │  document_builder · export_preview          │
+   │  configuracoes · emoji_picker · theme       │
    └───────────────┬─────────────────────────────┘
                    │
-      ┌────────────┼──────────────┬───────────────┐
-      ▼            ▼              ▼               ▼
-   Captura      Geração       Armazenamento    Sistema
-   captura_     pdf_export    capture_store    startup
-   utils        docx_export   config           instancia
-   deteccao_*                                  diagnostico
-                                               hotkey
-                        │
-                        ▼
+      ┌────────────┼───────────────┬──────────────┐
+      ▼            ▼               ▼              ▼
+  gestor.        gestor.       gestor.dados   gestor.sistema
+  captura        exportacao    capture_store  startup
+  captura_utils  pdf_export    config         instancia
+  deteccao_*     docx_export                  diagnostico
+  hotkey ◄── atalho global                    utils
+             (RegisterHotKey,
+              thread própria)         │
+                                      ▼
         Imagens\Capturas\  (png + .raw.png + .json)
         %APPDATA%\GestorEvidencias\  (config.json, erros.log)
 ```
@@ -282,7 +284,7 @@ tests/
 └── python/                  cenários, executáveis também sem o Robot
 ```
 
-São 28 casos. Duas decisões do desenho estão explicadas em
+São 29 casos. Duas decisões do desenho estão explicadas em
 [tests/README.md](tests/README.md), e vale conhecê-las antes de escrever mais
 testes:
 
@@ -371,7 +373,7 @@ querer: CPF, nome, valor, e-mail, token na URL.
 - [x] Três visualizações da lista
 - [x] Tamanho de fonte ajustável
 - [x] Empacotamento em executável
-- [x] Suíte de teste automatizada (28 casos)
+- [x] Suíte de teste automatizada (29 casos)
 - [x] Tela de Configurações extraída do `workspace.py` para módulo próprio
 - [x] Projeto sob Git
 - [x] Licença definida

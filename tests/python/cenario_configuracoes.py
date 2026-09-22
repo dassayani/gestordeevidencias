@@ -140,6 +140,14 @@ try:
             alvo = rotulo.upper()
             checar(any(alvo in t.upper() for t in na_tela), "a tela mostra %r" % rotulo)
 
+        # Cada titulo de secao aparece UMA vez. Conferir so a presenca deixou
+        # passar um "CAPTURA" duplicado quando a tela foi dividida em funcoes.
+        for titulo in ("CAPTURA", "NOMEAÇÃO E RETENÇÃO", "JANELA", "APARÊNCIA",
+                       "DOCUMENTO"):
+            quantas = sum(1 for t in na_tela if t.upper().strip() == titulo)
+            checar(quantas == 1,
+                   "o titulo %r aparece uma vez (apareceu %d)" % (titulo, quantas))
+
         # os campos trazem o que esta gravado, e nao o padrao
         checar(any(capturas in v for v in valores),
                "o campo da pasta mostra a pasta gravada")

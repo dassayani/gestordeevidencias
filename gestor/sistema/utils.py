@@ -20,10 +20,6 @@ def hex_to_rgb(hex_color):
     return tuple(int(hex_color[i:i + 2], 16) for i in (0, 2, 4))
 
 
-def rgb_to_hex(rgb):
-    return "#%02X%02X%02X" % tuple(int(round(c)) for c in rgb)
-
-
 def escurecer(rgb, fator=0.42):
     """Tom escuro derivado de uma cor, para faixa com texto branco em cima.
 

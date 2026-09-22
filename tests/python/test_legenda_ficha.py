@@ -30,17 +30,23 @@ CASOS = {
     "colada do Word (travessao e aspas curvas)":
         "Ao clicar em \u201cConfirmar\u201d \u2014 na tela de fechamento \u2014 o sistema "
         "valida o saldo\u2026 e registra o log de auditoria antes de concluir a operacao",
+    # Os dois casos abaixo sao um token unico de proposito — e o que faz a
+    # quebra por espaco falhar. As aspas ficam coladas: literais adjacentes se
+    # juntam sem inserir espaco nenhum.
     "uma palavra enorme (URL)":
-        "https://portal.empresa.com.br/fechamento/validacao/competencia/2026/09/relatorio-consolidado-final",
+        "https://portal.empresa.com.br/fechamento/validacao/competencia/2026/09/"
+        "relatorio-consolidado-final",
     "caminho de arquivo longo":
-        r"C:\Usuarios\dasayani\Documentos\Evidencias\Fechamento\2026-09\captura-da-tela-de-confirmacao.png",
+        r"C:\Usuarios\dasayani\Documentos\Evidencias\Fechamento\2026-09"
+        r"\captura-da-tela-de-confirmacao.png",
     "sem espaco algum":
         "validacaodofechamentocomsaldodisponivelelogdeauditoriaregistradoantesdeconcluir",
     "com quebra de linha":
         "Primeira parte da legenda\nSegunda parte que tambem e bem comprida e precisa quebrar",
     "espaco fino/nao separavel (colado de web)":
-        "Ao\u00a0clicar\u00a0no\u00a0botao\u00a0Confirmar\u00a0o\u00a0sistema\u00a0valida\u00a0o\u00a0saldo"
-        "\u00a0disponivel\u00a0e\u00a0registra\u00a0o\u00a0log\u00a0de\u00a0auditoria",
+        "Ao\u00a0clicar\u00a0no\u00a0botao\u00a0Confirmar\u00a0o\u00a0sistema"
+        "\u00a0valida\u00a0o\u00a0saldo\u00a0disponivel\u00a0e\u00a0registra"
+        "\u00a0o\u00a0log\u00a0de\u00a0auditoria",
 }
 
 pdf = FPDF(format="A4", unit="mm")

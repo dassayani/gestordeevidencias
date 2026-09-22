@@ -73,8 +73,15 @@ def abrir(app):
             tk.Frame(conteudo, bg=t["border_soft"], height=1).pack(fill="x", pady=(22, 0))
         widgets.titulo_secao(conteudo, titulo, app.modo_escuro,
                              pady=(18 if not primeira else 0, 12))
+    _secao_captura(app, conteudo, t, secao, win)
+    _secao_nomeacao(app, conteudo, t, secao)
+    _secao_janela(app, conteudo, t, secao, win)
+    _secao_aparencia(app, conteudo, t, secao)
+    _secao_documento(app, conteudo, t, secao, ao_fechar)
 
-    # ---- Captura ----
+
+def _secao_captura(app, conteudo, t, secao, win):
+    """Seção Captura da tela de Configurações."""
     secao("Captura", primeira=True)
 
     var_abrir = tk.BooleanVar(value=app.config.get("abrir_apos_captura", True))
@@ -203,7 +210,9 @@ def abrir(app):
                                              app.modo_escuro, app.pasta_capturas,
                                              "Alterar…", alterar_pasta)
 
-    # ---- Nomeação e retenção ----
+
+def _secao_nomeacao(app, conteudo, t, secao):
+    """Seção Nomeação e retenção da tela de Configurações."""
     secao("Nomeação e retenção")
 
     tk.Label(conteudo, text="Padrão de nome do arquivo", bg=t["bg_panel"],
@@ -254,7 +263,9 @@ def abrir(app):
     if not var_retencao_ativa.get():
         entry_retencao.config(state="disabled")
 
-    # ---- Janela ----
+
+def _secao_janela(app, conteudo, t, secao, win):
+    """Seção Janela da tela de Configurações."""
     secao("Janela")
 
     var_iniciar = tk.BooleanVar(value=startup.esta_habilitado())
@@ -310,7 +321,9 @@ def abrir(app):
     entry_tempo.bind("<FocusOut>", salvar_tempo)
     entry_tempo.bind("<Return>", salvar_tempo)
 
-    # ---- Aparência ----
+
+def _secao_aparencia(app, conteudo, t, secao):
+    """Seção Aparência da tela de Configurações."""
     secao("Aparência")
 
     opcoes_escala = [(c, rotulo) for c, rotulo, _ in theme.ESCALAS]
@@ -344,7 +357,9 @@ def abrir(app):
                                    "adotam o novo tamanho ao serem abertas.",
                          app.modo_escuro).pack(fill="x")
 
-    # ---- Documento ----
+
+def _secao_documento(app, conteudo, t, secao, ao_fechar):
+    """Seção Documento da tela de Configurações."""
     secao("Documento")
 
     var_borda = tk.BooleanVar(value=app.config.get("borda_ativada", False))

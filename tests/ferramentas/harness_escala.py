@@ -34,6 +34,7 @@ from tkinterdnd2 import TkinterDnD
 from gestor.dados import capture_store
 from gestor.dados import config
 from gestor.ui import document_builder
+from gestor.ui import theme
 from gestor.ui.workspace import AppEvidencias
 
 ESCALA = sys.argv[1] if len(sys.argv) > 1 else "padrao"
@@ -91,8 +92,7 @@ try:
     app.pausar_timer = True
     app.tempo_limite = 10 ** 9
     LOG.write("escala=%s -> FS_BODY=%d FS_BUTTON=%d CTRL_H=%d\n"
-              % (ESCALA, __import__("theme").FS_BODY, __import__("theme").FS_BUTTON,
-                 __import__("theme").CTRL_H))
+              % (ESCALA, theme.FS_BODY, theme.FS_BUTTON, theme.CTRL_H))
     estado = {}
 
     def p1():

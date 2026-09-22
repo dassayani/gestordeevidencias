@@ -11,6 +11,7 @@ comtypes==1.4.16
 emoji==2.16.0
 fpdf==1.7.2
 python-docx==1.2.0
+pymupdf==1.28.2        # renderiza a página do PDF na pré-visualização
 
 # Somente para gerar o executável (compilar.bat):
 pyinstaller==6.18.0

@@ -39,7 +39,7 @@ de nada para fora da máquina.
 - 🗂️ Filtros: Hoje, Marcadas (as selecionadas para o documento), Editadas, Tudo
 - 👁️ Três visualizações da lista: detalhes, blocos e grade
 - 📄 Três modelos de documento: Passo a passo, Ficha de evidência e Relatório QA
-- 👀 Pré-visualização na mesma escala do documento antes de gerar
+- 👀 Pré-visualização que é a página do documento de verdade, não uma amostra
 - 📎 Exportação em PDF e DOCX
 - 📋 Ctrl+C copia a captura como imagem **e** como arquivo (cola no Word ou anexa no e-mail)
 - 🗑️ Exclusão para a Lixeira do Windows, com volta
@@ -93,7 +93,7 @@ gerado é anexado manualmente onde for preciso, e o projeto fica no GitHub.
 | Interface | Tkinter + tkinterdnd2 (arrastar e soltar) |
 | Imagem | Pillow, NumPy (detecção de bordas) |
 | Integração Windows | pywin32, comtypes (UI Automation), pystray, screeninfo |
-| Documentos | fpdf 1.7 (PDF), python-docx (DOCX) |
+| Documentos | fpdf 1.7 (PDF), python-docx (DOCX), pymupdf (renderiza a prévia) |
 | Empacotamento | PyInstaller (`--onedir`) |
 | Testes | Robot Framework + cenários em Python |
 
@@ -284,7 +284,7 @@ tests/
 └── python/                  cenários, executáveis também sem o Robot
 ```
 
-São 29 casos. Duas decisões do desenho estão explicadas em
+São 30 casos. Duas decisões do desenho estão explicadas em
 [tests/README.md](tests/README.md), e vale conhecê-las antes de escrever mais
 testes:
 
@@ -368,12 +368,12 @@ querer: CPF, nome, valor, e-mail, token na URL.
 - [x] Captura de área e de janela ativa, com atalho global
 - [x] Editor com todas as ferramentas de anotação
 - [x] Três modelos de documento, em PDF e DOCX
-- [x] Pré-visualização fiel ao documento gerado
+- [x] Pré-visualização idêntica ao documento: mostra a página gerada, não uma imitação
 - [x] Exclusão para a Lixeira
 - [x] Três visualizações da lista
 - [x] Tamanho de fonte ajustável
 - [x] Empacotamento em executável
-- [x] Suíte de teste automatizada (29 casos)
+- [x] Suíte de teste automatizada (30 casos)
 - [x] Tela de Configurações extraída do `workspace.py` para módulo próprio
 - [x] Projeto sob Git
 - [x] Licença definida

@@ -43,6 +43,14 @@ O editor já abre marcado como gravado
     [Tags]    regressao
     Executar cenário de tela    test_editor
 
+A prévia mostra exatamente a página que vai ser gerada
+    [Documentation]    Compara pixel a pixel o que a tela exibe com a página do
+    ...                documento exportado, nos três modelos. Enquanto a prévia
+    ...                era montada imitando o layout, rodapé, quebra de legenda,
+    ...                tamanho de imagem e cor divergiram um de cada vez.
+    [Tags]    regressao
+    Executar cenário de tela    cenario_previa_fiel
+
 Documento: campos, sequência, prévia e geração nos três modelos
     [Documentation]    Vários prints, capa inteira preenchida, legendas por passo,
     ...                reordenação, PDF e DOCX nos três modelos, conteúdo conferido

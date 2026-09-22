@@ -460,8 +460,18 @@ class AppEvidencias:
         itens = capture_store.list_captures(self.pasta_capturas)
         termo = self.entrada_busca.get().strip().lower() if hasattr(self, "entrada_busca") else ""
 
+        def procurado(i):
+            """O termo aparece no nome, na legenda ou no caso/projeto.
+
+            O caso entrou aqui porque é justamente por ele que se procura uma
+            evidência semanas depois — pelo número do teste, não pelo horário
+            que o arquivo recebeu no nome.
+            """
+            return any(termo in (i.get(campo) or "").lower()
+                       for campo in ("name", "caption", "caso"))
+
         def passa_filtro(i):
-            if termo and termo not in i["name"].lower() and termo not in i["caption"].lower():
+            if termo and not procurado(i):
                 return False
             if self.filtro_atual == "hoje":
                 return datetime.fromtimestamp(i["mtime"]).date() == datetime.now().date()

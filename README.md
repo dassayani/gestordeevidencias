@@ -35,7 +35,7 @@ de nada para fora da máquina.
   numerado, borrão e recorte
 - 🖍️ Borrão para ocultar dado sensível antes de a evidência sair da máquina
 - 🏷️ Legenda e Caso/Projeto por captura
-- 🔎 Busca por nome do arquivo ou legenda
+- 🔎 Busca por nome do arquivo, legenda ou caso/projeto
 - 🗂️ Filtros: Hoje, Marcadas (as selecionadas para o documento), Editadas, Tudo
 - 👁️ Três visualizações da lista: detalhes, blocos e grade
 - 📄 Três modelos de documento: Passo a passo, Ficha de evidência e Relatório QA
@@ -358,14 +358,13 @@ querer: CPF, nome, valor, e-mail, token na URL.
 - [x] Empacotamento em executável
 - [x] Suíte de teste automatizada (28 casos)
 - [x] Tela de Configurações extraída do `workspace.py` para módulo próprio
+- [x] Projeto sob Git
+- [x] Licença definida
+- [x] Busca alcançando também o campo Caso/Projeto
 
 ### Próximo
 
-- [ ] Colocar o projeto sob Git
 - [ ] Agrupar os módulos em pastas por camada
-- [ ] Definir a licença
-- [ ] Quebrar `executar_captura`, a maior função que restou (164 linhas)
-- [ ] Busca alcançar também o campo Caso/Projeto, que hoje fica de fora
 
 ### Mais adiante
 
@@ -405,7 +404,11 @@ campo que volta ao padrão.
 
 ## 📄 Licença
 
-Ainda não definida.
+**Todos os direitos reservados** — ver [LICENSE](LICENSE).
+
+O código está visível publicamente para consulta e avaliação, o que não concede
+licença de uso, cópia ou modificação. Para qualquer uso, fale com a
+responsável pelo repositório.
 
 ## 👥 Responsável
 

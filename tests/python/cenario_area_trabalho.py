@@ -91,6 +91,31 @@ try:
     checar(any("0 capturas selecionadas" in t for t in textos(root)),
            "o rodape volta para '0 capturas selecionadas'")
 
+    # ---- busca: nome, legenda e caso/projeto ----
+    capture_store.save_meta(os.path.join(capturas, "print_100001.png"),
+                            {"caption": "Tela de confirmacao do saldo",
+                             "caso": "CT-4471", "shapes": []})
+    capture_store.save_meta(os.path.join(capturas, "print_100002.png"),
+                            {"caption": "Mensagem de erro", "caso": "CT-9999",
+                             "shapes": []})
+    app.filtro_atual = "tudo"
+    for termo, esperado, descricao in (
+            ("print_100001", 1, "busca pelo nome do arquivo"),
+            ("confirmacao do saldo", 1, "busca pela legenda"),
+            ("CT-4471", 1, "busca pelo caso/projeto"),
+            ("ct-4471", 1, "busca pelo caso ignorando maiuscula"),
+            ("CT-", 2, "busca por parte do caso acha os dois"),
+            ("nao existe nada assim", 0, "termo sem resultado nao traz nada")):
+        app.entrada_busca.delete(0, "end")
+        app.entrada_busca.insert(0, termo)
+        root.update()
+        achados = len(app._itens_filtrados())
+        checar(achados == esperado,
+               "%s (%r -> %d, esperado %d)" % (descricao, termo, achados, esperado))
+    app.entrada_busca.delete(0, "end")
+    app.filtro_atual = "hoje"
+    root.update()
+
     # ---- modos de visualizacao ----
     for modo in ("detalhes", "blocos", "grade"):
         app._definir_modo_visualizacao(modo)

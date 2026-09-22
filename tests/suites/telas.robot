@@ -70,6 +70,13 @@ Tamanho de fonte e pastas padrão
     ...                documentos vão para PDF/ e DOCX/ dentro da pasta de capturas.
     Executar cenário de tela    test_pastas_fonte
 
+Selecionar uma área salva o arquivo com o tamanho certo
+    [Documentation]    Caminho inteiro da captura: abrir o seletor, arrastar,
+    ...                soltar e conferir o arquivo. Cobre também Escape e
+    ...                arrasto mínimo demais.
+    [Tags]    regressao
+    Executar cenário de tela    cenario_captura_area
+
 A captura traz exatamente a área pedida
     [Documentation]    Alvo colorido em posição conhecida, conferido canto a canto,
     ...                nos dois monitores — inclusive o que está em 150%, onde o

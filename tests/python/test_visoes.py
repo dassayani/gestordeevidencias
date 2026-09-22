@@ -11,16 +11,32 @@ _os.chdir(RAIZ)
 SAIDA = _os.path.join(RAIZ, "tests", "_saida")
 _os.makedirs(SAIDA, exist_ok=True)
 
-import ctypes, traceback
+import os, ctypes, tempfile, shutil, traceback
 if not ctypes.windll.user32.SetProcessDpiAwarenessContext(ctypes.c_void_p(-4)):
     ctypes.windll.shcore.SetProcessDpiAwareness(2)
 from tkinterdnd2 import TkinterDnD
-import main as m, workspace, config
+from PIL import Image
+import workspace, config
+
+# Pasta propria com capturas criadas agora. Antes este teste lia a pasta real
+# da maquina, o que o amarrava a dois acasos: ter captura la, e ela ser de
+# hoje — o filtro inicial do painel e "Hoje", entao virar a meia-noite fazia
+# o teste falhar sozinho.
+tmp = tempfile.mkdtemp(prefix="ge_visoes_")
+capturas = os.path.join(tmp, "Capturas")
+os.makedirs(capturas)
+for i in range(6):
+    Image.new("RGB", (420 + i * 30, 300), (40 + i * 25, 100, 150)).save(
+        os.path.join(capturas, "print_1200%02d.png" % i))
+cfg = config.load(tmp)
+cfg["pasta_capturas"] = capturas
+config.save(tmp, cfg)
 
 falhas, erros = [], []
 root = TkinterDnD.Tk()
 root.report_callback_exception = lambda *a: erros.append("".join(traceback.format_exception(*a)))
-app = workspace.AppEvidencias(root, m.PASTA_CAPTURAS, m.PASTA_PDFS, m.BASE_DIR, m.DATA_DIR)
+app = workspace.AppEvidencias(root, capturas, os.path.join(tmp, "PDF"), RAIZ, tmp)
+app.pausar_timer = True
 modo_original = app.modo_visualizacao
 root.deiconify(); root.geometry("460x820"); root.update()
 
@@ -52,7 +68,7 @@ for modo in ("detalhes", "blocos", "grade"):
     root.update()
 
     # a escolha foi gravada
-    if config.load(m.DATA_DIR).get("modo_visualizacao") != modo:
+    if config.load(tmp).get("modo_visualizacao") != modo:
         falhas.append(f"{modo}: nao persistiu na configuracao")
 
 # recolunamento ao estreitar/alargar
@@ -86,4 +102,8 @@ if erros:
 print("\nFALHAS:", "nenhuma" if not falhas else "")
 for f in falhas:
     print(" -", f)
-root.destroy()
+try:
+    root.destroy()
+except Exception:
+    pass
+shutil.rmtree(tmp, ignore_errors=True)

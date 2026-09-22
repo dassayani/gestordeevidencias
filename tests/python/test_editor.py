@@ -15,12 +15,31 @@ import sys, os, ctypes, time, traceback
 if not ctypes.windll.user32.SetProcessDpiAwarenessContext(ctypes.c_void_p(-4)):
     ctypes.windll.shcore.SetProcessDpiAwareness(2)
 from tkinterdnd2 import TkinterDnD
-import main as m, workspace, capture_store
+import workspace, capture_store
+
+# Pasta propria com capturas criadas agora: antes este teste abria o app sobre
+# a pasta real da maquina, o que o amarrava a existir captura la (e do dia de
+# hoje, por causa do filtro inicial) e mexia em evidencia de verdade.
+import tempfile, shutil
+from PIL import Image as _Image
+import config as _config
+
+_tmp = tempfile.mkdtemp(prefix="ge_teste_")
+_capturas = os.path.join(_tmp, "Capturas")
+os.makedirs(_capturas)
+for _i in range(3):
+    _Image.new("RGB", (900, 600), (40 + _i * 40, 100, 150)).save(
+        os.path.join(_capturas, "print_1100%02d.png" % _i))
+_cfg = _config.load(_tmp)
+_cfg["pasta_capturas"] = _capturas
+_config.save(_tmp, _cfg)
+
 
 falhas, erros = [], []
 root = TkinterDnD.Tk()
 root.report_callback_exception = lambda *a: erros.append("".join(traceback.format_exception(*a)))
-app = workspace.AppEvidencias(root, m.PASTA_CAPTURAS, m.PASTA_PDFS, m.BASE_DIR, m.DATA_DIR)
+app = workspace.AppEvidencias(root, _capturas, os.path.join(_tmp, "PDF"), RAIZ, _tmp)
+app.pausar_timer = True
 root.update()
 
 pngs = sorted(f for f in os.listdir(app.pasta_capturas)
@@ -66,3 +85,5 @@ if erros: falhas.append("excecoes engolidas pelo Tk:\n" + "\n".join(erros))
 print("\nFALHAS:", "nenhuma" if not falhas else "")
 for f in falhas: print(" -", f)
 root.destroy()
+
+shutil.rmtree(_tmp, ignore_errors=True)

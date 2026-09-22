@@ -3,24 +3,23 @@ lista de capturas, seleção para documento e disparo da captura de tela."""
 import os
 import threading
 from datetime import datetime
-from tkinter import Toplevel, messagebox
+from tkinter import messagebox
 import tkinter as tk
 import tkinter.font as tkfont
 
 import pystray
 from PIL import Image, ImageTk, ImageGrab
 from pystray import MenuItem as item
-from screeninfo import get_monitors
 from tkinterdnd2 import COPY, DND_FILES
 
 import capture_store
 import captura_utils
 import config
 import configuracoes
-import deteccao_bordas
 import deteccao_janelas
 import editor
 import hotkey
+import seletor
 import theme
 import utils
 import widgets
@@ -923,169 +922,7 @@ class AppEvidencias:
         self.root.after(200, self.executar_captura)
 
     def executar_captura(self):
-        monitores = get_monitors()
-        mx, my = min(m.x for m in monitores), min(m.y for m in monitores)
-        lw = max(m.x + m.width for m in monitores) - mx
-        lh = max(m.y + m.height for m in monitores) - my
-
-        # O inventário de janelas é levantado ANTES do overlay existir: o
-        # overlay cobre o desktop inteiro, então depois dele o Windows
-        # responderia que a janela sob o cursor é o próprio overlay.
-        try:
-            regioes = deteccao_janelas.listar_regioes((mx, my, mx + lw, my + lh))
-        except Exception:
-            regioes = []
-
-        print_t = ImageGrab.grab(all_screens=True)
-        t = theme.get(self.modo_escuro)
-        sel = Toplevel(self.root)
-        sel.attributes("-alpha", 0.3, "-topmost", True)
-        sel.overrideredirect(True)
-        sel.geometry(f"{lw}x{lh}+{mx}+{my}")
-        canv = tk.Canvas(sel, cursor="cross", bg="grey", highlightthickness=0)
-        canv.pack(fill="both", expand=True)
-
-        # As coordenadas do canvas são relativas à origem do desktop virtual e
-        # coincidem com os pixels de print_t; as regiões vêm em coordenadas
-        # absolutas. `sugestao` é guardada no referencial do canvas.
-        estado = {"sugestao": None, "arrastando": False, "ponto": None,
-                  "candidatos": [], "indice": 0}
-        try:
-            cinza_tela = deteccao_bordas.preparar(print_t)
-        except Exception:
-            cinza_tela = None
-
-        def candidatos(cx, cy):
-            """Pilha de regiões plausíveis no ponto, da menor para a maior.
-
-            As duas fontes entram juntas em vez de uma servir de reserva da
-            outra: o Windows conhece as janelas e controles, a leitura de
-            bordas enxerga dentro de navegador e emulador, e nenhuma das duas
-            sozinha acerta em todo lugar. O usuário escolhe na roda do mouse
-            qual nível quer — cartão, painel ou janela.
-            """
-            lista = [(r[0] - mx, r[1] - my, r[2] - mx, r[3] - my)
-                     for r in deteccao_janelas.candidatos_sob_ponto(regioes, cx + mx, cy + my)]
-            moldura = lista[-1] if lista else (0, 0, lw, lh)
-            preferida = None
-            if cinza_tela is not None:
-                try:
-                    lista.extend(deteccao_bordas.candidatos(cinza_tela, cx, cy))
-                    # A coluna verificada na altura inteira da janela é a única
-                    # com evidência forte o bastante pra ser o palpite inicial:
-                    # as demais podem estar cortadas no realce ou na divisória
-                    # que por acaso passa sob o cursor.
-                    preferida = deteccao_bordas.coluna_no_ponto(cinza_tela, cx, moldura)
-                    if preferida:
-                        lista.append(preferida)
-                except Exception:
-                    pass
-            # a tela inteira não é sugestão útil: pra isso basta arrastar
-            lista = [r for r in lista if _area(r) <= 0.92 * lw * lh]
-            unicos = []
-            for r in sorted(lista, key=_area):
-                if not any(all(abs(a - b) <= 8 for a, b in zip(r, u)) for u in unicos):
-                    unicos.append(r)
-            inicial = unicos.index(preferida) if preferida in unicos else 0
-            return unicos, inicial
-
-        def desenhar_sugestao():
-            canv.delete("sugestao")
-            lista = estado["candidatos"]
-            if not lista:
-                estado["sugestao"] = None
-                return
-            idx = max(0, min(estado["indice"], len(lista) - 1))
-            estado["indice"] = idx
-            nova = lista[idx]
-            estado["sugestao"] = nova
-            canv.create_rectangle(*nova, outline=t["accent"], width=3, tags="sugestao")
-            if len(lista) > 1:
-                canv.create_text(nova[0] + 6, max(14, nova[1] - 14),
-                                 text=f"{idx + 1}/{len(lista)} · roda do mouse ajusta a área",
-                                 fill=t["accent"], anchor="w",
-                                 font=(theme.FONT, theme.FS_CAPTION, "bold"), tags="sugestao")
-
-        def ao_mover(e):
-            if estado["arrastando"]:
-                return
-            # só recalcula quando o cursor anda o bastante: a leitura de bordas
-            # é barata, mas não a ponto de rodar a cada pixel
-            ultimo = estado.get("ponto")
-            if ultimo and abs(e.x - ultimo[0]) < 6 and abs(e.y - ultimo[1]) < 6:
-                return
-            estado["ponto"] = (e.x, e.y)
-            lista, inicial = candidatos(e.x, e.y)
-            if lista == estado["candidatos"]:
-                return
-            estado["candidatos"] = lista
-            estado["indice"] = inicial
-            desenhar_sugestao()
-
-        def ao_roda(e):
-            """Roda pra cima aperta a sugestão, pra baixo abre."""
-            if estado["arrastando"] or len(estado["candidatos"]) < 2:
-                return
-            estado["indice"] += -1 if e.delta > 0 else 1
-            desenhar_sugestao()
-
-        def ao_pressionar(e):
-            self.xs, self.ys = e.x, e.y
-            estado["arrastando"] = False
-
-        def ao_arrastar(e):
-            if abs(e.x - self.xs) > 4 or abs(e.y - self.ys) > 4:
-                estado["arrastando"] = True
-                canv.delete("sugestao")
-            canv.delete("rect")
-            canv.create_rectangle(self.xs, self.ys, e.x, e.y, outline="red", width=2, tags="rect")
-
-        def finalizar(area_canvas):
-            """area_canvas é (x1, y1, x2, y2) no referencial do canvas."""
-            sel.destroy()
-            self._capturando = False
-            if area_canvas is None:
-                self.mostrar_janela()
-                return
-            x1, y1, x2, y2 = area_canvas
-            recorte = print_t.crop((x1, y1, x2, y2))
-            if self.config.get("incluir_cursor", False):
-                recorte = captura_utils.colar_cursor(recorte, offset=(x1 + mx, y1 + my))
-            self._guardar_ultima_area((x1 + mx, y1 + my, x2 + mx, y2 + my))
-            self._salvar_captura(recorte)
-
-        def drop(e):
-            x1, y1 = min(self.xs, e.x), min(self.ys, e.y)
-            x2, y2 = max(self.xs, e.x), max(self.ys, e.y)
-            # Clique sem arrastar captura a área sugerida; arrastar mantém a
-            # seleção manual. As duas dimensões são validadas, senão uma faixa
-            # de 1 px de altura passaria como seleção.
-            if not estado["arrastando"] and estado["sugestao"]:
-                finalizar(estado["sugestao"])
-            elif (x2 - x1) > 10 and (y2 - y1) > 10:
-                finalizar((x1, y1, x2, y2))
-            else:
-                finalizar(None)
-
-        def cancelar(_=None):
-            sel.destroy()
-            self._capturando = False
-            self.mostrar_janela()
-
-        canv.bind("<Motion>", ao_mover)
-        canv.bind("<MouseWheel>", ao_roda)
-        canv.bind("<ButtonPress-1>", ao_pressionar)
-        canv.bind("<B1-Motion>", ao_arrastar)
-        canv.bind("<ButtonRelease-1>", drop)
-        sel.bind("<Escape>", cancelar)
-        canv.bind("<Button-3>", cancelar)
-
-        # Obrigatório: o Tk só realiza uma Toplevel cujo mestre está
-        # `withdrawn` ao processar as tarefas ociosas. Sem esta chamada o
-        # seletor fica com a geometria inicial 1x1+0+0 e nunca é mapeado, que
-        # é o caso do atalho acionado com o painel recolhido na bandeja.
-        sel.update_idletasks()
-        sel.focus_force()
+        seletor.SeletorDeArea(self)
 
     def iniciar_captura_janela_ativa(self):
         if self._capturando:

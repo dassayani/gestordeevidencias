@@ -22,11 +22,30 @@ if not ctypes.windll.user32.SetProcessDpiAwarenessContext(ctypes.c_void_p(-4)):
     ctypes.windll.shcore.SetProcessDpiAwareness(2)
 import tkinter as tk
 from tkinterdnd2 import TkinterDnD
-import main as m, workspace
+import workspace
+
+# Pasta propria com capturas criadas agora: antes este teste abria o app sobre
+# a pasta real da maquina, o que o amarrava a existir captura la (e do dia de
+# hoje, por causa do filtro inicial) e mexia em evidencia de verdade.
+import tempfile, shutil
+from PIL import Image as _Image
+import config as _config
+
+_tmp = tempfile.mkdtemp(prefix="ge_teste_")
+_capturas = os.path.join(_tmp, "Capturas")
+os.makedirs(_capturas)
+for _i in range(3):
+    _Image.new("RGB", (900, 600), (40 + _i * 40, 100, 150)).save(
+        os.path.join(_capturas, "print_1100%02d.png" % _i))
+_cfg = _config.load(_tmp)
+_cfg["pasta_capturas"] = _capturas
+_config.save(_tmp, _cfg)
+
 
 falhas = []
 root = TkinterDnD.Tk()
-app = workspace.AppEvidencias(root, m.PASTA_CAPTURAS, m.PASTA_PDFS, m.BASE_DIR, m.DATA_DIR)
+app = workspace.AppEvidencias(root, _capturas, os.path.join(_tmp, "PDF"), RAIZ, _tmp)
+app.pausar_timer = True
 root.deiconify(); root.update()
 pngs = sorted(f for f in os.listdir(app.pasta_capturas)
               if f.lower().endswith(".png") and not f.endswith(".raw.png"))
@@ -149,3 +168,5 @@ print("\nFALHAS:", "nenhuma" if not falhas else "")
 for f in falhas:
     print(" -", f)
 ed.destroy(); root.destroy()
+
+shutil.rmtree(_tmp, ignore_errors=True)

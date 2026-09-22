@@ -21,7 +21,10 @@ import win32gui, win32con
 from tkinterdnd2 import TkinterDnD
 from PIL import Image, ImageDraw, ImageGrab
 from screeninfo import get_monitors
-import main as m, workspace, export_preview, pdf_export
+from gestor.ui import workspace
+from gestor.ui import export_preview
+from gestor.exportacao import pdf_export
+import main as m
 import fitz
 
 SP = SAIDA

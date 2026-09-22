@@ -16,14 +16,14 @@ if not ctypes.windll.user32.SetProcessDpiAwarenessContext(ctypes.c_void_p(-4)):
     ctypes.windll.shcore.SetProcessDpiAwareness(2)
 import win32clipboard
 from tkinterdnd2 import TkinterDnD
-import workspace
+from gestor.ui import workspace
 
 # Pasta propria com capturas criadas agora: antes este teste abria o app sobre
 # a pasta real da maquina, o que o amarrava a existir captura la (e do dia de
 # hoje, por causa do filtro inicial) e mexia em evidencia de verdade.
 import tempfile, shutil
 from PIL import Image as _Image
-import config as _config
+from gestor.dados import config as _config
 
 _tmp = tempfile.mkdtemp(prefix="ge_teste_")
 _capturas = os.path.join(_tmp, "Capturas")
@@ -100,6 +100,12 @@ ed._sujo = False
 print("\nFALHAS:", "nenhuma" if not falhas else "")
 for f in falhas:
     print(" -", f)
+try:
+    # A bandeja roda numa thread com laco de mensagens nativo. Parar antes de
+    # encerrar evita derrubar o processo na saida.
+    app.icon.stop()
+except Exception:
+    pass
 ed.destroy(); root.destroy()
 
 shutil.rmtree(_tmp, ignore_errors=True)

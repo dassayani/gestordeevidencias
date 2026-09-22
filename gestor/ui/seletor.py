@@ -16,10 +16,10 @@ from tkinter import Toplevel
 from PIL import ImageGrab
 from screeninfo import get_monitors
 
-import captura_utils
-import deteccao_bordas
-import deteccao_janelas
-import theme
+from gestor.captura import captura_utils
+from gestor.captura import deteccao_bordas
+from gestor.captura import deteccao_janelas
+from gestor.ui import theme
 
 # Quanto o cursor precisa andar para a sugestão ser recalculada. A leitura de
 # bordas é barata, mas não a ponto de rodar a cada pixel.

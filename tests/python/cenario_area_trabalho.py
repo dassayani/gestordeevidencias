@@ -24,10 +24,10 @@ import tkinter as tk
 from tkinterdnd2 import TkinterDnD
 from PIL import Image
 import win32gui
-import capture_store
-import config
-import theme
-from workspace import AppEvidencias
+from gestor.dados import capture_store
+from gestor.dados import config
+from gestor.ui import theme
+from gestor.ui.workspace import AppEvidencias
 
 falhas = []
 
@@ -172,14 +172,27 @@ try:
     cobre = any((r[2] - r[0]) >= largura_tela * 0.9 for r in visiveis)
     checar(cobre, "o botao de captura abre o seletor cobrindo a tela")
 
+    # Fecha pelo caminho real (Escape), e não destruindo a Toplevel na marra:
+    # o seletor é criado por um `after`, e destruir a janela com trabalho ainda
+    # agendado deixava callback pendente sobre widget morto — foi assim que
+    # este cenário derrubou o processo dentro da suíte.
     for w in root.winfo_children():
-        if isinstance(w, tk.Toplevel):
-            w.destroy()
+        if isinstance(w, tk.Toplevel) and w.winfo_exists():
+            w.event_generate("<Escape>")
+    for _ in range(6):
+        root.update_idletasks()
+        root.update()
+        time.sleep(0.05)
+    restantes = [w for w in root.winfo_children()
+                 if isinstance(w, tk.Toplevel) and w.winfo_exists()]
+    for w in restantes:
+        w.destroy()
     root.update()
+    checar(not restantes, "Escape fecha o seletor aberto pelo botao")
 
     # ---- limpar dados: tudo vai para a Lixeira ----
     restantes_antes = len(os.listdir(capturas))
-    import utils
+    from gestor.sistema import utils
     alvos = [os.path.join(capturas, f) for f in os.listdir(capturas)
              if os.path.isfile(os.path.join(capturas, f))]
     checar(utils.mover_para_lixeira(alvos), "limpar a pasta manda tudo para a Lixeira")
@@ -196,6 +209,12 @@ print("\nFALHAS:", "nenhuma" if not falhas else "")
 for f in falhas:
     print(" -", f)
 try:
+    try:
+        # A bandeja roda numa thread com laco de mensagens nativo. Parar antes de
+        # encerrar evita derrubar o processo na saida.
+        app.icon.stop()
+    except Exception:
+        pass
     root.destroy()
 except Exception:
     pass

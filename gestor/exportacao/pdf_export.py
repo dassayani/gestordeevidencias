@@ -11,7 +11,7 @@ import unicodedata
 from PIL import Image
 from fpdf import FPDF as _FPDFBase
 
-import utils
+from gestor.sistema import utils
 
 # O fpdf 1.7 escreve o texto em latin-1. Acento comum cabe, mas os caracteres
 # tipográficos que o Word, o Teams e o Chat inserem sozinhos (travessão no

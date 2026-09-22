@@ -13,7 +13,7 @@ _os.makedirs(SAIDA, exist_ok=True)
 
 import sys, os, time, json, tempfile
 from PIL import Image
-import capture_store
+from gestor.dados import capture_store
 
 falhas = []
 marca = "captura_teste_%d" % int(time.time())

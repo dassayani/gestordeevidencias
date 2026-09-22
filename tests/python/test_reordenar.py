@@ -12,7 +12,7 @@ _os.makedirs(SAIDA, exist_ok=True)
 
 import sys
 
-import document_builder
+from gestor.ui import document_builder
 
 falhas = []
 

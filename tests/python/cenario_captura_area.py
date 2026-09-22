@@ -27,9 +27,10 @@ if not ctypes.windll.user32.SetProcessDpiAwarenessContext(ctypes.c_void_p(-4)):
 import tkinter as tk
 from tkinterdnd2 import TkinterDnD
 from PIL import Image
-import config
-from workspace import AppEvidencias
+from gestor.dados import config
+from gestor.ui.workspace import AppEvidencias
 
+print("inicio do cenario", flush=True)
 falhas = []
 
 
@@ -54,6 +55,25 @@ def pngs(pasta):
                   if f.lower().endswith(".png") and not f.endswith(".raw.png"))
 
 
+def abrir_seletor(root, app, limite=6.0):
+    """Abre o seletor e espera ele aparecer de verdade.
+
+    O overlay nasce de um `after` e precisa ser realizado pelo Tk. Com espera
+    de tempo fixo, a maquina ocupada fazia o cenario falhar sem defeito algum
+    no app — esperar pela condicao tira esse acaso do caminho.
+    """
+    app.iniciar_seletor()
+    fim = time.time() + limite
+    while time.time() < fim:
+        root.update_idletasks()
+        root.update()
+        sel, canv = overlay_e_canvas(root)
+        if sel is not None and canv is not None and sel.winfo_width() > 100:
+            return sel, canv
+        time.sleep(0.05)
+    return overlay_e_canvas(root)
+
+
 tmp = tempfile.mkdtemp(prefix="ge_captura_")
 capturas = os.path.join(tmp, "Capturas")
 os.makedirs(capturas)
@@ -73,12 +93,7 @@ root.update()
 try:
     # ---- 1) arrastar uma area conhecida ----
     antes = pngs(capturas)
-    app.iniciar_seletor()
-    root.update()
-    time.sleep(0.5)
-    root.update()
-
-    sel, canv = overlay_e_canvas(root)
+    sel, canv = abrir_seletor(root, app)
     checar(sel is not None and canv is not None, "o seletor abriu com o canvas")
 
     if canv is not None:
@@ -116,11 +131,7 @@ try:
 
     # ---- 2) Escape cancela sem salvar ----
     antes = pngs(capturas)
-    app.iniciar_seletor()
-    root.update()
-    time.sleep(0.5)
-    root.update()
-    sel, canv = overlay_e_canvas(root)
+    sel, canv = abrir_seletor(root, app)
     checar(sel is not None, "o seletor abriu de novo")
     if sel is not None:
         sel.event_generate("<Escape>")
@@ -133,11 +144,7 @@ try:
 
     # ---- 3) clique sem arrastar e area pequena demais nao salvam lixo ----
     antes = pngs(capturas)
-    app.iniciar_seletor()
-    root.update()
-    time.sleep(0.5)
-    root.update()
-    sel, canv = overlay_e_canvas(root)
+    sel, canv = abrir_seletor(root, app)
     if canv is not None:
         canv.event_generate("<ButtonPress-1>", x=800, y=600)
         canv.event_generate("<B1-Motion>", x=803, y=602)
@@ -161,6 +168,12 @@ print("\nFALHAS:", "nenhuma" if not falhas else "")
 for f in falhas:
     print(" -", f)
 try:
+    try:
+        # A bandeja roda numa thread com laco de mensagens nativo. Parar antes de
+        # encerrar evita derrubar o processo na saida.
+        app.icon.stop()
+    except Exception:
+        pass
     root.destroy()
 except Exception:
     pass

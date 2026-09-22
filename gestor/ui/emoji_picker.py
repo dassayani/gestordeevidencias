@@ -13,8 +13,8 @@ from tkinter import Toplevel
 
 from PIL import Image, ImageDraw, ImageFont, ImageTk
 
-import theme
-import widgets
+from gestor.ui import theme
+from gestor.ui import widgets
 
 # Tamanhos oferecidos, em pixels na imagem final.
 TAMANHOS = (("P", 32), ("M", 48), ("G", 72))

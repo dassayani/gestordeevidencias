@@ -23,8 +23,9 @@ if not ctypes.windll.user32.SetProcessDpiAwarenessContext(ctypes.c_void_p(-4)):
     ctypes.windll.shcore.SetProcessDpiAwareness(2)
 from tkinterdnd2 import TkinterDnD
 from PIL import Image
-import config, document_builder
-from workspace import AppEvidencias
+from gestor.dados import config
+from gestor.ui import document_builder
+from gestor.ui.workspace import AppEvidencias
 
 tmp = tempfile.mkdtemp(prefix="ge_reord_")
 capturas = os.path.join(tmp, "Capturas")
@@ -127,6 +128,12 @@ print("\nFALHAS:", "nenhuma" if not falhas else "")
 for f in falhas:
     print(" -", f)
 try:
+    try:
+        # A bandeja roda numa thread com laco de mensagens nativo. Parar antes de
+        # encerrar evita derrubar o processo na saida.
+        app.icon.stop()
+    except Exception:
+        pass
     root.destroy()
 except Exception:
     pass

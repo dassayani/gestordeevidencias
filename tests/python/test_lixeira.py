@@ -16,7 +16,7 @@ SAIDA = _os.path.join(RAIZ, "tests", "_saida")
 _os.makedirs(SAIDA, exist_ok=True)
 
 import sys, os, time, tempfile
-import utils
+from gestor.sistema import utils
 
 falhas = []
 marca = "lixeira_teste_%d" % int(time.time())

@@ -8,10 +8,10 @@ import tkinter as tk
 
 from PIL import Image, ImageDraw, ImageFont, ImageTk
 
-import capture_store
-import config
-import theme
-import widgets
+from gestor.dados import capture_store
+from gestor.dados import config
+from gestor.ui import theme
+from gestor.ui import widgets
 
 # Miniatura da coluna de sequência: cabe na largura do card (coluna de ~230px
 # menos a barra de rolagem e os espaçamentos) e é alta o bastante pra dar pra
@@ -475,7 +475,7 @@ class MontarDocumento(Toplevel):
                         highlightthickness=2)
 
     def _atualizar_paginas(self):
-        import pdf_export
+        from gestor.exportacao import pdf_export
         n = pdf_export.contar_paginas(self.passos, self.var_modelo.get())
         if self.lbl_paginas:
             self.lbl_paginas.config(text=f"{len(self.passos)} passos · {n} páginas estimadas")
@@ -498,6 +498,6 @@ class MontarDocumento(Toplevel):
             "borda_cor": self.var_cor.get(),
             "fonte_legenda": self.parent_app.config.get("fonte_legenda", "Arial"),
         }
-        import export_preview
+        from gestor.ui import export_preview
         export_preview.PreVisualizarExportar(self.parent_app, self, self.var_modelo.get(), capa,
                                               list(self.passos), opcoes)

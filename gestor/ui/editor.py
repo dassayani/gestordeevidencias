@@ -15,11 +15,11 @@ import tkinter as tk
 
 from PIL import Image, ImageTk, ImageDraw, ImageFont
 
-import capture_store
-import emoji_picker
-import theme
-import utils
-import widgets
+from gestor.dados import capture_store
+from gestor.ui import emoji_picker
+from gestor.ui import theme
+from gestor.sistema import utils
+from gestor.ui import widgets
 
 TAMANHO_EMOJI_PADRAO = emoji_picker.TAMANHO_PADRAO
 

@@ -88,7 +88,7 @@ def delete_capture(png_path):
     Devolve False quando a Lixeira recusou - nesse caso nada e apagado, em
     vez de destruir a evidencia em silencio.
     """
-    import utils
+    from gestor.sistema import utils
 
     alvos = [p for p in (png_path, raw_path(png_path), json_path(png_path),
                          txt_path(png_path)) if os.path.exists(p)]

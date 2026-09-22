@@ -31,10 +31,10 @@ LOG = open(os.path.join(SAIDA, "escala.log"), "w", buffering=1)
 
 from PIL import ImageGrab
 from tkinterdnd2 import TkinterDnD
-import capture_store
-import config
-import document_builder
-from workspace import AppEvidencias
+from gestor.dados import capture_store
+from gestor.dados import config
+from gestor.ui import document_builder
+from gestor.ui.workspace import AppEvidencias
 
 ESCALA = sys.argv[1] if len(sys.argv) > 1 else "padrao"
 SUFIXO = sys.argv[2] if len(sys.argv) > 2 else ESCALA

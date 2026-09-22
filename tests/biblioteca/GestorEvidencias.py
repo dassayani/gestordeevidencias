@@ -71,7 +71,7 @@ class GestorEvidencias:
     def gerar_documento(self, modelo, legenda=LEGENDA_LONGA, cor="#0B7285",
                         borda=False, passos=2):
         """Gera o PDF de `modelo` (passo, ficha ou qa) e devolve o caminho."""
-        import pdf_export
+        from gestor.exportacao import pdf_export
         geradores = {"passo": pdf_export.exportar_passo_a_passo,
                      "ficha": pdf_export.exportar_ficha_evidencia,
                      "qa": pdf_export.exportar_relatorio_qa}
@@ -93,7 +93,7 @@ class GestorEvidencias:
     @keyword("Gerar DOCX do modelo")
     def gerar_docx(self, modelo, legenda=LEGENDA_LONGA, cor="#0B7285"):
         """Gera o DOCX de `modelo` e devolve o caminho."""
-        import docx_export
+        from gestor.exportacao import docx_export
         geradores = {"passo": docx_export.exportar_passo_a_passo,
                      "ficha": docx_export.exportar_ficha_evidencia,
                      "qa": docx_export.exportar_relatorio_qa}
@@ -134,7 +134,7 @@ class GestorEvidencias:
         É o defeito que fazia uma URL ou um caminho de arquivo sair para fora
         do documento: a quebra só acontecia em espaços.
         """
-        import pdf_export
+        from gestor.exportacao import pdf_export
         largura = pdf_export.PAGE_W - 2 * pdf_export.MARGEM - 28
         pdf = pdf_export.FPDF(format="A4", unit="mm")
         pdf.add_page()
@@ -173,7 +173,7 @@ class GestorEvidencias:
     @keyword("Mandar arquivos para a Lixeira")
     def mandar_para_lixeira(self, quantidade=3):
         """Cria arquivos, manda para a Lixeira e confere que saíram da pasta."""
-        import utils
+        from gestor.sistema import utils
         pasta = self._pasta()
         criados = []
         for i in range(int(quantidade)):

@@ -19,9 +19,9 @@ import sys
 import tempfile
 
 from tkinterdnd2 import TkinterDnD
-import config
-import theme
-from workspace import AppEvidencias
+from gestor.dados import config
+from gestor.ui import theme
+from gestor.ui.workspace import AppEvidencias
 
 falhas = []
 
@@ -91,6 +91,12 @@ checar(recarregado.get("escala_fonte") == "grande", "a escala escolhida persiste
 checar(theme.escala_por_chave("grande") == 1.15, "a chave 'grande' vira o fator 1.15")
 checar(theme.escala_por_chave("inexistente") == 1.0, "chave desconhecida cai no padrao")
 
+try:
+    # A bandeja roda numa thread com laco de mensagens nativo. Parar antes de
+    # encerrar evita derrubar o processo na saida.
+    app.icon.stop()
+except Exception:
+    pass
 root.destroy()
 shutil.rmtree(tmp, ignore_errors=True)
 

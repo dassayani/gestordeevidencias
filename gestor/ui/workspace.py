@@ -12,17 +12,17 @@ from PIL import Image, ImageTk, ImageGrab
 from pystray import MenuItem as item
 from tkinterdnd2 import COPY, DND_FILES
 
-import capture_store
-import captura_utils
-import config
-import configuracoes
-import deteccao_janelas
-import editor
-import hotkey
-import seletor
-import theme
-import utils
-import widgets
+from gestor.dados import capture_store
+from gestor.captura import captura_utils
+from gestor.dados import config
+from gestor.ui import configuracoes
+from gestor.captura import deteccao_janelas
+from gestor.ui import editor
+from gestor.captura import hotkey
+from gestor.ui import seletor
+from gestor.ui import theme
+from gestor.sistema import utils
+from gestor.ui import widgets
 
 FILTROS = (("hoje", "Hoje"), ("marcadas", "Marcadas"), ("editadas", "Editadas"), ("tudo", "Tudo"))
 
@@ -1003,7 +1003,7 @@ class AppEvidencias:
         if not self.arquivos_selecionados:
             messagebox.showinfo("Criar documento", "Selecione ao menos uma captura antes.")
             return
-        import document_builder
+        from gestor.ui import document_builder
         document_builder.MontarDocumento(self, set(self.arquivos_selecionados))
 
     def excluir_selecionadas_ou_tudo(self):

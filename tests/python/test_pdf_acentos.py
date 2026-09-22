@@ -12,7 +12,8 @@ _os.makedirs(SAIDA, exist_ok=True)
 
 import os
 from PIL import Image
-import pdf_export, docx_export
+from gestor.exportacao import pdf_export
+from gestor.exportacao import docx_export
 
 img = os.path.join(SAIDA, "amostra.png")
 Image.new("RGB", (800, 500), (40, 90, 110)).save(img)

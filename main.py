@@ -110,10 +110,12 @@ except Exception:
     except Exception:
         pass
 
-import diagnostico  # noqa: E402
-import instancia  # noqa: E402
-import startup  # noqa: E402
-from workspace import AppEvidencias  # noqa: E402  (precisa vir depois do ajuste de sys.path/DPI)
+# Estes imports vêm depois do ajuste de sys.path e do modo de DPI, de
+# propósito — daí o noqa: E402.
+from gestor.sistema import diagnostico  # noqa: E402
+from gestor.sistema import instancia  # noqa: E402
+from gestor.sistema import startup  # noqa: E402
+from gestor.ui.workspace import AppEvidencias  # noqa: E402
 
 if __name__ == "__main__":
     diagnostico.instalar(DATA_DIR)

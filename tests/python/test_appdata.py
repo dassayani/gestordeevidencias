@@ -12,7 +12,9 @@ SAIDA = _os.path.join(RAIZ, "tests", "_saida")
 _os.makedirs(SAIDA, exist_ok=True)
 
 import sys, os, json, tempfile, shutil
-import main, config, diagnostico
+from gestor.dados import config
+from gestor.sistema import diagnostico
+import main
 
 falhas = []
 

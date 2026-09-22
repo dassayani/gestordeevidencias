@@ -8,7 +8,7 @@ import tkinter.font as tkfont
 
 from PIL import Image, ImageDraw, ImageFilter, ImageFont, ImageTk
 
-import theme
+from gestor.ui import theme
 
 
 def _fonte_pil(negrito, tamanho_pt, escala):
@@ -455,10 +455,12 @@ def caminho_icone():
     """Caminho do icon.ico, funcionando tanto rodando do fonte quanto no .exe.
 
     No executável do PyInstaller os dados ficam extraídos em sys._MEIPASS; no
-    fonte, ao lado deste módulo.
+    fonte, na raiz do projeto — três pastas acima deste módulo, que vive em
+    gestor/ui/.
     """
     import sys
-    base = getattr(sys, "_MEIPASS", None) or os.path.dirname(os.path.abspath(__file__))
+    raiz = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    base = getattr(sys, "_MEIPASS", None) or raiz
     caminho = os.path.join(base, "icon.ico")
     return caminho if os.path.exists(caminho) else None
 

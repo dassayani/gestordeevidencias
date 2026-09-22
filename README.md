@@ -52,9 +52,11 @@ de nada para fora da máquina.
 ### 🚧 Ainda não existe
 
 - [ ] OCR / busca por texto dentro da imagem
-- [ ] Integração com Jira ou Azure DevOps
 - [ ] Organização em projetos/pastas dentro do app (hoje a organização é por
       pasta do sistema + campo Caso/Projeto + filtros)
+
+Integração com Jira ou Azure DevOps **está fora do escopo**: o documento
+gerado é anexado manualmente onde for preciso, e o projeto fica no GitHub.
 - [ ] Reorganização do código em pacotes por camada (ver [Roadmap](#️-roadmap))
 - [ ] Versionamento em Git — **o projeto ainda não está sob controle de versão**
 
@@ -127,9 +129,9 @@ imagem.
         %APPDATA%\GestorEvidencias\  (config.json, erros.log)
 ```
 
-Os módulos ficam todos na raiz do repositório. O agrupamento em pastas por
-camada está no roadmap — a suíte de testes cobre o caminho inteiro, então a
-mudança deixou de ser um salto no escuro, mas ainda não foi feita.
+Cada camada é um pacote dentro de `gestor/`. Só o `main.py` fica na raiz: é o
+ponto de entrada, e é dele que sai o caminho base usado para achar os dados
+quando a aplicação está empacotada.
 
 ---
 
@@ -137,25 +139,38 @@ mudança deixou de ser um salto no escuro, mas ainda não foi feita.
 
 ```
 .
-├── main.py                  entrada: DPI, pastas, instância única
-├── workspace.py             painel principal, lista, captura, bandeja
-├── editor.py                editor de anotação
-├── document_builder.py      montar documento (sequência, capa, opções)
-├── export_preview.py        pré-visualização e exportação
-├── configuracoes.py         tela de Configurações
-├── widgets.py  theme.py     componentes e tokens visuais
-├── capture_store.py         leitura/escrita das capturas e metadados
-├── config.py                config.json
-├── captura_utils.py         cursor, som, nomes, retenção
-├── deteccao_bordas.py       sugestão da área de captura
-├── deteccao_janelas.py      retângulo real da janela (DWM)
-├── hotkey.py                atalhos globais e combinações oferecidas
-├── pdf_export.py            geração do PDF (3 modelos)
-├── docx_export.py           geração do DOCX (3 modelos)
-├── startup.py               início com o Windows, menu Iniciar
-├── instancia.py             instância única
-├── diagnostico.py           log de erro e aviso na tela
-├── utils.py                 clipboard, Lixeira, cores, desenho
+├── main.py                      entrada: DPI, pastas, instância única
+│
+├── gestor/
+│   ├── ui/                      telas e componentes
+│   │   ├── workspace.py         painel principal, lista, bandeja
+│   │   ├── editor.py            editor de anotação
+│   │   ├── seletor.py           overlay de seleção de área
+│   │   ├── document_builder.py  montar documento (sequência, capa, opções)
+│   │   ├── export_preview.py    pré-visualização e exportação
+│   │   ├── configuracoes.py     tela de Configurações
+│   │   ├── emoji_picker.py      seletor de emoji do editor
+│   │   └── widgets.py theme.py  componentes e tokens visuais
+│   │
+│   ├── captura/                 tirar o print
+│   │   ├── captura_utils.py     cursor, som, nomes, retenção
+│   │   ├── deteccao_bordas.py   sugestão da área de captura
+│   │   ├── deteccao_janelas.py  retângulo real da janela (DWM)
+│   │   └── hotkey.py            atalhos globais e combinações
+│   │
+│   ├── exportacao/              gerar o documento
+│   │   ├── pdf_export.py        PDF nos 3 modelos
+│   │   └── docx_export.py       DOCX nos 3 modelos
+│   │
+│   ├── dados/                   o que persiste
+│   │   ├── capture_store.py     capturas e metadados
+│   │   └── config.py            config.json
+│   │
+│   └── sistema/                 integração com o Windows
+│       ├── startup.py           início com o Windows, menu Iniciar
+│       ├── instancia.py         instância única
+│       ├── diagnostico.py       log de erro e aviso na tela
+│       └── utils.py             clipboard, Lixeira, cores, desenho
 │
 ├── tests/
 │   ├── suites/              casos em Robot, por área
@@ -369,7 +384,6 @@ querer: CPF, nome, valor, e-mail, token na URL.
 ### Mais adiante
 
 - [ ] OCR e busca dentro da imagem
-- [ ] Integração com Jira / Azure DevOps
 - [ ] Organização em projetos dentro do app
 
 ---

@@ -59,7 +59,7 @@ def save(data_dir, cfg):
     except Exception:
         try:
             import sys
-            import diagnostico
+            from gestor.sistema import diagnostico
             diagnostico.registrar(*sys.exc_info(), contexto="gravando config.json")
         except Exception:
             pass

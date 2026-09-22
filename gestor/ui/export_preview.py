@@ -10,12 +10,12 @@ import tkinter.font as tkfont
 
 from PIL import Image, ImageTk
 
-import config
-import docx_export
-import pdf_export
-import theme
-import utils
-import widgets
+from gestor.dados import config
+from gestor.exportacao import docx_export
+from gestor.exportacao import pdf_export
+from gestor.ui import theme
+from gestor.sistema import utils
+from gestor.ui import widgets
 
 PAGINA_W, PAGINA_H = 480, 678  # aproxima a proporção A4
 

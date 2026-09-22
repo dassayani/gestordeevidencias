@@ -9,12 +9,12 @@ contrário.
 from tkinter import Toplevel, messagebox, filedialog
 import tkinter as tk
 
-import captura_utils
-import config
-import hotkey
-import startup
-import theme
-import widgets
+from gestor.captura import captura_utils
+from gestor.dados import config
+from gestor.captura import hotkey
+from gestor.sistema import startup
+from gestor.ui import theme
+from gestor.ui import widgets
 
 FONTES_PDF = [("Arial", "Arial / Helvetica"), ("Times", "Times"), ("Courier", "Courier")]
 

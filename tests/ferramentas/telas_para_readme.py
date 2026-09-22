@@ -22,11 +22,11 @@ if not ctypes.windll.user32.SetProcessDpiAwarenessContext(ctypes.c_void_p(-4)):
 import tkinter as tk
 from tkinterdnd2 import TkinterDnD
 from PIL import Image, ImageDraw, ImageGrab
-import capture_store
-import config
-import configuracoes
-import document_builder
-from workspace import AppEvidencias
+from gestor.dados import capture_store
+from gestor.dados import config
+from gestor.ui import configuracoes
+from gestor.ui import document_builder
+from gestor.ui.workspace import AppEvidencias
 
 DESTINO = os.path.join(RAIZ, "docs", "images")
 os.makedirs(DESTINO, exist_ok=True)

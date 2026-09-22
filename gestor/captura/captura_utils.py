@@ -10,7 +10,7 @@ import win32gui
 import win32ui
 from PIL import Image
 
-import capture_store
+from gestor.dados import capture_store
 
 COR_CHAVE = (255, 0, 255)
 

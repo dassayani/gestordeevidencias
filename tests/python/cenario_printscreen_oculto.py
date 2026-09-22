@@ -31,9 +31,9 @@ import tkinter as tk
 import win32gui
 from tkinterdnd2 import TkinterDnD
 from PIL import Image
-import config
-import hotkey
-from workspace import AppEvidencias
+from gestor.dados import config
+from gestor.captura import hotkey
+from gestor.ui.workspace import AppEvidencias
 
 falhas = []
 
@@ -131,6 +131,12 @@ for f in falhas:
 try:
     if app.hotkeys:
         app.hotkeys.parar()
+    try:
+        # A bandeja roda numa thread com laco de mensagens nativo. Parar antes de
+        # encerrar evita derrubar o processo na saida.
+        app.icon.stop()
+    except Exception:
+        pass
     root.destroy()
 except Exception:
     pass

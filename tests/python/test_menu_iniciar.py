@@ -15,7 +15,7 @@ SAIDA = _os.path.join(RAIZ, "tests", "_saida")
 _os.makedirs(SAIDA, exist_ok=True)
 
 import os
-import startup
+from gestor.sistema import startup
 
 falhas = []
 existia = startup.no_menu_iniciar()

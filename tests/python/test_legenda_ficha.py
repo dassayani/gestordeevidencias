@@ -15,8 +15,8 @@ _os.chdir(RAIZ)
 SAIDA = _os.path.join(RAIZ, "tests", "_saida")
 _os.makedirs(SAIDA, exist_ok=True)
 
-import pdf_export
-from pdf_export import FPDF, MARGEM, PAGE_W
+from gestor.exportacao import pdf_export
+from gestor.exportacao.pdf_export import FPDF, MARGEM, PAGE_W
 
 LARGURA = PAGE_W - 2 * MARGEM - 28
 

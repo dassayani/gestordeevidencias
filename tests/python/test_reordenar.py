@@ -40,8 +40,9 @@ class CardFalso:
 
 
 class EventoFalso:
-    def __init__(self, y):
+    def __init__(self, y, x=0):
         self.y_root = y
+        self.x_root = x
 
 
 def montar(n):
@@ -61,7 +62,8 @@ def nomes(doc):
 
 
 def arrastar(doc, origem, y_solta):
-    doc._arraste_iniciar(origem)
+    # o arraste comeca no meio do card de origem (cards de 100 px a partir de 1000)
+    doc._arraste_iniciar(origem, EventoFalso(1050 + 100 * origem))
     doc._arraste_mover(EventoFalso(y_solta))
     doc._arraste_soltar(EventoFalso(y_solta))
     return nomes(doc)
@@ -77,9 +79,26 @@ checar(arrastar(montar(4), 1, 1140) == "ABCD", "soltar no mesmo lugar nao muda n
 
 # clique simples (sem movimento) nao pode reordenar
 d = montar(4)
-d._arraste_iniciar(0)
+d._arraste_iniciar(0, EventoFalso(1050))
 d._arraste_soltar(EventoFalso(1010))
 checar(nomes(d) == "ABCD", "clique sem arrastar nao reordena")
+
+# limiar: tremida de poucos pixels e clique, nao arraste (senao o duplo clique
+# na miniatura reconstruiria a coluna entre um clique e outro)
+reconstruiu = []
+d = montar(4)
+d._atualizar_sequencia = lambda: reconstruiu.append(1)
+d._arraste_iniciar(0, EventoFalso(1050, x=300))
+d._arraste_mover(EventoFalso(1053, x=302))
+checar(d._arraste["ativo"] is False, "movimento de 3 px nao ativa o arraste")
+d._arraste_soltar(EventoFalso(1053, x=302))
+checar(nomes(d) == "ABCD" and not reconstruiu,
+       "tremida de 3 px nao reordena nem reconstrui a coluna")
+
+d = montar(4)
+d._arraste_iniciar(0, EventoFalso(1050, x=300))
+d._arraste_mover(EventoFalso(1060, x=300))
+checar(d._arraste["ativo"] is True, "movimento de 10 px ativa o arraste")
 
 # lista de 1 item nao quebra
 d1 = montar(1)

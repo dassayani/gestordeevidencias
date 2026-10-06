@@ -18,6 +18,9 @@ from gestor.ui import widgets
 # reconhecer o print.
 _LARGURA_MINIATURA = 168
 _ALTURA_MINIATURA = 112
+# Deslocamento (px) a partir do qual o movimento do mouse deixa de ser clique e
+# passa a ser arraste de reordenação.
+_LIMIAR_ARRASTE = 5
 
 def _com_numero(imagem, numero, cor_hex):
     """Desenha o número do passo no canto da própria miniatura.
@@ -200,7 +203,7 @@ class MontarDocumento(Toplevel):
             arrastaveis.append(rotulo_texto)
 
             for w in arrastaveis:
-                w.bind("<ButtonPress-1>", lambda e, i=idx: self._arraste_iniciar(i))
+                w.bind("<ButtonPress-1>", lambda e, i=idx: self._arraste_iniciar(i, e))
                 w.bind("<B1-Motion>", self._arraste_mover)
                 w.bind("<ButtonRelease-1>", self._arraste_soltar)
 
@@ -220,8 +223,10 @@ class MontarDocumento(Toplevel):
                 return i
         return len(self._cards)
 
-    def _arraste_iniciar(self, idx):
-        self._arraste = {"origem": idx, "destino": idx, "ativo": False}
+    def _arraste_iniciar(self, idx, event=None):
+        self._arraste = {"origem": idx, "destino": idx, "ativo": False,
+                         "x0": getattr(event, "x_root", 0),
+                         "y0": getattr(event, "y_root", 0)}
 
     def _arraste_mover(self, event):
         estado = getattr(self, "_arraste", None)
@@ -229,6 +234,13 @@ class MontarDocumento(Toplevel):
             return
         t = theme.get(self.parent_app.modo_escuro)
         if not estado["ativo"]:
+            # Só vira arraste depois de um deslocamento mínimo. Sem o limiar,
+            # uma tremida de 1 px entre os dois cliques de um duplo clique
+            # contava como arraste, e soltar reconstruía a coluna: o widget do
+            # primeiro clique era destruído e o duplo clique falhava.
+            if max(abs(event.x_root - estado["x0"]),
+                   abs(event.y_root - estado["y0"])) < _LIMIAR_ARRASTE:
+                return
             estado["ativo"] = True
             # o card que está sendo levado fica apagado
             self._cards[estado["origem"]].config(bg=t["accent_bg"])

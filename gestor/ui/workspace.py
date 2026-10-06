@@ -983,7 +983,14 @@ class AppEvidencias:
 
     def _salvar_captura(self, imagem):
         nome = captura_utils.nome_arquivo(self.config.get("padrao_nome", "hora"))
-        imagem.save(os.path.join(self.pasta_capturas, nome))
+        caminho = os.path.join(self.pasta_capturas, nome)
+        imagem.save(caminho)
+        try:
+            # o instante da captura ordena o documento; o nome só tem HHMMSS no
+            # padrão `hora`, e o mtime muda quando o print é editado
+            capture_store.registrar_captura(caminho)
+        except Exception as e:
+            print(f"[captura] não foi possível gravar o instante: {e}")
         if self.config.get("copiar_apos_captura", True):
             # deixa a captura pronta pra colar com Ctrl+V em qualquer programa,
             # sem precisar arrastar o card nem usar o botão direito

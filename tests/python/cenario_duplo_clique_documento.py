@@ -160,23 +160,28 @@ def duplo_clique(w, tremida=0):
     root.update()
 
 
-def arrastar(w, dy_total, passo=6):
+def arrastar(w, dy_total, passo=6, antes_de_soltar=None):
     separar_gestos()
     evento(w, "<ButtonPress-1>")
     sinal = 1 if dy_total >= 0 else -1
     for d in range(passo, abs(dy_total) + 1, passo):
         evento(w, "<B1-Motion>", dy=sinal * d)
     evento(w, "<B1-Motion>", dy=dy_total)
+    if antes_de_soltar:
+        antes_de_soltar()
     evento(w, "<ButtonRelease-1>", dy=dy_total)
     root.update()
 
 
+# Os cartoes trocam de lugar sem ser recriados: a ordem de CRIACAO dos widgets
+# (winfo_children) deixa de ser a ordem na tela. Le-se sempre a ordem exibida.
+
 def miniaturas_sequencia(j):
-    return [rotulos_com_imagem(c)[0] for c in j.frame_sequencia.winfo_children()]
+    return [rotulos_com_imagem(c)[0] for c in j._cards]
 
 
 def miniaturas_centro(j):
-    return rotulos_com_imagem(j.col_central)
+    return [rotulos_com_imagem(j._cartoes_centro[p["caminho"]]["frame"])[0] for p in j.passos]
 
 
 def fechar_editor(j):
@@ -231,7 +236,7 @@ try:
     fechar_editor(janela)
 
     # ---- lapis e link ----
-    lapis = [w for w in descendentes(janela.frame_sequencia.winfo_children()[2])
+    lapis = [w for w in descendentes(janela._cards[2])
              if w.winfo_class() == "Label" and w.cget("text") == "✎"]
     checar(len(lapis) == 1, "cada cartao da sequencia tem o botao de lapis")
     if lapis:
@@ -269,19 +274,31 @@ try:
 
     alvo = janela._cards[2]
     thumb = miniaturas_sequencia(janela)[0]
-    y_destino = alvo.winfo_rooty() + int(alvo.winfo_height() * 0.8)
+    y_destino = alvo.winfo_rooty() + int(alvo.winfo_height() * 0.5)
     y_origem = thumb.winfo_rooty() + thumb.winfo_height() // 2
-    arrastar(thumb, y_destino - y_origem)
-    esperado = [ordem[1], ordem[2], ordem[0], ordem[3]]
-    if [p["nome"] for p in janela.passos] != esperado:
-        print("   diagnostico: estado=%s arraste=%s editor=%s toplevels=%s"
-              % (janela.state(), janela._arraste, janela._editor, toplevels(janela)))
-        print("   diagnostico: y_origem=%s y_destino=%s cartoes=%s"
-              % (y_origem, y_destino,
-                 [(c.winfo_rooty(), c.winfo_height()) for c in janela._cards]))
-    checar([p["nome"] for p in janela.passos] == esperado,
-           "arraste real do primeiro cartao ate abaixo do terceiro reordena (%s)"
-           % [n[-8:-4] for n in (p["nome"] for p in janela.passos)])
+    visto = {}
+
+    def antes_de_soltar():
+        # O que a tela mostra um instante antes de soltar: o vao e o destino.
+        estado = janela._arraste
+        slaves = janela.frame_sequencia.pack_slaves()
+        visto["destino"] = estado["destino"]
+        visto["posicao_do_vao"] = slaves.index(estado["vao"])
+        visto["vao_existe"] = bool(estado["vao"].winfo_exists())
+        visto["fantasma"] = bool(janela._fantasma is not None)
+
+    arrastar(thumb, y_destino - y_origem, antes_de_soltar=antes_de_soltar)
+    final = [p["nome"] for p in janela.passos]
+    checar(visto.get("vao_existe") and visto.get("fantasma"),
+           "durante o arraste ha um vao e um fantasma na tela")
+    checar(final != ordem, "arraste real do primeiro cartao para baixo reordena")
+    checar(final.index(ordem[0]) == visto.get("posicao_do_vao"),
+           "o item sai exatamente onde o vao estava antes de soltar (vao %s, saiu %s)"
+           % (visto.get("posicao_do_vao"), final.index(ordem[0])))
+    checar(janela._arraste is None and janela._fantasma is None
+           and not [w for w in janela.frame_sequencia.winfo_children()
+                    if w.winfo_class() == "Frame" and w not in janela._cards],
+           "ao soltar nao sobram vao nem fantasma")
     checar(len(miniaturas_sequencia(janela)) == 4 and len(miniaturas_centro(janela)) == 4,
            "depois do arraste todas as miniaturas continuam na tela")
 

@@ -63,12 +63,20 @@ Reordenar os passos mantém as miniaturas na tela
     [Tags]    regressao
     Executar cenário de tela    test_reordenar_miniaturas
 
-Reordenar coloca os passos na posição certa
-    [Documentation]    Inclui o limiar de 5 px: uma tremida entre os dois cliques
-    ...                de um duplo clique não pode virar arraste nem reconstruir
-    ...                a coluna.
+Reordenar decide o destino pela regra certa
+    [Documentation]    A função pura que escolhe a posição: alcança todas, sem pular,
+    ...                nos dois sentidos, e a folga impede o vão de oscilar com o
+    ...                ponteiro parado sobre o meio de um cartão.
     [Tags]    regressao
     Executar cenário de tela    test_reordenar
+
+Arrastar a Sequência mostra o destino e solta onde mostrou
+    [Documentation]    Vão e fantasma durante o arraste, números ao vivo, todos os
+    ...                pares origem/destino, rolagem automática nos dois sentidos
+    ...                (e mais rápida perto da borda), Esc, desfazer, Alt+seta e
+    ...                velocidade: nada é reconstruído nem relido do disco.
+    [Tags]    regressao
+    Executar cenário de tela    cenario_arraste_sequencia    tempo_limite=420
 
 Editar a imagem a partir do documento e voltar com tudo persistido
     [Documentation]    Abre o editor de um passo, anota, recorta e grava. O documento

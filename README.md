@@ -42,6 +42,8 @@ de nada para fora da máquina.
 - 👀 Pré-visualização que é a página do documento de verdade, não uma amostra
 - ✏️ Ao montar o documento, duplo clique na miniatura (ou ✎) abre o editor da
   imagem e, ao gravar, o documento volta com tudo atualizado
+- ↕️ Reordenar a sequência arrastando: o cartão abre um vão onde vai entrar, a lista
+  rola sozinha perto das bordas, Esc cancela, e dá para desfazer (Alt+↑/↓ também)
 - 📎 Exportação em PDF e DOCX
 - 📋 Ctrl+C copia a captura como imagem **e** como arquivo (cola no Word ou anexa no e-mail)
 - 🗑️ Exclusão para a Lixeira do Windows, com volta
@@ -286,7 +288,7 @@ tests/
 └── python/                  cenários, executáveis também sem o Robot
 ```
 
-São 34 casos. Duas decisões do desenho estão explicadas em
+São 35 casos. Duas decisões do desenho estão explicadas em
 [tests/README.md](tests/README.md), e vale conhecê-las antes de escrever mais
 testes:
 
@@ -375,7 +377,7 @@ querer: CPF, nome, valor, e-mail, token na URL.
 - [x] Três visualizações da lista
 - [x] Tamanho de fonte ajustável
 - [x] Empacotamento em executável
-- [x] Suíte de teste automatizada (34 casos)
+- [x] Suíte de teste automatizada (35 casos)
 - [x] Editar a imagem direto do Montar documento, sem perder o que já foi preenchido
 - [x] Tela de Configurações extraída do `workspace.py` para módulo próprio
 - [x] Projeto sob Git
@@ -408,7 +410,7 @@ Antes de qualquer entrega, duas coisas:
 
 ```bat
 venv\Scripts\python.exe -m pyflakes *.py    :: precisa sair limpo
-tests\executar.bat                           :: precisa fechar 34/34
+tests\executar.bat                           :: precisa fechar 35/35
 ```
 
 E, para mudança de interface: **rode o app e olhe a tela**. Vários defeitos

@@ -1,4 +1,16 @@
-"""Testa a reordenacao por arraste e o nome do arquivo exportado."""
+# -*- coding: utf-8 -*-
+"""A regra que decide para onde o item arrastado vai: `calcular_destino`.
+
+E uma funcao pura (altura do ponteiro + pontos medios dos outros cartoes ->
+posicao de insercao), por isso se testa aqui sem janela nenhuma; o que a tela
+faz com ela e conferido em cenario_arraste_sequencia.
+
+Propriedades que importam para quem arrasta:
+  * o destino sempre existe (0..N) e cresce junto com a altura do ponteiro
+  * e coerente nos dois sentidos: nao ha posicao inalcancavel
+  * a folga impede o vao de oscilar com o ponteiro parado sobre o meio de um
+    cartao - o defeito que tornaria o arraste "nervoso"
+"""
 
 import os as _os
 import sys as _sys
@@ -7,105 +19,84 @@ import sys as _sys
 RAIZ = _os.path.dirname(_os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))
 _sys.path.insert(0, RAIZ)
 _os.chdir(RAIZ)
-SAIDA = _os.path.join(RAIZ, "tests", "_saida")
-_os.makedirs(SAIDA, exist_ok=True)
 
 import sys
 
-from gestor.ui import document_builder
+from gestor.ui.document_builder import calcular_destino
 
 falhas = []
 
 
-def checar(cond, msg):
-    print(("OK: " if cond else "FALHOU: ") + msg)
-    if not cond:
-        falhas.append(msg)
+def checar(condicao, descricao):
+    print(("OK: " if condicao else "FALHOU: ") + descricao)
+    if not condicao:
+        falhas.append(descricao)
 
 
-class CardFalso:
-    """Imita o retangulo de um card na tela: 100px de altura, empilhados."""
-
-    def __init__(self, indice):
-        self.indice = indice
-
-    def winfo_rooty(self):
-        return 1000 + self.indice * 100
-
-    def winfo_height(self):
-        return 100
-
-    def config(self, **kw):
-        pass
+# quatro cartoes de 213 px + 8 de folga, o primeiro comecando em 4
+ALTURA, FOLGA = 213, 8
+MIDS = [4 + i * (ALTURA + FOLGA) + ALTURA / 2 for i in range(4)]
+MARGEM = 0.15 * ALTURA
 
 
-class EventoFalso:
-    def __init__(self, y, x=0):
-        self.y_root = y
-        self.x_root = x
+def varrer(ys, atual):
+    """Destino em cada altura, partindo de `atual`, como no arraste de verdade:
+    cada passo parte do destino anterior."""
+    d, caminho = atual, []
+    for y in ys:
+        d = calcular_destino(y, MIDS, d, MARGEM)
+        caminho.append(d)
+    return caminho
 
 
-def montar(n):
-    """Instancia a tela sem construir a UI de verdade."""
-    doc = document_builder.MontarDocumento.__new__(document_builder.MontarDocumento)
-    doc.passos = [{"nome": chr(ord("A") + i), "caminho": "", "legenda": ""} for i in range(n)]
-    doc._cards = [CardFalso(i) for i in range(n)]
-    doc._arraste = None
-    doc._atualizar_sequencia = lambda: None
-    doc._atualizar_coluna_central = lambda: None
-    doc.parent_app = type("P", (), {"modo_escuro": False})()
-    return doc
+# ---- extremos ----
+checar(calcular_destino(-500, MIDS, 2, MARGEM) == 0, "bem acima de tudo -> posicao 0")
+checar(calcular_destino(5000, MIDS, 1, MARGEM) == 4, "bem abaixo de tudo -> fim da lista")
+checar(calcular_destino(MIDS[0], [], 0, MARGEM) == 0, "lista sem outros cartoes -> 0")
 
+# ---- cada posicao e alcancavel, descendo e subindo ----
+descendo = varrer(range(-50, 1000, 3), 0)
+subindo = varrer(range(1000, -50, -3), 4)
+checar(sorted(set(descendo)) == [0, 1, 2, 3, 4], "descendo passa por 0, 1, 2, 3 e 4")
+checar(sorted(set(subindo)) == [0, 1, 2, 3, 4], "subindo passa por 4, 3, 2, 1 e 0")
+checar(descendo == sorted(descendo), "descendo, o destino nunca diminui")
+checar(subindo == sorted(subindo, reverse=True), "subindo, o destino nunca aumenta")
 
-def nomes(doc):
-    return "".join(p["nome"] for p in doc.passos)
+# ---- so troca depois de passar do meio por mais que a folga ----
+checar(calcular_destino(MIDS[1] + MARGEM - 1, MIDS, 1, MARGEM) == 1,
+       "ainda dentro da folga do meio: nao troca")
+checar(calcular_destino(MIDS[1] + MARGEM + 1, MIDS, 1, MARGEM) == 2,
+       "passou da folga do meio: troca")
+checar(calcular_destino(MIDS[1] - MARGEM + 1, MIDS, 2, MARGEM) == 2,
+       "voltando, ainda dentro da folga: nao troca de volta")
+checar(calcular_destino(MIDS[1] - MARGEM - 1, MIDS, 2, MARGEM) == 1,
+       "voltando, passou da folga: troca de volta")
 
+# ---- sem oscilacao: ponteiro parado sobre o meio de qualquer cartao ----
+for i, meio in enumerate(MIDS):
+    for atual in range(5):
+        d = calcular_destino(meio, MIDS, atual, MARGEM)
+        estavel = all(calcular_destino(meio, MIDS, d, MARGEM) == d for _ in range(5))
+        if not estavel:
+            checar(False, "ponteiro parado no meio do cartao %d oscila (partindo de %d)" % (i, atual))
+            break
+    else:
+        continue
+    break
+else:
+    checar(True, "ponteiro parado sobre o meio de qualquer cartao nao faz o vao oscilar")
 
-def arrastar(doc, origem, y_solta):
-    # o arraste comeca no meio do card de origem (cards de 100 px a partir de 1000)
-    doc._arraste_iniciar(origem, EventoFalso(1050 + 100 * origem))
-    doc._arraste_mover(EventoFalso(y_solta))
-    doc._arraste_soltar(EventoFalso(y_solta))
-    return nomes(doc)
+# ---- pequenas tremidas perto de uma fronteira nao fazem o vao pular ----
+fronteira = MIDS[2]
+d0 = calcular_destino(fronteira + MARGEM + 2, MIDS, 2, MARGEM)       # acabou de trocar
+tremida = [fronteira + MARGEM + delta for delta in (2, -3, 4, -5, 3, -4, 5, -2)]
+checar(len(set(varrer(tremida, d0))) == 1,
+       "tremer 5 px em volta da fronteira depois de trocar nao devolve o vao")
 
-
-# cards: A=1000-1100 (meio 1050), B=1100-1200 (1150), C=1200-1300 (1250),
-#        D=1300-1400 (1350)
-checar(arrastar(montar(4), 0, 1360) == "BCDA", "arrastar o primeiro pro fim -> BCDA")
-checar(arrastar(montar(4), 3, 1010) == "DABC", "arrastar o ultimo pro topo -> DABC")
-checar(arrastar(montar(4), 0, 1160) == "BACD", "descer um item uma posicao -> BACD")
-checar(arrastar(montar(4), 2, 1040) == "CABD", "subir o terceiro pro topo -> CABD")
-checar(arrastar(montar(4), 1, 1140) == "ABCD", "soltar no mesmo lugar nao muda nada")
-
-# clique simples (sem movimento) nao pode reordenar
-d = montar(4)
-d._arraste_iniciar(0, EventoFalso(1050))
-d._arraste_soltar(EventoFalso(1010))
-checar(nomes(d) == "ABCD", "clique sem arrastar nao reordena")
-
-# limiar: tremida de poucos pixels e clique, nao arraste (senao o duplo clique
-# na miniatura reconstruiria a coluna entre um clique e outro)
-reconstruiu = []
-d = montar(4)
-d._atualizar_sequencia = lambda: reconstruiu.append(1)
-d._arraste_iniciar(0, EventoFalso(1050, x=300))
-d._arraste_mover(EventoFalso(1053, x=302))
-checar(d._arraste["ativo"] is False, "movimento de 3 px nao ativa o arraste")
-d._arraste_soltar(EventoFalso(1053, x=302))
-checar(nomes(d) == "ABCD" and not reconstruiu,
-       "tremida de 3 px nao reordena nem reconstrui a coluna")
-
-d = montar(4)
-d._arraste_iniciar(0, EventoFalso(1050, x=300))
-d._arraste_mover(EventoFalso(1060, x=300))
-checar(d._arraste["ativo"] is True, "movimento de 10 px ativa o arraste")
-
-# lista de 1 item nao quebra
-d1 = montar(1)
-checar(arrastar(d1, 0, 5000) == "A", "lista com 1 item aguenta arraste sem quebrar")
-
-# soltar muito abaixo do ultimo card
-checar(arrastar(montar(3), 0, 9999) == "BCA", "soltar bem abaixo manda pro fim")
+# ---- a folga e simetrica ----
+sobe = calcular_destino(MIDS[2] - MARGEM - 1, MIDS, 3, MARGEM)
+desce = calcular_destino(MIDS[2] + MARGEM + 1, MIDS, 2, MARGEM)
+checar(sobe == 2 and desce == 3, "a folga e a mesma nos dois sentidos")
 
 print()
 print("FALHAS:", falhas if falhas else "nenhuma")

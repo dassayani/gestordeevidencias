@@ -222,6 +222,12 @@ class EditorImagem(Toplevel):
         `legenda_inicial` sobrepõe a legenda do disco — é como o Montar
         documento entrega a legenda que o usuário digitou e ainda não gravou.
         """
+        # Lê do disco ANTES de criar a janela: com a imagem corrompida a leitura
+        # falha, e se a Toplevel já existisse ficaria na tela uma janela vazia
+        # que ninguém consegue fechar direito.
+        meta = capture_store.load_meta(caminho_img)
+        img_raw = capture_store.load_raw_image(caminho_img)
+
         super().__init__(parent)
         self.parent = parent
         self.app = app
@@ -235,7 +241,6 @@ class EditorImagem(Toplevel):
         self.state("zoomed")
         self.configure(bg=t["bg_panel"])
 
-        meta = capture_store.load_meta(caminho_img)
         self.legenda_inicial = meta.get("caption", "")
         # Legenda do chamador diferente da gravada: abre como alteração não
         # gravada, para fechar sem gravar avisar em vez de descartar a legenda
@@ -247,7 +252,7 @@ class EditorImagem(Toplevel):
         self.caso_inicial = meta.get("caso", "")
         self.shapes = meta.get("shapes", [])
         self._shape_seq = max([s.get("id", 0) for s in self.shapes], default=0)
-        self.img_raw = capture_store.load_raw_image(caminho_img)
+        self.img_raw = img_raw
 
         self.ferramenta = "seta"
         self.cor_selecionada = theme.PALETTE[0]

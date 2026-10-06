@@ -61,15 +61,19 @@ def load_meta(png_path):
     return meta
 
 
+def _descartar(tmp):
+    try:
+        os.remove(tmp)
+    except Exception:
+        pass
+
+
 def _substituir(tmp, destino):
     """Troca o destino pelo temporário; limpa o temporário se a troca falhar."""
     try:
         os.replace(tmp, destino)
     except Exception:
-        try:
-            os.remove(tmp)
-        except Exception:
-            pass
+        _descartar(tmp)
         raise
 
 
@@ -77,10 +81,15 @@ def save_png(imagem, destino):
     """Grava a imagem sem deixar o arquivo pela metade em caso de falha.
 
     Escreve num temporário ao lado e só então troca: disco cheio ou arquivo
-    bloqueado no meio da gravação não destroem a versão que já existia.
+    bloqueado no meio da gravação não destroem a versão que já existia, e o
+    temporário parcial não fica para trás.
     """
     tmp = destino + ".tmp"
-    imagem.save(tmp, format="PNG")
+    try:
+        imagem.save(tmp, format="PNG")
+    except Exception:
+        _descartar(tmp)
+        raise
     _substituir(tmp, destino)
 
 
@@ -90,8 +99,12 @@ def save_meta(png_path, meta, marcar_editada=True):
         meta["edited_at"] = datetime.now().isoformat()
     destino = json_path(png_path)
     tmp = destino + ".tmp"
-    with open(tmp, "w", encoding="utf-8") as f:
-        json.dump(meta, f, ensure_ascii=False)
+    try:
+        with open(tmp, "w", encoding="utf-8") as f:
+            json.dump(meta, f, ensure_ascii=False)
+    except Exception:
+        _descartar(tmp)
+        raise
     _substituir(tmp, destino)
     tp = txt_path(png_path)
     if os.path.exists(tp):

@@ -121,9 +121,32 @@ def _com_numero(imagem, numero, cor_hex):
 
 MODELOS_UI = [
     ("passo", "Passo a passo", "1 imagem por passo, legenda acima"),
-    ("ficha", "Ficha de evidência", "2 por página, com metadados"),
-    ("qa", "Relatório QA", "coluna lateral com contexto"),
+    ("ficha", "Ficha", "2 por página, com metadados"),
+    ("qa", "Relatório", "coluna lateral com contexto"),
 ]
+
+# Título que a capa traz quando o usuário ainda não escreveu o dele, por modelo.
+TITULOS_PADRAO = {
+    "passo": "Evidências passo a passo",
+    "ficha": "Evidências de Testes",
+    "qa": "Relatório de Evidências",
+}
+
+
+def titulo_padrao(modelo):
+    return TITULOS_PADRAO.get(modelo, TITULOS_PADRAO["passo"])
+
+
+def titulo_ao_trocar_modelo(atual, modelo_anterior, modelo_novo):
+    """O texto que o campo Título deve ter depois de trocar de modelo.
+
+    Só acompanha o modelo quem ainda mostra o padrão do modelo ANTERIOR; um
+    título digitado pelo usuário (inclusive vazio, apagado de propósito) fica
+    como está, senão trocar de modelo desfaria o que ele escreveu.
+    """
+    if atual == titulo_padrao(modelo_anterior):
+        return titulo_padrao(modelo_novo)
+    return atual
 
 
 class MontarDocumento(Toplevel):
@@ -938,7 +961,7 @@ class MontarDocumento(Toplevel):
         if guardado is not None:
             return guardado     # string vazia também vale: o usuário apagou
         if chave == "titulo":
-            return "Evidências de teste"
+            return titulo_padrao(self.var_modelo.get())
         if chave == "data":
             return datetime.now().strftime("%d/%m/%Y")
         if chave == "autor":
@@ -1106,8 +1129,7 @@ class MontarDocumento(Toplevel):
 
     def _linha_modelo(self, linha, valor, nome, desc, t):
         def selecionar(v=valor):
-            self.var_modelo.set(v)
-            self._atualizar_modelos_visual()
+            self._trocar_modelo(v)
 
         linha.bind("<Button-1>", lambda e: selecionar())
         self._card_modelo_widgets = getattr(self, "_card_modelo_widgets", {})
@@ -1122,6 +1144,22 @@ class MontarDocumento(Toplevel):
         sub.bind("<Button-1>", lambda e: selecionar())
         self._card_modelo_widgets[valor] = (linha, lbl, sub)
         self._atualizar_modelos_visual()
+
+    def _trocar_modelo(self, novo):
+        anterior = self.var_modelo.get()
+        self.var_modelo.set(novo)
+        self._atualizar_modelos_visual()
+        entry = self.entries_capa.get("titulo")
+        if entry is None:
+            return
+        try:
+            atual = entry.get()
+            titulo = titulo_ao_trocar_modelo(atual, anterior, novo)
+            if titulo != atual:
+                entry.delete(0, "end")
+                entry.insert(0, titulo)
+        except tk.TclError:
+            pass          # campo já destruído: a coluna refaz com o modelo novo
 
     def _atualizar_modelos_visual(self):
         t = theme.get(self.parent_app.modo_escuro)

@@ -38,7 +38,7 @@ de nada para fora da máquina.
 - 🔎 Busca por nome do arquivo, legenda ou caso/projeto
 - 🗂️ Filtros: Hoje, Marcadas (as selecionadas para o documento), Editadas, Tudo
 - 👁️ Três visualizações da lista: detalhes, blocos e grade
-- 📄 Três modelos de documento: Passo a passo, Ficha de evidência e Relatório QA
+- 📄 Três modelos de documento: Passo a passo, Ficha e Relatório (cada um com o seu título padrão na capa)
 - 👀 Pré-visualização que é a página do documento de verdade, não uma amostra
 - ✏️ Ao montar o documento, duplo clique na miniatura (ou ✎) abre o editor da
   imagem e, ao gravar, o documento volta com tudo atualizado
@@ -288,7 +288,7 @@ tests/
 └── python/                  cenários, executáveis também sem o Robot
 ```
 
-São 35 casos. Duas decisões do desenho estão explicadas em
+São 37 casos. Duas decisões do desenho estão explicadas em
 [tests/README.md](tests/README.md), e vale conhecê-las antes de escrever mais
 testes:
 
@@ -377,7 +377,7 @@ querer: CPF, nome, valor, e-mail, token na URL.
 - [x] Três visualizações da lista
 - [x] Tamanho de fonte ajustável
 - [x] Empacotamento em executável
-- [x] Suíte de teste automatizada (35 casos)
+- [x] Suíte de teste automatizada (37 casos)
 - [x] Editar a imagem direto do Montar documento, sem perder o que já foi preenchido
 - [x] Tela de Configurações extraída do `workspace.py` para módulo próprio
 - [x] Projeto sob Git
@@ -410,7 +410,7 @@ Antes de qualquer entrega, duas coisas:
 
 ```bat
 venv\Scripts\python.exe -m pyflakes *.py    :: precisa sair limpo
-tests\executar.bat                           :: precisa fechar 35/35
+tests\executar.bat                           :: precisa fechar 37/37
 ```
 
 E, para mudança de interface: **rode o app e olhe a tela**. Vários defeitos

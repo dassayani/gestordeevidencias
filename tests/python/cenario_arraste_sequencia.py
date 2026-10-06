@@ -223,6 +223,13 @@ try:
     # =================================================================
     # Lista curta: contrato do arraste
     # =================================================================
+    # A lista curta nao e para testar a rolagem automatica (ha secao propria, mais
+    # adiante): aqui ela so atrapalharia. O cartao 3 tem a miniatura abaixo da
+    # area visivel, o ponteiro de teste comecaria dentro da faixa de rolagem e a
+    # lista andaria sozinha durante o gesto, deslocando o alvo calculado.
+    _autoscroll_ms = document_builder._AUTOSCROLL_MS
+    document_builder._AUTOSCROLL_MS = 10 ** 9
+
     j = abrir(pequenas)
     original = nomes_da_ordem(j)
     checar(len(original) == 4, "4 capturas no documento")
@@ -241,6 +248,18 @@ try:
     checar(abs(e["vao"].winfo_height() - e["altura"]) <= 2 and e["altura"] > 100,
            "o vao tem a altura do cartao levado (%d px x %d px)"
            % (e["vao"].winfo_height(), e["altura"]))
+
+    # Os pontos medios contra a geometria REAL, calculada so a partir das alturas
+    # dos cartoes: sem isto o teste de todos os pares usaria os mesmos numeros
+    # que o codigo calculou, e concordaria com qualquer valor errado.
+    esperado_mids, topo_c = [], 4
+    for rec in e["recs_outros"]:
+        altura_c = rec["frame"].winfo_height()
+        esperado_mids.append(topo_c + altura_c / 2)
+        topo_c += altura_c + 8
+    checar(len(e["mids"]) == 3 and all(abs(m - x) <= 1 for m, x in zip(e["mids"], esperado_mids)),
+           "os pontos medios batem com o layout sem o cartao levado (%s x %s)"
+           % ([round(m) for m in e["mids"]], [round(x) for x in esperado_mids]))
 
     # percorre todas as posicoes de baixo para cima, devagar
     vistos = []
@@ -300,6 +319,17 @@ try:
             item = antes[origem]
             b = Arraste(j, origem)
             b.ir_para(b.y + (12 if origem < 3 else -12), atualizar=True)
+            # pontos medios contra a geometria real: para origens acima de outros
+            # cartoes e que o desconto do cartao levado entra em jogo
+            esperado_m, topo_m = [], 4
+            for rec_m in b.estado["recs_outros"]:
+                h_m = rec_m["frame"].winfo_height()
+                esperado_m.append(topo_m + h_m / 2)
+                topo_m += h_m + 8
+            if not all(abs(m - x) <= 1 for m, x in zip(b.estado["mids"], esperado_m)):
+                falhas_par.append((origem, destino, "mids",
+                                   [round(m) for m in b.estado["mids"]],
+                                   [round(x) for x in esperado_m]))
             alvo = y_do_destino(j, b.estado, destino)
             b.ir_para(alvo, atualizar=True)
             mostrado = b.estado["destino"]
@@ -531,6 +561,7 @@ try:
     # =================================================================
     # Lista longa: rolagem automatica e velocidade
     # =================================================================
+    document_builder._AUTOSCROLL_MS = _autoscroll_ms
     j = abrir(grandes)
     cv = j._canvas_sequencia
     original = nomes_da_ordem(j)

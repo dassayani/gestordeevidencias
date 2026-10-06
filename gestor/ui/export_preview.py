@@ -138,8 +138,11 @@ class PreVisualizarExportar(Toplevel):
         import pymupdf
 
         self._fechar_documento()
+        # Um arquivo por janela: com duas prévias abertas, o nome só com o pid
+        # fazia a segunda tentar sobrescrever um PDF que a primeira mantém
+        # aberto, e falhar.
         destino = os.path.join(tempfile.gettempdir(),
-                               "ge_previa_%d.pdf" % os.getpid())
+                               "ge_previa_%d_%d.pdf" % (os.getpid(), id(self)))
         pdf_export.exportar(self.modelo, destino, self.capa, self.passos,
                             self.opcoes)
         self._arquivo_previa = destino
@@ -147,6 +150,22 @@ class PreVisualizarExportar(Toplevel):
         self.total_paginas = self._documento.page_count
         if self.pagina_atual >= self.total_paginas:
             self.pagina_atual = max(0, self.total_paginas - 1)
+
+    def regerar(self):
+        """Gera o documento de novo com o que está nos passos agora.
+
+        Quem edita uma imagem com a prévia aberta precisa que ela acompanhe:
+        o PDF da prévia foi gerado uma vez e ficaria com a versão antiga.
+        """
+        self._erro_previa = ""
+        try:
+            self._gerar_previa()
+        except Exception as e:
+            self._erro_previa = str(e)
+        if hasattr(self, "lbl_resumo"):
+            self.lbl_resumo.config(
+                text=f"{len(self.passos)} capturas · {self.total_paginas} páginas")
+        self._render_pagina()
 
     def _fechar_documento(self):
         doc = getattr(self, "_documento", None)
@@ -239,10 +258,10 @@ class PreVisualizarExportar(Toplevel):
         rodape = tk.Frame(col, bg=t["bg_footer"])
         rodape.pack(fill="x", side="bottom")
         # a contagem vem do documento gerado, e não de uma estimativa
-        tk.Label(rodape, text=f"{len(self.passos)} capturas · {self.total_paginas} páginas",
-                 bg=t["bg_footer"],
-                 fg=t["text_tertiary"], font=(theme.FONT, theme.FS_CAPTION)).pack(
-                     anchor="w", padx=16, pady=(12, 6))
+        self.lbl_resumo = tk.Label(
+            rodape, text=f"{len(self.passos)} capturas · {self.total_paginas} páginas",
+            bg=t["bg_footer"], fg=t["text_tertiary"], font=(theme.FONT, theme.FS_CAPTION))
+        self.lbl_resumo.pack(anchor="w", padx=16, pady=(12, 6))
         self.btn_exportar = widgets.botao_primario(rodape, "Exportar PDF", self._exportar,
                                                      self.parent_app.modo_escuro)
         self.btn_exportar.pack(fill="x", padx=16, pady=(0, 14))

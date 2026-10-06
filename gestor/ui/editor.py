@@ -214,9 +214,18 @@ def render_composite(raw_img, shapes):
 
 
 class EditorImagem(Toplevel):
-    def __init__(self, parent, caminho_img, callback_atualizar, modo_escuro):
+    def __init__(self, parent, caminho_img, callback_atualizar, modo_escuro,
+                 app=None, janela_retorno=None, legenda_inicial=None):
+        """`app` é o AppEvidencias (dono do timer de inatividade) e
+        `janela_retorno` a janela que reaparece ao fechar. Ambos são opcionais:
+        sem eles o editor se comporta como antes, preso ao painel principal.
+        `legenda_inicial` sobrepõe a legenda do disco — é como o Montar
+        documento entrega a legenda que o usuário digitou e ainda não gravou.
+        """
         super().__init__(parent)
         self.parent = parent
+        self.app = app
+        self.janela_retorno = janela_retorno or parent
         self.caminho_img = caminho_img
         self.callback_atualizar = callback_atualizar
         self.modo_escuro = modo_escuro
@@ -228,6 +237,13 @@ class EditorImagem(Toplevel):
 
         meta = capture_store.load_meta(caminho_img)
         self.legenda_inicial = meta.get("caption", "")
+        # Legenda do chamador diferente da gravada: abre como alteração não
+        # gravada, para fechar sem gravar avisar em vez de descartar a legenda
+        # em silêncio.
+        legenda_divergente = (legenda_inicial is not None
+                              and legenda_inicial != self.legenda_inicial)
+        if legenda_inicial is not None:
+            self.legenda_inicial = legenda_inicial
         self.caso_inicial = meta.get("caso", "")
         self.shapes = meta.get("shapes", [])
         self._shape_seq = max([s.get("id", 0) for s in self.shapes], default=0)
@@ -275,8 +291,17 @@ class EditorImagem(Toplevel):
 
         self._definir_ferramenta_ativa("seta")
         self._atualizar_lista_camadas()
+        if legenda_divergente:
+            self.sujo = True
         self._atualizar_status()
         self.after(120, self._redraw_canvas)
+
+    def _pausar_timer(self, pausado):
+        """Liga/desliga a pausa de inatividade no dono dela. Gravar em
+        `self.parent` (a raiz Tk) não tinha efeito: o timer lê o atributo do
+        AppEvidencias."""
+        if self.app is not None:
+            self.app.pausar_timer = pausado
 
     # ---------- construção da UI ----------
 
@@ -573,12 +598,12 @@ class EditorImagem(Toplevel):
             self._atualizar_status()
             self._redraw_canvas()
 
-        self.parent.pausar_timer = True
+        self._pausar_timer(True)
         try:
             emoji_picker.SeletorEmoji(self, self.modo_escuro, escolhido,
                                        tamanho_inicial=self.tamanho_emoji)
         finally:
-            self.parent.pausar_timer = False
+            self._pausar_timer(False)
 
     def _definir_ferramenta_ativa(self, nome):
         for n, b in self.botoes_ferramenta.items():
@@ -598,9 +623,9 @@ class EditorImagem(Toplevel):
                 self._atualizar_lista_camadas()
 
     def escolher_cor(self):
-        self.parent.pausar_timer = True
+        self._pausar_timer(True)
         cores = colorchooser.askcolor(color=self.cor_selecionada, parent=self)
-        self.parent.pausar_timer = False
+        self._pausar_timer(False)
         if cores[1]:
             self._escolher_cor_predefinida(cores[1])
 
@@ -1304,8 +1329,7 @@ class EditorImagem(Toplevel):
 
     def gravar_e_fechar(self):
         self.gravar()
-        self.parent.deiconify()
-        self.destroy()
+        self._voltar()
 
     def salvar_copia(self):
         composto = render_composite(self.img_raw,
@@ -1325,5 +1349,14 @@ class EditorImagem(Toplevel):
         if self.sujo and not messagebox.askyesno(
                 "Sair sem gravar", "Existem edições não gravadas. Sair mesmo assim?", parent=self):
             return
-        self.parent.deiconify()
+        self._voltar()
+
+    def _voltar(self):
+        """Fecha o editor e traz de volta a janela de onde ele foi aberto."""
+        retorno = self.janela_retorno
         self.destroy()
+        try:
+            retorno.deiconify()
+            retorno.lift()
+        except Exception:
+            pass          # a janela de retorno pode ter sido fechada

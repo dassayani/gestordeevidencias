@@ -844,7 +844,7 @@ class AppEvidencias:
 
     def abrir_editor(self, caminho):
         return editor.EditorImagem(self.root, caminho, self.atualizar_galeria,
-                                    self.modo_escuro)
+                                    self.modo_escuro, app=self)
 
     def _atualizar_contador(self):
         self.lbl_selecionadas.config(
@@ -1085,7 +1085,10 @@ class AppEvidencias:
         enquanto o editor está aberto."""
         if self.pausar_timer:
             return
-        if any(isinstance(c, editor.EditorImagem) for c in self.root.winfo_children()):
+        # Qualquer janela auxiliar aberta (editor, Montar documento, prévia)
+        # segura o painel: com a raiz escondida o Tk não mapeia as Toplevels
+        # filhas dela, e o trabalho em andamento sumiria da tela.
+        if any(isinstance(c, tk.Toplevel) for c in self.root.winfo_children()):
             return
         self.root.withdraw()
 

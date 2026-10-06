@@ -176,6 +176,30 @@ try:
     janela.update()
     checar(titulo(janela) == "", "titulo apagado continua vazio depois de refazer a coluna")
 
+    # ---- a previa mostra o nome novo do modelo e o titulo da capa ----
+    # O campo ja esta vazio (apagado de proposito acima): escreve-se o padrao do
+    # modelo a cada volta, como faria quem comeca de novo.
+    for modelo, nome_esperado in (("passo", "Passo a passo"), ("ficha", "Ficha"),
+                                  ("qa", "Relatório")):
+        escolher(janela, modelo)
+        campo = janela.entries_capa["titulo"]       # a coluna pode ter sido refeita
+        campo.delete(0, "end")
+        campo.insert(0, PADRAO[modelo])
+        janela._pre_visualizar()
+        root.update()
+        previa = next((w for w in root.winfo_children()
+                       if isinstance(w, export_preview.PreVisualizarExportar)), None)
+        checar(previa is not None, "[%s] a previa abriu" % modelo)
+        if previa is None:
+            continue
+        texto = previa.lbl_pagina.cget("text")
+        checar(texto.endswith("modelo: " + nome_esperado),
+               "[%s] a previa diz 'modelo: %s' (%r)" % (modelo, nome_esperado, texto))
+        checar(previa.capa.get("titulo") == PADRAO[modelo],
+               "[%s] a previa recebeu o titulo padrao do modelo" % modelo)
+        previa.fechar()
+        root.update()
+
     checar(not [a for a in avisos if a[0] == "erro"], "nenhuma mensagem de erro")
     janela.destroy()
     root.update()

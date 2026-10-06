@@ -64,8 +64,6 @@ de nada para fora da máquina.
 
 Integração com Jira ou Azure DevOps **está fora do escopo**: o documento
 gerado é anexado manualmente onde for preciso, e o projeto fica no GitHub.
-- [ ] Reorganização do código em pacotes por camada (ver [Roadmap](#️-roadmap))
-- [ ] Versionamento em Git — **o projeto ainda não está sob controle de versão**
 
 ---
 
@@ -393,12 +391,17 @@ querer: CPF, nome, valor, e-mail, token na URL.
 - [x] Editar a imagem direto do Montar documento, sem perder o que já foi preenchido
 - [x] Tela de Configurações extraída do `workspace.py` para módulo próprio
 - [x] Projeto sob Git
+- [x] Módulos agrupados em pacotes por camada (`ui`, `captura`, `exportacao`, `dados`, `sistema`)
 - [x] Licença definida
 - [x] Busca alcançando também o campo Caso/Projeto
+- [x] Nomes e título padrão da capa por modelo (Passo a passo, Ficha, Relatório)
+- [x] Documento em ordem cronológica, com seletor de ordem e `captured_at`
+- [x] Arrastar a sequência com vão, rolagem automática e desfazer
 
 ### Próximo
 
-- [ ] Agrupar os módulos em pastas por camada
+- [ ] Duplo clique na página da pré-visualização para editar a imagem (hoje o
+      duplo clique vale na tela de montar o documento)
 
 ### Mais adiante
 
@@ -409,8 +412,8 @@ querer: CPF, nome, valor, e-mail, token na URL.
 
 ## 🤝 Contribuindo
 
-O projeto ainda não está sob controle de versão — este é o primeiro item do
-roadmap. Assim que estiver, a intenção é:
+O código fica no GitHub (`dassayani/gestordeevidencias`). Cada mudança nasce
+numa branch própria:
 
 ```bat
 git checkout -b feature/nome-curto
@@ -421,13 +424,18 @@ Prefixos: `feature/`, `fix/`, `refactor/`, `test/`, `docs/`.
 Antes de qualquer entrega, duas coisas:
 
 ```bat
-venv\Scripts\python.exe -m pyflakes *.py    :: precisa sair limpo
-tests\executar.bat                           :: precisa fechar 39/39
+venv\Scripts\python.exe -m pyflakes gestor main.py tests\python tests\biblioteca   :: precisa sair limpo
+tests\executar.bat                                                                 :: precisa fechar 39/39
 ```
 
 E, para mudança de interface: **rode o app e olhe a tela**. Vários defeitos
 desta base só aparecem visualmente — lista que esvazia, miniatura que some,
-campo que volta ao padrão.
+campo que volta ao padrão, texto cortado.
+
+Teste de gesto (arrastar, duplo clique) merece uma conferência com o **mouse de
+verdade**: o evento sintético do Tk não reproduz tudo, e foi assim que se achou
+um duplo clique que falhava de forma intermitente. Detalhes em
+[tests/README.md](tests/README.md).
 
 ### Convenções de commit
 

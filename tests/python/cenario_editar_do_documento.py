@@ -96,6 +96,11 @@ _deiconify_original = root.deiconify
 root.deiconify = lambda: (chamadas_raiz.append(1), _deiconify_original())[1]
 
 
+galeria = []
+_galeria_original = app.atualizar_galeria
+app.atualizar_galeria = lambda *a, **k: (galeria.append(1), _galeria_original(*a, **k))[1]
+
+
 def hash_arquivo(caminho):
     with open(caminho, "rb") as f:
         return hashlib.md5(f.read()).hexdigest()
@@ -190,11 +195,24 @@ try:
     checar(janela._editor is ed and len(editores_abertos()) == 1,
            "pedir outra edicao nao abre um segundo editor")
 
+    # O <Destroy> do editor tambem dispara para cada widget filho dele. A lista
+    # de camadas se reconstrói o tempo todo; isso nao pode liberar o Montar.
+    ed._atualizar_lista_camadas()
+    janela.update()
+    checar(not desbloqueado(janela) and janela._editor is ed,
+           "destruir widgets internos do editor nao libera o Montar no meio da edicao")
+
     # ---- anotar, recortar e gravar ----
     ed.shapes.append({"id": 1, "tool": "retangulo", "coords": [150, 150, 400, 300],
                       "color": "#E8590C", "width": 4, "dash": False, "visible": True})
     ed._marcar_sujo()
     ed._aplicar_recorte([100, 100, 600, 400])
+    # A legenda tambem muda dentro do editor: o disco passa a ser a verdade, e o
+    # Montar tem de acompanha-la ao voltar.
+    LEG_FINAL = "Legenda ajustada dentro do editor"
+    ed.txt_legenda.delete("1.0", "end")
+    ed.txt_legenda.insert("1.0", LEG_FINAL)
+    galeria_antes = len(galeria)
     ed.gravar_e_fechar()
     janela.update()
     root.update()
@@ -205,8 +223,10 @@ try:
     checar(not chamadas_raiz, "fechar o editor nao traz o painel principal de volta")
     checar(bool(janela.winfo_viewable()), "a tela do documento continua visivel")
 
+    checar(len(galeria) > galeria_antes,
+           "gravar no editor atualiza tambem a lista do painel principal")
     meta = capture_store.load_meta(caminho_alvo)
-    checar(meta.get("caption") == LEG_ALVO, "a legenda do Montar foi gravada no .json")
+    checar(meta.get("caption") == LEG_FINAL, "a legenda do editor foi gravada no .json")
     checar(len(meta.get("shapes", [])) == 1, "a anotacao foi gravada")
     checar(bool(meta.get("edited_at")), "a captura editada fica marcada como editada")
     with Image.open(caminho_alvo) as im:
@@ -215,9 +235,10 @@ try:
     checar(os.path.exists(capture_store.raw_path(caminho_alvo)), "o original continua ao lado")
 
     # ---- o documento reflete tudo ----
-    checar(janela.passos[ALVO]["legenda"] == LEG_ALVO, "o passo guarda a legenda")
-    checar(janela.entries_legenda[ALVO].get("1.0", "end").strip() == LEG_ALVO,
-           "a caixa de legenda mostra a legenda")
+    checar(janela.passos[ALVO]["legenda"] == LEG_FINAL,
+           "o passo guarda a legenda que o editor gravou, e nao a que estava no Montar")
+    checar(janela.entries_legenda[ALVO].get("1.0", "end").strip() == LEG_FINAL,
+           "a caixa de legenda mostra a legenda gravada")
     checar(janela.imagens_passos[ALVO].height() != altura_antes,
            "a miniatura da coluna central foi refeita (%d -> %d px)"
            % (altura_antes, janela.imagens_passos[ALVO].height()))

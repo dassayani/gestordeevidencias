@@ -79,6 +79,26 @@ Editar a imagem a partir do documento e voltar com tudo persistido
     [Tags]    regressao
     Executar cenário de tela    cenario_editar_do_documento    tempo_limite=240
 
+Duplo clique e arraste de verdade no Montar documento
+    [Documentation]    Eventos de mouse reais (apertar, mover, soltar): duplo clique
+    ...                com tremida, lápis, link, arraste e tremida, imagem corrompida
+    ...                sem deixar janela vazia, legenda colada pelo mouse, troca de
+    ...                tema e fechamento do Montar com o editor aberto.
+    [Tags]    regressao
+    Executar cenário de tela    cenario_duplo_clique_documento    tempo_limite=300
+
+Gravar a captura é atômico e o editor não finge que gravou
+    [Documentation]    Falha no meio da escrita preserva a versão anterior e não deixa
+    ...                .tmp; o editor avisa, continua aberto e mantém a alteração.
+    [Tags]    regressao
+    Executar cenário de tela    test_gravacao_atomica
+
+Timer de inatividade, janelas auxiliares e prévias simultâneas
+    [Documentation]    A pausa chega ao dono do timer, o painel não se esconde com
+    ...                janela auxiliar aberta, e duas prévias não disputam o arquivo.
+    [Tags]    regressao
+    Executar cenário de tela    cenario_timer_e_previas    tempo_limite=240
+
 Ctrl+C e Ctrl+V funcionam nos campos do editor
     [Tags]    regressao
     Executar cenário de tela    test_atalhos_campos

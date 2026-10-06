@@ -286,7 +286,7 @@ tests/
 └── python/                  cenários, executáveis também sem o Robot
 ```
 
-São 31 casos. Duas decisões do desenho estão explicadas em
+São 34 casos. Duas decisões do desenho estão explicadas em
 [tests/README.md](tests/README.md), e vale conhecê-las antes de escrever mais
 testes:
 
@@ -375,7 +375,7 @@ querer: CPF, nome, valor, e-mail, token na URL.
 - [x] Três visualizações da lista
 - [x] Tamanho de fonte ajustável
 - [x] Empacotamento em executável
-- [x] Suíte de teste automatizada (31 casos)
+- [x] Suíte de teste automatizada (34 casos)
 - [x] Editar a imagem direto do Montar documento, sem perder o que já foi preenchido
 - [x] Tela de Configurações extraída do `workspace.py` para módulo próprio
 - [x] Projeto sob Git
@@ -408,7 +408,7 @@ Antes de qualquer entrega, duas coisas:
 
 ```bat
 venv\Scripts\python.exe -m pyflakes *.py    :: precisa sair limpo
-tests\executar.bat                           :: precisa fechar 31/31
+tests\executar.bat                           :: precisa fechar 34/34
 ```
 
 E, para mudança de interface: **rode o app e olhe a tela**. Vários defeitos

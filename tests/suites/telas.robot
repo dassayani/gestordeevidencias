@@ -139,3 +139,17 @@ O atalho de captura funciona com o painel escondido
     ...                executável isso dá falso negativo.
     [Tags]    regressao
     Executar cenário de tela    cenario_printscreen_oculto
+
+O título padrão da capa acompanha o modelo sem pisar no digitado
+    [Documentation]    A regra pura: cada modelo com o seu título, troca só quando o
+    ...                título ainda é o padrão do modelo anterior, e o que o usuário
+    ...                escreveu (ou apagou de propósito) fica como está.
+    [Tags]    regressao
+    Executar cenário de tela    test_titulo_por_modelo
+
+Trocar de modelo na tela troca o título padrão e preserva o digitado
+    [Documentation]    Pelo clique na lista de modelos; mover e remover passos
+    ...                refazem a coluna central e não podem perder nem reverter o
+    ...                título, nem trocar o modelo por trás do usuário.
+    [Tags]    regressao
+    Executar cenário de tela    cenario_titulo_por_modelo

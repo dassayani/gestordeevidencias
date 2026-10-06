@@ -332,6 +332,6 @@ class PreVisualizarExportar(Toplevel):
 
 _MODELOS_NOMES = [
     ("passo", "Passo a passo", None),
-    ("ficha", "Ficha de evidência", None),
-    ("qa", "Relatório QA", None),
+    ("ficha", "Ficha", None),
+    ("qa", "Relatório", None),
 ]

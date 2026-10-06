@@ -96,6 +96,7 @@ lista.
 | `test_reordenar_miniaturas` | arrastar um passo apagava as miniaturas dos outros |
 | `cenario_editor` | abrir um print legendado já marcava "alterações não gravadas" |
 | `cenario_documento` | reordenar a sequência apagava a capa inteira (título, caso, autor, ambiente) |
+| `test_titulo_por_modelo` / `cenario_titulo_por_modelo` | trocar de modelo desfazia o título que o usuário escreveu, ou deixava o título do modelo anterior |
 | `test_legenda_ficha` | legenda sem espaços (URL, caminho) saía para fora do cartão |
 | `cenario_area_capturada` | recorte deslocado no monitor em 150% |
 | `cenario_area_trabalho` | a busca não alcançava o campo Caso/Projeto |

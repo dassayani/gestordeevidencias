@@ -167,15 +167,29 @@ class MontarDocumento(Toplevel):
         self.imagens_passos = []
         self._capa_digitada = {}
         self.passos = []
-        for nome in sorted(nomes_selecionados, reverse=True):
+        carregados, instantes = {}, []
+        for nome in nomes_selecionados:
             caminho = os.path.join(parent_app.pasta_capturas, nome)
             if not os.path.exists(caminho):
                 continue
             meta = capture_store.load_meta(caminho)
-            self.passos.append({
-                "nome": nome, "caminho": caminho,
-                "legenda": meta.get("caption", ""),
-            })
+            instante = capture_store.instante_da_captura(caminho, meta)
+            try:
+                # print antigo recebe o instante agora: depois de uma edição o
+                # mtime deixa de servir, e a ordem do documento mudaria
+                capture_store.garantir_captured_at(caminho, meta)
+            except Exception:
+                pass          # arquivo bloqueado: o instante estimado serve por agora
+            carregados[caminho] = {"nome": nome, "caminho": caminho,
+                                   "legenda": meta.get("caption", ""), "instante": instante}
+            instantes.append((caminho, instante))
+        # O documento é uma sequência de passos: nasce do início ao fim do
+        # processo. Antes ordenava pelo nome em ordem decrescente — a ordem da
+        # galeria, que mostra o mais novo primeiro — e o último print virava o
+        # passo 1. A seleção da galeria é um set: sem esta ordenação, ela não
+        # teria ordem nenhuma.
+        self.passos = [carregados[c] for c in capture_store.ordenar_instantes(instantes)]
+        self._modo_ordem = "cronologica"      # cronologica | recentes | manual
 
         self.var_modelo = tk.StringVar(value="passo")
         self.var_cor = tk.StringVar(value="#0B7285")
@@ -198,6 +212,7 @@ class MontarDocumento(Toplevel):
         self._fantasma = None
         self._selecionado = None           # caminho do cartão alvo do Alt+seta
         self._ordem_antes_mover = None     # para o "Desfazer"
+        self._modo_antes_mover = "cronologica"   # e o modo de ordem de antes
         self._aviso_job = None
 
         self._montar_ui(t)
@@ -238,7 +253,30 @@ class MontarDocumento(Toplevel):
                      anchor="w", padx=14, pady=(14, 0))
         widgets.texto_fluido(col, "arraste pra reordenar · duplo clique na imagem edita · ✕ remove",
                               self.parent_app.modo_escuro,
-                              bg=t["bg_footer"]).pack(fill="x", padx=14, pady=(0, 10))
+                              bg=t["bg_footer"]).pack(fill="x", padx=14, pady=(0, 8))
+
+        # Seletor de ordem. O documento nasce do início ao fim; "Mais novos"
+        # inverte, e mexer à mão troca ambos por "ordem manual". Os rótulos
+        # dizem o que acontece, e não a chave técnica por trás.
+        seletor = tk.Frame(col, bg=t["bg_footer"])
+        seletor.pack(fill="x", padx=14, pady=(0, 10))
+        escuro = self.parent_app.modo_escuro
+        pilulas = tk.Frame(seletor, bg=t["bg_footer"])
+        pilulas.pack(anchor="w")
+        self._pill_cron = widgets.Pill(pilulas, "Cronológica", escuro, bg=t["bg_footer"],
+                                       ativo=True, altura=26, fonte_pt=9,
+                                       comando=lambda: self._ordenar_por_captura(False))
+        self._pill_cron.pack(side="left", padx=(0, 6))
+        self._pill_rec = widgets.Pill(pilulas, "Mais novos", escuro, bg=t["bg_footer"],
+                                      ativo=False, altura=26, fonte_pt=9,
+                                      comando=lambda: self._ordenar_por_captura(True))
+        self._pill_rec.pack(side="left")
+        # Numa linha própria: ao lado das duas pílulas o texto não cabe nos
+        # 230 px da coluna e aparecia cortado.
+        self._lbl_ordem_manual = tk.Label(seletor, text="ordem manual", bg=t["bg_footer"],
+                                          fg=t["text_muted"], anchor="w",
+                                          font=(theme.FONT, theme.FS_CAPTION))
+        self._atualizar_pills_ordem()
 
         # Aviso de movimento com "Desfazer", preso embaixo da coluna. Só é
         # mostrado depois de uma reordenação e some sozinho.
@@ -695,15 +733,22 @@ class MontarDocumento(Toplevel):
 
     # ---------- aplicar uma ordem ----------
 
-    def _aplicar_ordem(self, caminhos, movido=None, avisar=True):
-        """Põe os passos na ordem dada, movendo os mesmos widgets de lugar."""
+    def _aplicar_ordem(self, caminhos, movido=None, avisar=True, modo=None, texto=None):
+        """Põe os passos na ordem dada, movendo os mesmos widgets de lugar.
+
+        `modo` é o rótulo da ordem resultante. Sem ele, mexer na ordem à mão
+        passa o documento para "manual" e não mexer em nada deixa como está.
+        """
         antes = [p["caminho"] for p in self.passos]
+        modo_antes = self._modo_ordem
         if caminhos != antes:
             por_caminho = {p["caminho"]: p for p in self.passos}
             self.passos[:] = [por_caminho[c] for c in caminhos]
+        self._modo_ordem = modo or ("manual" if caminhos != antes else modo_antes)
         self._reordenar_em_lugar()
+        self._atualizar_pills_ordem()
         if avisar and caminhos != antes:
-            self._registrar_movimento(antes, movido)
+            self._registrar_movimento(antes, movido, modo_antes, texto)
 
     def _reordenar_em_lugar(self):
         self._empacotar_sequencia()
@@ -747,10 +792,11 @@ class MontarDocumento(Toplevel):
 
     # ---------- aviso de movimento e desfazer ----------
 
-    def _registrar_movimento(self, antes, caminho):
+    def _registrar_movimento(self, antes, caminho, modo_antes="manual", texto=None):
         self._ordem_antes_mover = antes
+        self._modo_antes_mover = modo_antes
         posicao = self._indice_de(caminho) + 1 if caminho else 0
-        texto = "Movido para a posição %d" % posicao if posicao else "Ordem alterada"
+        texto = texto or ("Movido para a posição %d" % posicao if posicao else "Ordem alterada")
         self._lbl_aviso_seq.config(text=texto)
         self._aviso_seq.pack(side="bottom", fill="x", before=self._wrap_seq)
         if self._aviso_job:
@@ -772,10 +818,38 @@ class MontarDocumento(Toplevel):
 
     def _desfazer_movimento(self):
         antes = self._ordem_antes_mover
+        modo_antes = self._modo_antes_mover
         self._esconder_aviso()
         if not antes or set(antes) != {p["caminho"] for p in self.passos}:
             return
-        self._aplicar_ordem(antes, avisar=False)
+        # desfazer devolve também o rótulo da ordem: voltar de "Mais recentes"
+        # para a ordem de antes não pode deixar o seletor mentindo
+        self._aplicar_ordem(antes, avisar=False, modo=modo_antes)
+
+    # ---------- ordenar pelo instante da captura ----------
+
+    def _ordenar_por_captura(self, decrescente):
+        """Seletor de ordem: do início ao fim (padrão) ou do mais novo ao mais
+        antigo. Reaplicar sobrescreve a ordem manual, e entra no Desfazer."""
+        self._sincronizar_legendas()
+        modo = "recentes" if decrescente else "cronologica"
+        nova = capture_store.ordenar_instantes(
+            [(p["caminho"], p["instante"]) for p in self.passos], decrescente)
+        texto = ("Ordenado do mais novo ao mais antigo" if decrescente
+                 else "Ordenado do início ao fim")
+        self._aplicar_ordem(nova, None, True, modo, texto)
+
+    def _atualizar_pills_ordem(self):
+        """O seletor mostra a ordem em vigor; depois de mexer à mão, nenhuma das
+        duas fica ativa e aparece "ordem manual"."""
+        if not hasattr(self, "_pill_cron"):
+            return
+        self._pill_cron.definir("Cronológica", self._modo_ordem == "cronologica")
+        self._pill_rec.definir("Mais novos", self._modo_ordem == "recentes")
+        if self._modo_ordem == "manual":
+            self._lbl_ordem_manual.pack(anchor="w", pady=(4, 0))
+        else:
+            self._lbl_ordem_manual.pack_forget()
 
     def _atalho_desfazer(self, event=None):
         """Ctrl+Z desfaz a última movimentação — menos dentro de um campo de

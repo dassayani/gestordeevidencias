@@ -44,6 +44,9 @@ de nada para fora da máquina.
   imagem e, ao gravar, o documento volta com tudo atualizado
 - ↕️ Reordenar a sequência arrastando: o cartão abre um vão onde vai entrar, a lista
   rola sozinha perto das bordas, Esc cancela, e dá para desfazer (Alt+↑/↓ também)
+- 🕐 O documento nasce do início ao fim do processo (o primeiro print tirado é o
+  passo 1), mesmo que a galeria mostre o mais novo primeiro. Um seletor na
+  Sequência alterna entre "Cronológica" e "Mais novos"
 - 📎 Exportação em PDF e DOCX
 - 📋 Ctrl+C copia a captura como imagem **e** como arquivo (cola no Word ou anexa no e-mail)
 - 🗑️ Exclusão para a Lixeira do Windows, com volta
@@ -288,7 +291,7 @@ tests/
 └── python/                  cenários, executáveis também sem o Robot
 ```
 
-São 37 casos. Duas decisões do desenho estão explicadas em
+São 39 casos. Duas decisões do desenho estão explicadas em
 [tests/README.md](tests/README.md), e vale conhecê-las antes de escrever mais
 testes:
 
@@ -321,6 +324,7 @@ E o `.json`:
 {
   "caption": "Tela de confirmação do fechamento",
   "caso": "CT-4471",
+  "captured_at": "2026-09-21T14:30:52",
   "shapes": [
     {"id": 1, "tool": "seta", "coords": [120, 80, 340, 210],
      "color": "#E8590C", "width": 3, "dash": false, "visible": true}
@@ -329,6 +333,14 @@ E o `.json`:
 ```
 
 Apagar uma captura leva os três juntos, para a Lixeira.
+
+`captured_at` é o instante em que o print foi tirado e é ele que ordena o
+documento — não a data de modificação do arquivo, que muda quando o print é
+editado (o editor regrava o PNG). Prints de antes desse campo recebem o instante
+na primeira vez que entram num documento: a data e hora do nome, quando ele as
+traz (`captura-AAAAMMDD-HHMMSS`), ou a modificação do arquivo. Um print antigo
+**já editado** com o padrão `captura-HHMMSS` só tem a hora no nome; o dia é
+estimado pela edição, e vale conferir a ordem desses.
 
 ---
 
@@ -377,7 +389,7 @@ querer: CPF, nome, valor, e-mail, token na URL.
 - [x] Três visualizações da lista
 - [x] Tamanho de fonte ajustável
 - [x] Empacotamento em executável
-- [x] Suíte de teste automatizada (37 casos)
+- [x] Suíte de teste automatizada (39 casos)
 - [x] Editar a imagem direto do Montar documento, sem perder o que já foi preenchido
 - [x] Tela de Configurações extraída do `workspace.py` para módulo próprio
 - [x] Projeto sob Git
@@ -410,7 +422,7 @@ Antes de qualquer entrega, duas coisas:
 
 ```bat
 venv\Scripts\python.exe -m pyflakes *.py    :: precisa sair limpo
-tests\executar.bat                           :: precisa fechar 37/37
+tests\executar.bat                           :: precisa fechar 39/39
 ```
 
 E, para mudança de interface: **rode o app e olhe a tela**. Vários defeitos

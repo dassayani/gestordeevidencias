@@ -78,6 +78,22 @@ Arrastar a Sequência mostra o destino e solta onde mostrou
     [Tags]    regressao
     Executar cenário de tela    cenario_arraste_sequencia    tempo_limite=420
 
+O documento nasce do início ao fim do processo
+    [Documentation]    O primeiro print tirado é o passo 1, apesar dos nomes (dois dias,
+    ...                virada de meia-noite, padrões misturados) e da ordem da seleção.
+    ...                Editar um print não o tira do lugar, o seletor "Cronológica" /
+    ...                "Mais novos" reordena, mexer à mão vira "ordem manual", e
+    ...                desfazer devolve a ordem e o rótulo. A galeria não muda.
+    [Tags]    regressao
+    Executar cenário de tela    cenario_ordem_documento    tempo_limite=240
+
+O instante da captura ordena e não se perde ao editar
+    [Documentation]    Fonte do instante (captured_at, nome, mtime, print antigo já
+    ...                editado), nenhuma gravação o apaga, ordenação determinística
+    ...                mesmo com empate, e a galeria segue por modificação.
+    [Tags]    regressao
+    Executar cenário de tela    test_ordem_capturas
+
 Editar a imagem a partir do documento e voltar com tudo persistido
     [Documentation]    Abre o editor de um passo, anota, recorta e grava. O documento
     ...                volta com a miniatura nova, a legenda, a capa, a ordem, a

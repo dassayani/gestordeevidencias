@@ -1309,16 +1309,28 @@ class EditorImagem(Toplevel):
     # ---------- ações do rodapé ----------
 
     def gravar(self):
+        """Grava imagem, original e metadados. Devolve False se falhar, e nesse
+        caso o editor continua aberto com as alterações ainda pendentes."""
         meta = {
             "caption": self.txt_legenda.get("1.0", "end").strip(),
             "caso": self.entry_caso.get().strip(),
             "shapes": self.shapes,
         }
-        capture_store.save_meta(self.caminho_img, meta)
-        self.img_raw.convert("RGBA").save(capture_store.raw_path(self.caminho_img))
-        composto = render_composite(self.img_raw,
-                                    [s for s in self.shapes if s.get("visible", True)])
-        composto.save(self.caminho_img)
+        try:
+            # Cada arquivo é gravado de forma atômica, mas os três juntos não
+            # são: uma falha no meio pode deixar um deles à frente dos outros.
+            # O .json vai por último para que o erro apareça antes de ele
+            # declarar a captura como editada.
+            composto = render_composite(self.img_raw,
+                                        [s for s in self.shapes if s.get("visible", True)])
+            capture_store.save_png(self.img_raw.convert("RGBA"),
+                                   capture_store.raw_path(self.caminho_img))
+            capture_store.save_png(composto, self.caminho_img)
+            capture_store.save_meta(self.caminho_img, meta)
+        except Exception as e:
+            messagebox.showerror("Gravar", f"Não foi possível gravar a captura:\n{e}",
+                                 parent=self)
+            return False
         # zera junto a marca do campo de legenda: um evento de modificação
         # ainda na fila voltaria a acender "Alterações não gravadas" logo
         # depois de gravar
@@ -1326,10 +1338,11 @@ class EditorImagem(Toplevel):
         self.sujo = False
         self._atualizar_status()
         self.callback_atualizar()
+        return True
 
     def gravar_e_fechar(self):
-        self.gravar()
-        self._voltar()
+        if self.gravar():
+            self._voltar()
 
     def salvar_copia(self):
         composto = render_composite(self.img_raw,

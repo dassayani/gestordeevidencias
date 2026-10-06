@@ -34,15 +34,41 @@ def _caminho(data_dir):
 
 
 def load(data_dir):
+    """As preferências gravadas, sobre os valores padrão.
+
+    Um config.json ilegível (gravação interrompida, edição à mão) não pode
+    simplesmente virar "tudo padrão": a pasta de capturas voltaria para a de
+    fábrica sem aviso, e a próxima gravação apagaria de vez o que havia. O
+    arquivo é guardado ao lado, com o horário no nome, e o caso vai para o log.
+    """
     cfg = dict(PADRAO)
     caminho = _caminho(data_dir)
     if os.path.exists(caminho):
         try:
             with open(caminho, "r", encoding="utf-8") as f:
-                cfg.update(json.load(f))
+                dados = json.load(f)
+            if not isinstance(dados, dict):
+                raise ValueError("config.json não contém um objeto")
+            cfg.update(dados)
         except Exception:
-            pass
+            _guardar_ilegivel(caminho)
     return cfg
+
+
+def _guardar_ilegivel(caminho):
+    import sys
+    import time
+    copia = "%s.ilegivel-%s" % (caminho, time.strftime("%Y%m%d-%H%M%S"))
+    try:
+        os.replace(caminho, copia)
+    except Exception:
+        copia = None
+    try:
+        from gestor.sistema import diagnostico
+        diagnostico.registrar(*sys.exc_info(),
+                              contexto="config.json ilegível; guardado em %s" % copia)
+    except Exception:
+        pass
 
 
 def save(data_dir, cfg):
@@ -52,11 +78,20 @@ def save(data_dir, cfg):
     escrita fazia cada ajuste parecer aplicado e voltar atras no reinicio,
     sem nada que indicasse o motivo.
     """
+    caminho = _caminho(data_dir)
+    tmp = caminho + ".tmp"
     try:
-        with open(_caminho(data_dir), "w", encoding="utf-8") as f:
+        # temporário + troca: um desligamento no meio da gravação deixava o
+        # config.json pela metade, e no próximo início tudo voltava ao padrão
+        with open(tmp, "w", encoding="utf-8") as f:
             json.dump(cfg, f, ensure_ascii=False, indent=2)
+        os.replace(tmp, caminho)
         return True
     except Exception:
+        try:
+            os.remove(tmp)
+        except Exception:
+            pass
         try:
             import sys
             from gestor.sistema import diagnostico

@@ -152,13 +152,36 @@ def _faixa_colorida(document, hexcolor, altura_pt=6):
     return tabela
 
 
+# Passos que saíram sem imagem na última exportação (ver pdf_export).
+_sem_imagem = []
+
+
 def _imagem_com_largura(paragrafo, caminho, largura_cm, opcoes=None):
+    run = paragrafo.add_run()
+    inserida = False
     if caminho and os.path.exists(caminho):
-        run = paragrafo.add_run()
         try:
             run.add_picture(caminho, width=Cm(largura_cm))
+            inserida = True
         except Exception:
-            pass
+            # formato que o python-docx não lê: converte para RGB e tenta de novo
+            try:
+                import io
+                from PIL import Image
+                buffer = io.BytesIO()
+                with Image.open(caminho) as img:
+                    img.convert("RGB").save(buffer, format="PNG")
+                buffer.seek(0)
+                run.add_picture(buffer, width=Cm(largura_cm))
+                inserida = True
+            except Exception:
+                pass
+    if not inserida:
+        # lacuna visível, e não um parágrafo vazio que ninguém nota
+        nome = os.path.basename(caminho or "") or "(sem arquivo)"
+        _sem_imagem.append(nome)
+        run.text = "[imagem indisponível: %s]" % nome
+        run.font.color.rgb = MUTED_CLARO
     o = opcoes or {}
     if o.get("borda_ativada"):
         _borda_paragrafo(paragrafo, o.get("borda_cor"))
@@ -364,5 +387,8 @@ MODELOS = {
 
 
 def exportar(modelo, destino, capa, passos, opcoes=None):
+    """Gera o DOCX. Devolve os nomes dos passos que ficaram sem imagem."""
     funcao = MODELOS.get(modelo, MODELOS["passo"])
+    del _sem_imagem[:]
     funcao(destino, capa, passos, opcoes)
+    return list(_sem_imagem)

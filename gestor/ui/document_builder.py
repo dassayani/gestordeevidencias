@@ -208,7 +208,6 @@ class MontarDocumento(Toplevel):
         self._cartoes = {}           # cartões da sequência, por caminho
         self._cartoes_centro = {}    # cartões da coluna central, por caminho
         self._caminhos_fotos_centro = []   # a quem pertence cada item de imagens_passos
-        self._cache_thumbs = {}      # miniaturas em PIL, por arquivo
         self._fantasma = None
         self._selecionado = None           # caminho do cartão alvo do Alt+seta
         self._ordem_antes_mover = None     # para o "Desfazer"
@@ -318,29 +317,16 @@ class MontarDocumento(Toplevel):
     # ---------- miniaturas (com cache) ----------
 
     def _miniatura_pil(self, caminho, tamanho):
-        """Miniatura em PIL, decodificada do disco só quando o arquivo muda.
+        """Miniatura em PIL, do cache compartilhado com a galeria.
 
         Decodificar o PNG é o custo que importa: reconstruir uma coluna relia
         todas as imagens, e com 14 capturas de tela cheia isso congelava a
-        interface por segundos a cada reordenação. Guarda-se o PIL pequeno, e
-        não a PhotoImage — essa continua a viver só nas listas de referências.
+        interface por segundos a cada reordenação. A medida menor (coluna
+        central) sai da maior, sem decodificar o arquivo de novo.
         """
-        st = os.stat(caminho)
-        assinatura = (st.st_mtime_ns, st.st_size)
-        chave = (caminho, tamanho)
-        guardado = self._cache_thumbs.get(chave)
-        if guardado and guardado[0] == assinatura:
-            return guardado[1]
         grande = (_LARGURA_MINIATURA, _ALTURA_MINIATURA)
-        if tamanho == grande:
-            with Image.open(caminho) as im:
-                img = im.convert("RGB")
-            img.thumbnail(grande)
-        else:
-            img = self._miniatura_pil(caminho, grande).copy()
-            img.thumbnail(tamanho)
-        self._cache_thumbs[chave] = (assinatura, img)
-        return img
+        return capture_store.miniatura(caminho, tamanho,
+                                       origem=None if tamanho == grande else grande)
 
     def _indice_de(self, caminho):
         """Posição atual do passo. Os botões e o arraste guardam o caminho, e não
@@ -460,7 +446,11 @@ class MontarDocumento(Toplevel):
             self._estilo_borda(passo["caminho"])
 
     def _estilo_borda(self, caminho):
-        """Borda do cartão: acento no primeiro passo e no cartão selecionado.
+        """Borda do cartão: acento só no cartão selecionado.
+
+        O primeiro passo tinha acento fixo, herança de quando não havia
+        seleção. Com a seleção usando a mesma cor, o primeiro cartão parecia
+        selecionado o tempo todo — dois destacados ao clicar em outro.
 
         Só a cor muda, nunca a espessura: mexer no tamanho do cartão entre os
         dois cliques de um duplo clique desloca o layout sob o ponteiro.
@@ -469,8 +459,7 @@ class MontarDocumento(Toplevel):
         if rec is None:
             return
         t = theme.get(self.parent_app.modo_escuro)
-        primeiro = bool(self.passos) and self.passos[0]["caminho"] == caminho
-        destaque = primeiro or caminho == self._selecionado
+        destaque = caminho == self._selecionado
         try:
             rec["frame"].config(highlightbackground=t["accent"] if destaque else t["border_soft"])
         except tk.TclError:

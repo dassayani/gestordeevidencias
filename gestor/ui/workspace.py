@@ -112,6 +112,8 @@ class AppEvidencias:
         self.criar_icone_bandeja()
         self.resetar_timer()
         self.atualizar_galeria()
+        if self.pasta_indisponivel:
+            self.root.after(600, self._avisar_pasta_indisponivel)
 
         try:
             removidos = captura_utils.limpar_capturas_antigas(
@@ -257,6 +259,7 @@ class AppEvidencias:
         return destino
 
     def _resolver_pasta_capturas(self):
+        self.pasta_indisponivel = None
         pasta = self.config.get("pasta_capturas")
         if pasta and os.path.isdir(pasta):
             return pasta
@@ -265,8 +268,21 @@ class AppEvidencias:
                 os.makedirs(pasta, exist_ok=True)
                 return pasta
             except Exception:
-                pass
+                # Pendrive fora, unidade de rede caída: as capturas passam a ir
+                # para a pasta padrão. Sem avisar, quem conta com a pasta
+                # compartilhada só descobre depois, procurando a evidência.
+                self.pasta_indisponivel = pasta
         return self.pasta_capturas_padrao
+
+    def _avisar_pasta_indisponivel(self):
+        if not self.pasta_indisponivel:
+            return
+        messagebox.showwarning(
+            "Pasta de capturas indisponível",
+            f"A pasta configurada não está acessível:\n{self.pasta_indisponivel}\n\n"
+            f"Enquanto isso, as capturas serão salvas em:\n{self.pasta_capturas}\n\n"
+            "Quando a pasta voltar, reabra o app ou escolha-a de novo em "
+            "Configurações.", parent=self.root)
 
     # ---------- construção da UI ----------
 
@@ -431,16 +447,17 @@ class AppEvidencias:
         self._atualizar_botoes_filtro()
         self.atualizar_galeria()
 
-    def _atualizar_botoes_filtro(self):
+    def _atualizar_botoes_filtro(self, itens=None):
         for chave, rotulo in FILTROS:
             pill = self.botoes_filtro.get(chave)
             if not pill:
                 continue
-            texto = f"{rotulo} · {self._contagem_filtro('hoje')}" if chave == "hoje" else rotulo
+            texto = f"{rotulo} · {self._contagem_filtro('hoje', itens)}" if chave == "hoje" else rotulo
             pill.definir(texto, chave == self.filtro_atual)
 
-    def _contagem_filtro(self, chave):
-        itens = capture_store.list_captures(self.pasta_capturas)
+    def _contagem_filtro(self, chave, itens=None):
+        if itens is None:
+            itens = capture_store.list_captures(self.pasta_capturas)
         if chave == "hoje":
             return sum(1 for i in itens
                        if datetime.fromtimestamp(i["mtime"]).date() == datetime.now().date())
@@ -455,8 +472,9 @@ class AppEvidencias:
             self.arquivos_selecionados.add(i["name"])
         self.atualizar_galeria()
 
-    def _itens_filtrados(self):
-        itens = capture_store.list_captures(self.pasta_capturas)
+    def _itens_filtrados(self, itens=None):
+        if itens is None:
+            itens = capture_store.list_captures(self.pasta_capturas)
         termo = self.entrada_busca.get().strip().lower() if hasattr(self, "entrada_busca") else ""
 
         def procurado(i):
@@ -519,7 +537,10 @@ class AppEvidencias:
         self._colunas_grade = 0
         t = theme.get(self.modo_escuro)
 
-        itens = self._itens_filtrados()
+        # Uma listagem só por atualização: o contador do filtro "Hoje" listava a
+        # pasta de novo (lendo cada .json), dobrando o custo.
+        todos = capture_store.list_captures(self.pasta_capturas)
+        itens = self._itens_filtrados(todos)
 
         if not itens:
             tk.Label(self.frame_lista, text="Nenhuma captura encontrada.", bg=t["bg_panel"],
@@ -533,7 +554,7 @@ class AppEvidencias:
         self.canvas_lista.config(scrollregion=self.canvas_lista.bbox("all"))
         self._atualizar_contador()
         if hasattr(self, "botoes_filtro"):
-            self._atualizar_botoes_filtro()
+            self._atualizar_botoes_filtro(todos)
 
     def _cabecalho_data(self, texto, t):
         return tk.Label(self.frame_lista, text=texto.upper(), bg=t["bg_panel"],
@@ -689,9 +710,9 @@ class AppEvidencias:
 
     def _miniatura(self, pai, item, tamanho, t):
         try:
-            img = Image.open(item["path"])
-            img.thumbnail(tamanho)
-            img_tk = ImageTk.PhotoImage(img)
+            # do cache: decodificar o PNG inteiro a cada atualização congelava
+            # a lista por segundos quando havia muitas capturas
+            img_tk = ImageTk.PhotoImage(capture_store.miniatura(item["path"], tamanho))
             self.imagens_tk.append(img_tk)
             lbl = tk.Label(pai, image=img_tk, bg=t["bg_input"])
         except Exception:
@@ -699,9 +720,17 @@ class AppEvidencias:
         lbl.pack(expand=True)
         return lbl
 
+    def _imagem_marca(self, selecionada):
+        """A marca de seleção é a mesma em todos os cartões: uma PhotoImage
+        por estado basta, em vez de desenhar uma por cartão a cada atualização."""
+        cache = self.__dict__.setdefault("_marcas_tk", {})
+        chave = (self.modo_escuro, selecionada)
+        if chave not in cache:
+            cache[chave] = ImageTk.PhotoImage(widgets.marca_selecao(self.modo_escuro, selecionada))
+        return cache[chave]
+
     def _marca_selecao(self, pai, selecionada, t):
-        img = ImageTk.PhotoImage(widgets.marca_selecao(self.modo_escuro, selecionada))
-        self.imagens_tk.append(img)
+        img = self._imagem_marca(selecionada)
         marca = tk.Label(pai, image=img, bg=t["bg_input"], bd=0, highlightthickness=0)
         marca.place(x=2, y=2)
         return marca
@@ -837,10 +866,7 @@ class AppEvidencias:
             widget.config(bg=bg)
         for lbl in ref["info_labels"]:
             lbl.config(bg=bg)
-        img_marca = ImageTk.PhotoImage(widgets.marca_selecao(self.modo_escuro, selecionada))
-        self.imagens_tk.append(img_marca)
-        ref["marca"].config(image=img_marca)
-        ref["marca"].image = img_marca
+        ref["marca"].config(image=self._imagem_marca(selecionada))
 
     def abrir_editor(self, caminho):
         return editor.EditorImagem(self.root, caminho, self.atualizar_galeria,
@@ -982,7 +1008,8 @@ class AppEvidencias:
         self._salvar_captura(imagem)
 
     def _salvar_captura(self, imagem):
-        nome = captura_utils.nome_arquivo(self.config.get("padrao_nome", "hora"))
+        nome = captura_utils.nome_livre(self.pasta_capturas,
+                                        self.config.get("padrao_nome", "hora"))
         caminho = os.path.join(self.pasta_capturas, nome)
         imagem.save(caminho)
         try:
@@ -1047,9 +1074,20 @@ class AppEvidencias:
                 "Limpar", "Mover todas as capturas da pasta para a Lixeira "
                           "do Windows?"):
             return
-        alvos = [os.path.join(self.pasta_capturas, f)
-                 for f in os.listdir(self.pasta_capturas)
-                 if os.path.isfile(os.path.join(self.pasta_capturas, f))]
+        # Só as capturas e os arquivos irmãos delas (o que a galeria mostra e o
+        # que a pergunta promete). Antes ia tudo o que estivesse na pasta —
+        # uma planilha ou anotação guardada ali junto ia para a Lixeira também.
+        alvos = []
+        for nome in os.listdir(self.pasta_capturas):
+            baixo = nome.lower()
+            caminho = os.path.join(self.pasta_capturas, nome)
+            if (not os.path.isfile(caminho) or not baixo.endswith(".png")
+                    or baixo.endswith(".raw.png")):
+                continue
+            alvos.extend(p for p in (caminho, capture_store.raw_path(caminho),
+                                     capture_store.json_path(caminho),
+                                     capture_store.txt_path(caminho))
+                         if os.path.exists(p))
         if alvos and not utils.mover_para_lixeira(alvos):
             messagebox.showwarning(
                 "Limpar", "Não foi possível mover as capturas para a Lixeira. "

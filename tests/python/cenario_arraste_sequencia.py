@@ -233,6 +233,11 @@ try:
     j = abrir(pequenas)
     original = nomes_da_ordem(j)
     checar(len(original) == 4, "4 capturas no documento")
+    from gestor.ui import theme as _tema0
+    _acento = _tema0.get(app.modo_escuro)["accent"]
+    checar(not [c for c in original
+                if str(j._cartoes[c]["frame"].cget("highlightbackground")) == _acento],
+           "ao abrir, nenhum cartao aparece selecionado (antes o primeiro vinha sempre destacado)")
     checar(all(w.cget("text") for w in descendentes(j._cards[0])
                if w.winfo_class() == "Label" and w.cget("text") == "⋮⋮"),
            "cada cartao tem a alca de arraste")
@@ -531,8 +536,24 @@ try:
     _t = _tema.get(app.modo_escuro)
     checar(str(cartao.cget("highlightbackground")) == _t["accent"],
            "e destacado pela cor da borda")
-    checar(str(j._cartoes[ordem[1]]["frame"].cget("highlightbackground")) == _t["border_soft"],
-           "enquanto os outros seguem com a borda comum")
+    destacados = [c for c in ordem
+                  if str(j._cartoes[c]["frame"].cget("highlightbackground")) == _t["accent"]]
+    checar(destacados == [ordem[2]],
+           "so o cartao selecionado fica destacado - o primeiro nao parece selecionado junto (%d destacados)"
+           % len(destacados))
+    # trocar a selecao tira o destaque do anterior
+    outro = miniatura_do_cartao(j._cartoes[ordem[0]]["frame"])
+    separar_gestos()
+    evento(outro, "<ButtonPress-1>", outro.winfo_rootx() + 5, outro.winfo_rooty() + 5)
+    evento(outro, "<ButtonRelease-1>", outro.winfo_rootx() + 5, outro.winfo_rooty() + 5)
+    root.update()
+    destacados = [c for c in ordem
+                  if str(j._cartoes[c]["frame"].cget("highlightbackground")) == _t["accent"]]
+    checar(destacados == [ordem[0]], "clicar em outro cartao move o destaque para ele, so ele")
+    separar_gestos()
+    evento(miniatura, "<ButtonPress-1>", miniatura.winfo_rootx() + 5, miniatura.winfo_rooty() + 5)
+    evento(miniatura, "<ButtonRelease-1>", miniatura.winfo_rootx() + 5, miniatura.winfo_rooty() + 5)
+    root.update()
 
     # Alt+seta age sobre o cartao selecionado
     cartao.event_generate("<Alt-Up>")

@@ -41,7 +41,7 @@ As suítes:
   de área e atalho com o painel escondido.
 - **sistema** — Lixeira, menu Iniciar, pasta de dados em `%APPDATA%`.
 
-São 39 casos ao todo.
+São 41 casos ao todo.
 
 ## Ao escrever um cenário novo
 
@@ -121,6 +121,7 @@ lista.
 | `cenario_arraste_sequencia` / `test_reordenar` | arraste sem mostrar o destino, sem rolagem automática e com o item saindo fora do ponto indicado; soltar travava a tela por segundos |
 | `test_gravacao_atomica` | falha no meio da gravação deixava `.tmp` e o editor fechava como se tivesse gravado |
 | `cenario_timer_e_previas` | o painel se escondia com o Montar aberto; a pausa do timer não tinha efeito; duas prévias disputavam o mesmo arquivo |
+| `test_protecao_dados` / `cenario_protecao_dados` | com o padrão de nome `hora`, a captura nova sobrescrevia a de outro dia no mesmo horário e herdava o original e as anotações dela; a retenção apagava captura com legenda; a galeria levava 12 a 16 s para atualizar com 120 prints; `config.json` ilegível zerava tudo em silêncio; o PDF saía com o passo em branco quando a imagem não entrava; "Limpar pasta" levava qualquer arquivo da pasta |
 | `test_ordem_capturas` / `cenario_ordem_documento` | o último print virava o passo 1; ordenar por modificação jogaria para o fim o print editado; o texto "ordem manual" aparecia cortado |
 
 ## O que ainda depende de teste manual

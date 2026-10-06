@@ -231,7 +231,12 @@ copiar essa pasta inteira — não precisa de Python instalado do outro lado.
 Não há arquivo `.env`. As preferências ficam em `config.json`, dentro de
 `%APPDATA%\GestorEvidencias\` quando empacotado, ou na pasta do projeto quando
 rodando pelo código. Tudo é editável pela tela de Configurações; a tabela serve
-para quem precisar mexer direto no arquivo.
+para quem precisar mexer direto no arquivo. Se o `config.json` estiver ilegível
+(gravação interrompida, edição à mão com erro), o app abre com os padrões e
+guarda o arquivo original ao lado, como `config.json.ilegivel-<data>`, para
+recuperação manual. O erro fica em `erros.log`. Se a pasta de capturas
+configurada estiver inacessível (pendrive fora, rede caída), o app avisa e
+salva na pasta padrão enquanto isso.
 
 | Chave | O que faz | Padrão |
 |---|---|---|
@@ -243,7 +248,7 @@ para quem precisar mexer direto no arquivo.
 | `incluir_cursor` | Desenha o cursor do mouse na captura | `false` |
 | `som_captura` | Som ao capturar | `true` |
 | `padrao_nome` | `hora` ou `data_hora` no nome do arquivo | `hora` |
-| `retencao_dias` | Apaga capturas antigas nunca editadas; `0` desliga | `0` |
+| `retencao_dias` | Manda para a Lixeira capturas antigas que ninguém usou (sem edição, legenda, caso ou anotação); `0` desliga | `0` |
 | `tempo_inatividade_ms` | Tempo até o painel se esconder | `10000` |
 | `modo_visualizacao` | `detalhes`, `blocos` ou `grade` | `detalhes` |
 | `escala_fonte` / `escala_fonte_botao` | `pequena`, `padrao`, `grande`, `muito_grande` | `padrao` |
@@ -289,7 +294,7 @@ tests/
 └── python/                  cenários, executáveis também sem o Robot
 ```
 
-São 39 casos. Duas decisões do desenho estão explicadas em
+São 41 casos. Duas decisões do desenho estão explicadas em
 [tests/README.md](tests/README.md), e vale conhecê-las antes de escrever mais
 testes:
 
@@ -315,6 +320,10 @@ print_143052.png          imagem com as anotações aplicadas
 print_143052.raw.png      original sem anotação, para poder editar de novo
 print_143052.json         metadados
 ```
+
+Com o padrão de nome só de hora, dois prints podem cair no mesmo nome (o mesmo
+horário em dias diferentes, ou dois no mesmo segundo). O segundo recebe sufixo
+(`print_143052_2.png`). Nenhuma captura sobrescreve outra.
 
 E o `.json`:
 
@@ -387,7 +396,7 @@ querer: CPF, nome, valor, e-mail, token na URL.
 - [x] Três visualizações da lista
 - [x] Tamanho de fonte ajustável
 - [x] Empacotamento em executável
-- [x] Suíte de teste automatizada (39 casos)
+- [x] Suíte de teste automatizada (41 casos)
 - [x] Editar a imagem direto do Montar documento, sem perder o que já foi preenchido
 - [x] Tela de Configurações extraída do `workspace.py` para módulo próprio
 - [x] Projeto sob Git
@@ -425,7 +434,7 @@ Antes de qualquer entrega, duas coisas:
 
 ```bat
 venv\Scripts\python.exe -m pyflakes gestor main.py tests\python tests\biblioteca   :: precisa sair limpo
-tests\executar.bat                                                                 :: precisa fechar 39/39
+tests\executar.bat                                                                 :: precisa fechar 41/41
 ```
 
 E, para mudança de interface: **rode o app e olhe a tela**. Vários defeitos

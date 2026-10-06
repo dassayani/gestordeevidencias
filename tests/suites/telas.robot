@@ -78,6 +78,23 @@ Arrastar a Sequência mostra o destino e solta onde mostrou
     [Tags]    regressao
     Executar cenário de tela    cenario_arraste_sequencia    tempo_limite=420
 
+Nenhuma evidência é sobrescrita nem some em silêncio
+    [Documentation]    Com o app de verdade: captura com o mesmo nome de outra (padrão
+    ...                hora) ganha sufixo em vez de sobrescrever; "Limpar pasta" leva só
+    ...                capturas; pasta indisponível é avisada; exportar com imagem
+    ...                faltando avisa quais passos ficaram sem imagem; a galeria não
+    ...                decodifica os PNG de novo a cada atualização.
+    [Tags]    regressao
+    Executar cenário de tela    cenario_protecao_dados    tempo_limite=240
+
+Proteção de dados sem janela
+    [Documentation]    Nome livre (inclusive com .json ou .raw.png órfão), retenção que
+    ...                poupa captura com legenda, caso ou anotação, cache de miniaturas
+    ...                com limite, config.json ilegível guardado em vez de perdido, e a
+    ...                imagem que não entra no PDF/DOCX marcada e informada.
+    [Tags]    regressao
+    Executar cenário de tela    test_protecao_dados
+
 O documento nasce do início ao fim do processo
     [Documentation]    O primeiro print tirado é o passo 1, apesar dos nomes (dois dias,
     ...                virada de meia-noite, padrões misturados) e da ordem da seleção.

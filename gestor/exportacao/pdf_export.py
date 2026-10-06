@@ -124,18 +124,72 @@ def _capa_dados(capa):
     }
 
 
+# Passos que saíram sem imagem na última exportação. Antes a falha era engolida
+# e o passo saía em branco — num documento de evidência, sem ninguém perceber.
+_sem_imagem = []
+
+
+def _inserir_imagem(pdf, caminho, x, y, w, h):
+    """Põe a imagem centralizada na caixa. Devolve False se não conseguiu.
+
+    O fpdf 1.7 recusa alguns PNG válidos (16 bits por canal, por exemplo):
+    nesse caso a imagem é convertida para RGB de 8 bits e tentada de novo. O
+    fpdf lê o arquivo dentro de `image()`, então o temporário pode sair logo.
+    """
+    try:
+        with Image.open(caminho) as img:
+            iw, ih = img.size
+    except Exception:
+        return False
+    escala = min(w / iw, h / ih)
+    dw, dh = iw * escala, ih * escala
+    ox, oy = x + (w - dw) / 2, y + (h - dh) / 2
+    try:
+        pdf.image(caminho, x=ox, y=oy, w=dw, h=dh)
+        return True
+    except Exception:
+        pass
+    import tempfile
+    tmp = None
+    try:
+        with Image.open(caminho) as img:
+            if img.mode.startswith("I"):
+                # 16 bits por canal: reduz para 8 bits antes de converter
+                import numpy as np
+                valores = np.asarray(img, dtype=np.uint32) >> 8
+                convertida = Image.fromarray(valores.astype(np.uint8), "L").convert("RGB")
+            else:
+                convertida = img.convert("RGB")
+        fd, tmp = tempfile.mkstemp(suffix=".png", prefix="ge_img_")
+        os.close(fd)
+        convertida.save(tmp, format="PNG")
+        pdf.image(tmp, x=ox, y=oy, w=dw, h=dh)
+        return True
+    except Exception:
+        return False
+    finally:
+        if tmp:
+            try:
+                os.remove(tmp)
+            except Exception:
+                pass
+
+
 def _imagem_ajustada(pdf, caminho, x, y, w, h, borda=False, cor_borda=TEAL):
-    if caminho and os.path.exists(caminho):
-        try:
-            with Image.open(caminho) as img:
-                iw, ih = img.size
-            escala = min(w / iw, h / ih)
-            dw, dh = iw * escala, ih * escala
-            ox = x + (w - dw) / 2
-            oy = y + (h - dh) / 2
-            pdf.image(caminho, x=ox, y=oy, w=dw, h=dh)
-        except Exception:
-            pass
+    if not (caminho and os.path.exists(caminho) and _inserir_imagem(pdf, caminho, x, y, w, h)):
+        # Lacuna visível no lugar de um branco: quem lê o documento precisa
+        # saber que ali faltou a evidência.
+        _sem_imagem.append(os.path.basename(caminho or "") or "(sem arquivo)")
+        # Mexe na fonte, na cor e na posição sem devolver: os três modelos
+        # redefinem tudo logo depois da imagem (rodapé e passo seguinte).
+        pdf.set_draw_color(*MUTED_CLARO)
+        pdf.set_line_width(0.3)
+        pdf.rect(x, y, w, h)
+        pdf.set_font("Arial", "", 9)
+        pdf.set_text_color(*MUTED)
+        pdf.set_xy(x, y + h / 2 - 3)
+        pdf.cell(w, 6, "imagem indisponível: %s" % (os.path.basename(caminho or "") or "?"),
+                 align="C")
     if borda:
         pdf.set_draw_color(*cor_borda)
         pdf.set_line_width(0.5)
@@ -495,5 +549,8 @@ MODELOS = {
 
 
 def exportar(modelo, destino, capa, passos, opcoes=None):
+    """Gera o PDF. Devolve os nomes dos passos que ficaram sem imagem."""
     _, funcao = MODELOS.get(modelo, MODELOS["passo"])
+    del _sem_imagem[:]
     funcao(destino, capa, passos, opcoes)
+    return list(_sem_imagem)

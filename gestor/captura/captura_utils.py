@@ -89,22 +89,48 @@ PADROES_NOME_UI = [("hora", "captura-HHMMSS"),
                    ("data_hora", "captura-AAAAMMDD-HHMMSS")]
 
 
-def nome_arquivo(padrao, sufixo=""):
+def nome_livre(pasta, padrao, agora=None):
+    """Nome para uma captura nova que não pisa em nenhuma que já existe.
+
+    Com o padrão `hora` o nome só tem HHMMSS: o print de hoje às 14:30:52
+    recebia o mesmo nome do de qualquer outro dia nesse horário, e salvar
+    sobrescrevia a evidência antiga. Pior: o .raw.png e o .json da antiga
+    continuavam ao lado, e a imagem nova passava a abrir no editor com o
+    original e as anotações da velha. Também cobre dois prints no mesmo
+    segundo (Shift+Print Screen repetido). Um .json ou .raw.png órfão conta
+    como ocupado, pelo mesmo motivo.
+    """
     from datetime import datetime
+    agora = agora or datetime.now()
     fn = PADROES_NOME.get(padrao, PADROES_NOME["hora"])
-    return fn(datetime.now(), sufixo)
+    n = 1
+    while True:
+        nome = fn(agora, "" if n == 1 else "_%d" % n)
+        caminho = os.path.join(pasta, nome)
+        irmaos = (caminho, capture_store.raw_path(caminho), capture_store.json_path(caminho),
+                  capture_store.txt_path(caminho))
+        if not any(os.path.exists(p) for p in irmaos):
+            return nome
+        n += 1
 
 
 def limpar_capturas_antigas(pasta, dias):
-    """Remove capturas com mais de `dias` dias que nunca foram editadas
-    (sem legenda/anotações) — uma forma simples de 'retenção' sem precisar
-    lembrar seleção entre reinícios do app."""
+    """Remove capturas com mais de `dias` dias que ninguém usou: sem edição,
+    sem legenda, sem caso/projeto e sem anotação — uma forma simples de
+    'retenção' sem precisar lembrar seleção entre reinícios do app.
+
+    Olhar só `edited_at` não basta: a legenda digitada ao montar um documento
+    é gravada sem marcar a captura como editada (ela não foi editada), e uma
+    captura que já entrou num documento não pode sumir sozinha.
+    """
     if not dias or not os.path.isdir(pasta):
         return 0
     limite = time.time() - dias * 86400
     removidos = 0
     for item in capture_store.list_captures(pasta):
-        if item["mtime"] < limite and not item["edited"]:
+        usada = (item["edited"] or item["caption"] or item["caso"]
+                 or item["shape_count"])
+        if item["mtime"] < limite and not usada:
             # só conta o que a Lixeira realmente aceitou: o retorno passou a
             # ser significativo quando a exclusão deixou de ser definitiva
             if capture_store.delete_capture(item["path"]):

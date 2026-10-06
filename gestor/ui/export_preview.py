@@ -316,13 +316,26 @@ class PreVisualizarExportar(Toplevel):
         destino = self._caminho_destino(destino_pasta, formato)
         try:
             if formato == "docx":
-                docx_export.exportar(self.modelo, destino, self.capa, self.passos, self.opcoes)
+                sem_imagem = docx_export.exportar(self.modelo, destino, self.capa, self.passos,
+                                                  self.opcoes)
             else:
-                pdf_export.exportar(self.modelo, destino, self.capa, self.passos, self.opcoes)
+                sem_imagem = pdf_export.exportar(self.modelo, destino, self.capa, self.passos,
+                                                 self.opcoes)
         except Exception as e:
             messagebox.showerror("Exportar", f"Falha ao gerar o documento: {e}", parent=self)
             return
-        messagebox.showinfo("Exportar", f"Documento gerado:\n{destino}", parent=self)
+        if sem_imagem:
+            # Documento de evidência com passo sem imagem não pode sair calado.
+            lista = "\n".join("• " + nome for nome in sem_imagem[:8])
+            if len(sem_imagem) > 8:
+                lista += f"\n• … e mais {len(sem_imagem) - 8}"
+            messagebox.showwarning(
+                "Exportar",
+                f"Documento gerado, mas {len(sem_imagem)} passo(s) ficaram SEM IMAGEM "
+                f"(o lugar de cada um está marcado no documento):\n\n{lista}\n\n{destino}",
+                parent=self)
+        else:
+            messagebox.showinfo("Exportar", f"Documento gerado:\n{destino}", parent=self)
         os.startfile(destino_pasta)
         # A prévia continua aberta de propósito: é dela que se gera o outro
         # formato, ou o outro modelo, sem remontar o documento. Gerar de novo

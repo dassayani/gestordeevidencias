@@ -19,6 +19,7 @@ do .txt (se existir) é importada para o .json.
 import json
 import os
 import re
+from collections import OrderedDict
 from datetime import datetime, timedelta
 
 from PIL import Image
@@ -152,6 +153,45 @@ def save_caption(png_path, legenda):
     meta["caption"] = legenda
     save_meta(png_path, meta, marcar_editada=False)
     return True
+
+
+# ---------------------------------------------------------------- miniaturas
+
+_MINIATURAS = OrderedDict()      # (caminho, tamanho) -> (assinatura do arquivo, PIL)
+_LIMITE_MINIATURAS = 800         # ~50 KB cada: teto de memória na casa de 40 MB
+
+
+def miniatura(png_path, tamanho, origem=None):
+    """Miniatura RGB da captura, decodificada do disco só quando o arquivo muda.
+
+    Decodificar um PNG de tela cheia é o que custa (dezenas de ms cada), e a
+    galeria refazia todas a cada atualização — depois de cada captura, edição
+    ou clique no filtro "Marcadas": com 120 prints do dia a tela congelava por
+    12 a 16 s. Guarda-se o PIL pequeno (a PhotoImage continua sendo de quem a
+    exibe) e invalida-se pela data e tamanho do arquivo, então uma edição
+    aparece na hora.
+
+    `origem` é outro tamanho já em cache de onde reduzir, em vez de decodificar
+    o PNG de novo (o Montar usa duas medidas parecidas da mesma imagem).
+    """
+    st = os.stat(png_path)
+    assinatura = (st.st_mtime_ns, st.st_size)
+    chave = (os.path.normcase(os.path.abspath(png_path)), tuple(tamanho))
+    guardado = _MINIATURAS.get(chave)
+    if guardado and guardado[0] == assinatura:
+        _MINIATURAS.move_to_end(chave)
+        return guardado[1]
+    if origem is not None:
+        img = miniatura(png_path, origem).copy()
+        img.thumbnail(tamanho)
+    else:
+        with Image.open(png_path) as im:
+            im.thumbnail(tamanho)
+            img = im.convert("RGB")
+    _MINIATURAS[chave] = (assinatura, img)
+    while len(_MINIATURAS) > _LIMITE_MINIATURAS:
+        _MINIATURAS.popitem(last=False)
+    return img
 
 
 def load_raw_image(png_path):

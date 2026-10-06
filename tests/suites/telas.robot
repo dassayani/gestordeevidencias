@@ -64,7 +64,20 @@ Reordenar os passos mantém as miniaturas na tela
     Executar cenário de tela    test_reordenar_miniaturas
 
 Reordenar coloca os passos na posição certa
+    [Documentation]    Inclui o limiar de 5 px: uma tremida entre os dois cliques
+    ...                de um duplo clique não pode virar arraste nem reconstruir
+    ...                a coluna.
+    [Tags]    regressao
     Executar cenário de tela    test_reordenar
+
+Editar a imagem a partir do documento e voltar com tudo persistido
+    [Documentation]    Abre o editor de um passo, anota, recorta e grava. O documento
+    ...                volta com a miniatura nova, a legenda, a capa, a ordem, a
+    ...                rolagem e a prévia aberta atualizadas. Cobre também fechar sem
+    ...                gravar, editor destruído à força (o Montar não pode ficar
+    ...                travado), arquivo ausente e o painel que não se esconde.
+    [Tags]    regressao
+    Executar cenário de tela    cenario_editar_do_documento    tempo_limite=240
 
 Ctrl+C e Ctrl+V funcionam nos campos do editor
     [Tags]    regressao

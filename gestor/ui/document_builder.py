@@ -10,6 +10,7 @@ from PIL import Image, ImageDraw, ImageFont, ImageTk
 
 from gestor.dados import capture_store
 from gestor.dados import config
+from gestor.ui import editor
 from gestor.ui import theme
 from gestor.ui import widgets
 
@@ -88,6 +89,10 @@ class MontarDocumento(Toplevel):
         self.lbl_paginas = None
         self._cards = []
         self._arraste = None
+        self._editor = None          # editor de imagem aberto a partir daqui
+        self._previas = []           # prévias abertas, para regerar após editar
+        self._canvas_central = None
+        self.entries_legenda = {}
 
         self._montar_ui(t)
         self.protocol("WM_DELETE_WINDOW", self.destroy)
@@ -119,7 +124,7 @@ class MontarDocumento(Toplevel):
         tk.Label(col, text="SEQUÊNCIA", bg=t["bg_footer"], fg=t["text_muted"],
                  font=(theme.FONT, theme.FS_EYEBROW, "bold")).pack(
                      anchor="w", padx=14, pady=(14, 0))
-        widgets.texto_fluido(col, "arraste os cartões pra reordenar · ✕ remove",
+        widgets.texto_fluido(col, "arraste pra reordenar · duplo clique na imagem edita · ✕ remove",
                               self.parent_app.modo_escuro,
                               bg=t["bg_footer"]).pack(fill="x", padx=14, pady=(0, 10))
 
@@ -143,6 +148,7 @@ class MontarDocumento(Toplevel):
 
     def _atualizar_sequencia(self):
         t = theme.get(self.parent_app.modo_escuro)
+        rolagem = self._canvas_sequencia.yview()[0]
         for w in self.frame_sequencia.winfo_children():
             w.destroy()
         self.imagens_sequencia = []
@@ -165,7 +171,8 @@ class MontarDocumento(Toplevel):
             # estes seguem como ajuste fino de uma posição por vez.
             controles = tk.Frame(topo, bg=t["bg_input"])
             controles.pack(side="right")
-            for rotulo, acao in (("↑", lambda i=idx: self._mover(i, -1)),
+            for rotulo, acao in (("✎", lambda i=idx: self._editar_passo(i)),
+                                  ("↑", lambda i=idx: self._mover(i, -1)),
                                   ("↓", lambda i=idx: self._mover(i, 1)),
                                   ("✕", lambda i=idx: self._remover(i))):
                 alvo = tk.Label(controles, text=rotulo, bg=t["bg_input"],
@@ -193,7 +200,19 @@ class MontarDocumento(Toplevel):
                 miniatura.pack(padx=1, pady=1)
                 arrastaveis.extend((moldura, miniatura))
             except Exception:
-                pass
+                # Sem miniatura não há onde dar o duplo clique: o espaço
+                # reservado mantém o caminho para o editor (que explica o erro
+                # se o arquivo sumiu) e avisa que a imagem não carregou.
+                moldura = tk.Frame(linha, bg=t["border_soft"])
+                moldura.pack(padx=6, pady=(4, 0))
+                miniatura = tk.Label(moldura, text="imagem indisponível", bg=t["bg_input"],
+                                     fg=t["text_muted"], font=(theme.FONT, theme.FS_CAPTION),
+                                     width=22, height=4, cursor="fleur")
+                miniatura.pack(padx=1, pady=1)
+                arrastaveis.extend((moldura, miniatura))
+            # Duplo clique só na imagem, e não no cartão inteiro: o resto do
+            # cartão é área de arraste e não deve competir com ele.
+            miniatura.bind("<Double-Button-1>", lambda e, i=idx: self._editar_passo(i))
 
             texto = (passo["legenda"] or passo["nome"])[:60]
             rotulo_texto = widgets.texto_fluido(linha, texto, self.parent_app.modo_escuro,
@@ -207,7 +226,25 @@ class MontarDocumento(Toplevel):
                 w.bind("<B1-Motion>", self._arraste_mover)
                 w.bind("<ButtonRelease-1>", self._arraste_soltar)
 
+        self._restaurar_rolagem(self._canvas_sequencia, rolagem)
         self._atualizar_paginas()
+
+    def _restaurar_rolagem(self, canvas, fracao):
+        """Devolve a rolagem de uma coluna reconstruída.
+
+        Reconstruir a coluna recria o conteúdo do zero e a rolagem voltaria ao
+        topo: quem edita o passo 9 de 12 acharia que a lista foi perdida. O
+        scrollregion só é recalculado no próximo <Configure>, então é
+        refeito aqui antes de rolar.
+        """
+        if fracao <= 0:
+            return
+        try:
+            canvas.update_idletasks()
+            canvas.config(scrollregion=canvas.bbox("all"))
+            canvas.yview_moveto(fracao)
+        except tk.TclError:
+            pass
 
     # ---------- reordenar arrastando ----------
 
@@ -295,11 +332,18 @@ class MontarDocumento(Toplevel):
         # e o caso, o autor e o ambiente ficavam em branco depois de mover um
         # print de lugar.
         self._capa_digitada = self._capa_atual()
+        rolagem = 0.0
+        if self._canvas_central is not None:
+            try:
+                rolagem = self._canvas_central.yview()[0]
+            except tk.TclError:
+                pass          # canvas já destruído
         for w in self.col_central.winfo_children():
             w.destroy()
         self.imagens_passos = []
 
         canvas = tk.Canvas(self.col_central, bg=t["bg_content"], highlightthickness=0, width=1)
+        self._canvas_central = canvas
         scrollbar = tk.Scrollbar(self.col_central, orient="vertical", command=canvas.yview)
         frame = tk.Frame(canvas, bg=t["bg_content"])
         janela_central = canvas.create_window((0, 0), window=frame, anchor="nw")
@@ -362,14 +406,28 @@ class MontarDocumento(Toplevel):
             txt.bind("<KeyRelease>", lambda e, i=idx, w=txt: self._on_legenda_change(i, w))
             self.entries_legenda[idx] = txt
 
+            lado_imagem = tk.Frame(linha, bg=t["bg_panel"])
+            lado_imagem.pack(side="left")
             try:
                 img = Image.open(passo["caminho"])
                 img.thumbnail((160, 110))
                 img_tk = ImageTk.PhotoImage(img)
                 self.imagens_passos.append(img_tk)
-                tk.Label(linha, image=img_tk, bg=t["bg_input"]).pack(side="left")
+                miniatura = tk.Label(lado_imagem, image=img_tk, bg=t["bg_input"], cursor="hand2")
             except Exception:
-                pass
+                miniatura = tk.Label(lado_imagem, text="imagem indisponível", bg=t["bg_input"],
+                                     fg=t["text_muted"], font=(theme.FONT, theme.FS_CAPTION),
+                                     width=22, height=6, cursor="hand2")
+            miniatura.pack()
+            miniatura.bind("<Double-Button-1>", lambda e, i=idx: self._editar_passo(i))
+            # O duplo clique não se descobre sozinho nem é fácil pra todo
+            # mundo: o link dá o mesmo caminho com um clique só.
+            link = tk.Label(lado_imagem, text="✎ Editar imagem", bg=t["bg_panel"], fg=t["accent"],
+                            font=(theme.FONT, theme.FS_CAPTION), cursor="hand2")
+            link.pack(pady=(4, 0))
+            link.bind("<Button-1>", lambda e, i=idx: self._editar_passo(i))
+
+        self._restaurar_rolagem(canvas, rolagem)
 
     def _capa_atual(self):
         """O que está nos campos da capa agora, enquanto os widgets existem."""
@@ -401,6 +459,110 @@ class MontarDocumento(Toplevel):
     def _atualizar_coluna_central(self):
         t = theme.get(self.parent_app.modo_escuro)
         self._montar_coluna_central_conteudo(t)
+
+    # ---------- editar a imagem sem sair do documento ----------
+
+    def _sincronizar_legendas(self):
+        """Copia o que está nas caixas de legenda para os passos.
+
+        O <KeyRelease> cobre quem digita, mas não colar pelo mouse. Só vale
+        enquanto as caixas e `self.passos` estão na mesma ordem — por isso não
+        é chamado logo após reordenar, quando as caixas ainda são as antigas.
+        """
+        for idx, caixa in self.entries_legenda.items():
+            if 0 <= idx < len(self.passos):
+                try:
+                    self.passos[idx]["legenda"] = caixa.get("1.0", "end").strip()
+                except tk.TclError:
+                    pass      # caixa já destruída
+
+    def _gravar_legendas(self):
+        """Persiste a legenda de todos os passos no .json de cada captura.
+
+        A legenda digitada aqui vivia só na memória e se perdia ao fechar a
+        janela; o editor, por sua vez, lê do .json. Gravar em todos os passos
+        mantém as duas telas contando a mesma história.
+        """
+        mudou = False
+        for passo in self.passos:
+            try:
+                mudou |= capture_store.save_caption(passo["caminho"], passo["legenda"])
+            except Exception:
+                pass          # captura apagada ou bloqueada: o documento usa a da memória
+        if mudou:
+            self.parent_app.atualizar_galeria()
+
+    def _editar_passo(self, idx):
+        """Abre o editor de imagem do passo; ao gravar, o documento se atualiza."""
+        # Um editor por vez: com dois abertos sobre a mesma imagem, o último a
+        # gravar apagaria o trabalho do outro.
+        if self._editor is not None and self._editor.winfo_exists():
+            self._editor.deiconify()
+            self._editor.lift()
+            self._editor.focus_force()
+            return
+        if not (0 <= idx < len(self.passos)):
+            return
+        self._sincronizar_legendas()
+        passo = self.passos[idx]
+        caminho = passo["caminho"]
+        if not os.path.exists(caminho):
+            messagebox.showwarning(
+                "Editar imagem",
+                "O arquivo desta captura não foi encontrado — ele pode ter sido "
+                "movido ou apagado.", parent=self)
+            return
+        try:
+            ed = editor.EditorImagem(
+                self, caminho, lambda c=caminho: self._ao_gravar(c),
+                self.parent_app.modo_escuro, app=self.parent_app, janela_retorno=self,
+                legenda_inicial=passo["legenda"])
+        except Exception as e:
+            messagebox.showerror("Editar imagem",
+                                 f"Não foi possível abrir o editor:\n{e}", parent=self)
+            return
+        self._editor = ed
+        # Só o Montar fica bloqueado. grab_set travaria também o overlay do
+        # Print Screen, que é outra janela, e impediria capturar com o editor
+        # aberto.
+        self.attributes("-disabled", True)
+        # O desbloqueio vem do <Destroy> do editor, e não dos botões dele: o
+        # editor pode ser destruído por outro caminho (erro, troca de tema), e
+        # o Montar ficaria travado para sempre.
+        ed.bind("<Destroy>", lambda e, w=ed: self._editor_fechado(w, e), add="+")
+        ed.lift()
+        ed.focus_force()
+
+    def _editor_fechado(self, ed, evento):
+        if str(evento.widget) != str(ed):
+            return            # <Destroy> de um widget interno do editor
+        if self._editor is ed:
+            self._editor = None
+        try:
+            self.attributes("-disabled", False)
+            self.deiconify()
+            self.focus_force()
+        except tk.TclError:
+            pass              # o Montar também foi fechado
+
+    def _ao_gravar(self, caminho):
+        """Roda a cada gravação do editor: traz a imagem e a legenda do disco."""
+        if not self.winfo_exists():
+            return
+        passo = next((p for p in self.passos if p["caminho"] == caminho), None)
+        if passo is None:
+            return
+        # A fonte da verdade passa a ser o disco: o editor pode ter mudado a
+        # legenda além da imagem.
+        passo["legenda"] = capture_store.load_meta(caminho).get("caption", "")
+        self._atualizar_sequencia()
+        self._atualizar_coluna_central()
+        self.parent_app.atualizar_galeria()
+        for previa in list(self._previas):
+            if previa.winfo_exists():
+                previa.regerar()
+            else:
+                self._previas.remove(previa)
 
     def _montar_coluna_direita(self, corpo, t):
         col = tk.Frame(corpo, bg=t["bg_panel"])
@@ -444,6 +606,9 @@ class MontarDocumento(Toplevel):
         self.lbl_paginas.pack(anchor="w", padx=16, pady=(12, 4))
         widgets.botao_primario(rodape, "Pré-visualizar", self._pre_visualizar,
                                 self.parent_app.modo_escuro).pack(fill="x", padx=16, pady=(0, 14))
+        # A sequência é montada antes deste rótulo existir, e a contagem
+        # daquela primeira rodada não tinha onde aparecer.
+        self._atualizar_paginas()
 
     def _linha_modelo(self, linha, valor, nome, desc, t):
         def selecionar(v=valor):
@@ -498,6 +663,8 @@ class MontarDocumento(Toplevel):
         if not self.passos:
             messagebox.showinfo("Montar documento", "Adicione ao menos uma captura.", parent=self)
             return
+        self._sincronizar_legendas()
+        self._gravar_legendas()
         capa = {chave: entry.get().strip() for chave, entry in self.entries_capa.items()}
         # guarda o autor pro próximo documento já vir preenchido
         if capa.get("autor") != self.parent_app.config.get("autor_padrao", ""):
@@ -511,5 +678,6 @@ class MontarDocumento(Toplevel):
             "fonte_legenda": self.parent_app.config.get("fonte_legenda", "Arial"),
         }
         from gestor.ui import export_preview
-        export_preview.PreVisualizarExportar(self.parent_app, self, self.var_modelo.get(), capa,
-                                              list(self.passos), opcoes)
+        previa = export_preview.PreVisualizarExportar(
+            self.parent_app, self, self.var_modelo.get(), capa, list(self.passos), opcoes)
+        self._previas = [p for p in self._previas if p.winfo_exists()] + [previa]

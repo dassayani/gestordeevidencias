@@ -195,3 +195,12 @@ Trocar de modelo na tela troca o título padrão e preserva o digitado
     ...                título, nem trocar o modelo por trás do usuário.
     [Tags]    regressao
     Executar cenário de tela    cenario_titulo_por_modelo
+
+Ferramenta do editor continua ativa, seta afinada e Borrar com desfoque
+    [Documentation]    Várias setas seguidas sem voltar ao botão, cor nova vale
+    ...                para as próximas, só o Mover ajusta forma feita, Apagar
+    ...                apaga uma atrás da outra, Esc e Recorte voltam ao Mover.
+    ...                Seta nova afina para a cauda, Borrar novo desfoca conforme
+    ...                a intensidade, e prints antigos regravados não mudam.
+    [Tags]    regressao
+    Executar cenário de tela    cenario_ferramentas_fixas

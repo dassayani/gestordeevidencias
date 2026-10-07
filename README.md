@@ -32,9 +32,12 @@ de nada para fora da máquina.
 - 🪟 Captura da janela ativa, com detecção automática da borda real
 - 🎯 Sugestão da área de captura por detecção de bordas
 - ✏️ Editor de anotação: seta, quadro, elipse, marcador, texto, emoji, passo
-  numerado, borrão, tarja e recorte
+  numerado, borrão, tarja e recorte. A ferramenta escolhida continua ativa
+  (três setas seguidas sem voltar ao botão); ajustar uma forma já feita é com
+  o Mover, e Esc volta para ele
 - ⬛ Tarja sólida para dado sensível (CPF, token, senha) antes de a evidência
-  sair da máquina; o Borrar pixeliza, para o que só precisa ficar ilegível
+  sair da máquina; o Borrar desfoca, com intensidade ajustável, para o que só
+  precisa ficar ilegível
 - 🏷️ Legenda e Caso/Projeto por captura
 - 🔎 Busca por nome do arquivo, legenda ou caso/projeto
 - 🗂️ Filtros: Hoje, Marcadas (as selecionadas para o documento), Editadas, Tudo
@@ -296,7 +299,7 @@ tests/
 └── python/                  cenários, executáveis também sem o Robot
 ```
 
-São 42 casos. Duas decisões do desenho estão explicadas em
+São 43 casos. Duas decisões do desenho estão explicadas em
 [tests/README.md](tests/README.md), e vale conhecê-las antes de escrever mais
 testes:
 
@@ -336,10 +339,16 @@ E o `.json`:
   "captured_at": "2026-09-21T14:30:52",
   "shapes": [
     {"id": 1, "tool": "seta", "coords": [120, 80, 340, 210],
-     "color": "#E8590C", "width": 3, "dash": false, "visible": true}
+     "color": "#E8590C", "width": 3, "dash": false, "visible": true,
+     "estilo": "afinada"}
   ]
 }
 ```
+
+`estilo` marca as setas (`afinada`) e os borrões (`desfoque`) feitos a partir
+da versão que trouxe esses desenhos. Forma sem a marca é de antes e continua
+saindo como saía — seta de linha reta, borrão pixelado —, mesmo que o print
+seja aberto e gravado de novo. No borrão com desfoque, `width` é a intensidade.
 
 Apagar uma captura leva os três juntos, para a Lixeira.
 
@@ -370,10 +379,11 @@ querer: CPF, nome, valor, e-mail, token na URL.
 - A ferramenta **Tarja** cobre a região com um retângulo sólido, gravado na
   própria imagem — não é uma camada por cima que alguém possa remover. É a
   que deve ser usada para dado sensível.
-- A ferramenta **Borrar** pixeliza a região, também na imagem. Atenção: em
-  texto pequeno, pixelização pode ser revertida por ferramentas públicas
-  (reconstrução por blocos). Serve para o que só precisa ficar ilegível; para
-  CPF, token ou senha, use a Tarja.
+- A ferramenta **Borrar** desfoca a região, também na imagem (prints de
+  versões anteriores mantêm o borrão pixelado que já tinham). Atenção: em
+  texto pequeno, desfoque e pixelização podem ser revertidos em parte por
+  ferramentas públicas. Serve para o que só precisa ficar ilegível; para CPF,
+  token ou senha, use a Tarja.
 - Exclusão vai para a Lixeira, então um clique errado tem volta.
 - Falha silenciosa vira registro em `%APPDATA%\GestorEvidencias\erros.log`.
 
@@ -402,7 +412,7 @@ querer: CPF, nome, valor, e-mail, token na URL.
 - [x] Três visualizações da lista
 - [x] Tamanho de fonte ajustável
 - [x] Empacotamento em executável
-- [x] Suíte de teste automatizada (42 casos)
+- [x] Suíte de teste automatizada (43 casos)
 - [x] Editar a imagem direto do Montar documento, sem perder o que já foi preenchido
 - [x] Tela de Configurações extraída do `workspace.py` para módulo próprio
 - [x] Projeto sob Git
@@ -442,7 +452,7 @@ Antes de qualquer entrega, duas coisas:
 
 ```bat
 venv\Scripts\python.exe -m pyflakes gestor main.py tests\python tests\biblioteca   :: precisa sair limpo
-tests\executar.bat                                                                 :: precisa fechar 42/42
+tests\executar.bat                                                                 :: precisa fechar 43/43
 ```
 
 E, para mudança de interface: **rode o app e olhe a tela**. Vários defeitos

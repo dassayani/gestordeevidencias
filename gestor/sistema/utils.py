@@ -8,7 +8,7 @@ import time
 from ctypes import wintypes
 
 import win32clipboard
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFilter
 
 # O pywin32 não expõe esta constante; é o formato de "lista de arquivos" que o
 # Explorer usa ao copiar/colar e que os clientes de e-mail leem como anexo.
@@ -208,6 +208,88 @@ def draw_dashed_ellipse(draw, xy, fill, width, steps=72):
     ]
     for i in range(0, steps, 2):
         draw.line([pts[i], pts[i + 1]], fill=fill, width=width)
+
+
+def mascara_seta_afinada(coords, largura, superamostra=4):
+    """Máscara (modo L) da seta moderna e o canto onde ela vai.
+
+    Corpo que afina da cabeça para a cauda (a cauda tem um quarto da
+    largura) e cabeça grande. O PIL desenha polígono sem antialias, então o
+    desenho é feito `superamostra` vezes maior e reduzido com LANCZOS — é o
+    que tira o serrilhado das bordas inclinadas. Só a caixa da seta é
+    desenhada, não a imagem inteira.
+
+    Devolve (mascara, (x0, y0)); o editor usa a mesma máscara na tela e no
+    PNG gravado, então a prévia é o que sai.
+    """
+    x1, y1, x2, y2 = coords
+    larg = max(1.0, float(largura)) * 1.6
+    comp = math.hypot(x2 - x1, y2 - y1)
+    ang = math.atan2(y2 - y1, x2 - x1)
+    ux, uy = math.cos(ang), math.sin(ang)
+    px, py = -uy, ux
+    cabeca = min(4.2 * larg, comp * 0.55)
+    meia_cabeca = 3.4 * larg / 2
+    bx, by = x2 - ux * cabeca, y2 - uy * cabeca
+    cauda, corpo = larg * 0.25 / 2, larg / 2
+
+    margem = meia_cabeca + 2
+    x0 = int(math.floor(min(x1, x2) - margem))
+    y0 = int(math.floor(min(y1, y2) - margem))
+    largura_caixa = int(math.ceil(max(x1, x2) + margem)) - x0
+    altura_caixa = int(math.ceil(max(y1, y2) + margem)) - y0
+    s = superamostra
+
+    def p(x, y):
+        return ((x - x0) * s, (y - y0) * s)
+
+    grande = Image.new("L", (largura_caixa * s, altura_caixa * s), 0)
+    d = ImageDraw.Draw(grande)
+    d.polygon([p(x1 + px * cauda, y1 + py * cauda), p(bx + px * corpo, by + py * corpo),
+               p(bx - px * corpo, by - py * corpo), p(x1 - px * cauda, y1 - py * cauda)],
+              fill=255)
+    cx, cy = p(x1, y1)
+    d.ellipse([cx - cauda * s, cy - cauda * s, cx + cauda * s, cy + cauda * s], fill=255)
+    d.polygon([p(x2, y2), p(bx + px * meia_cabeca, by + py * meia_cabeca),
+               p(bx - px * meia_cabeca, by - py * meia_cabeca)], fill=255)
+    return grande.resize((largura_caixa, altura_caixa), Image.LANCZOS), (x0, y0)
+
+
+def desenhar_seta_afinada(img, coords, rgb, largura):
+    """Pinta a seta moderna na imagem (in-place)."""
+    mascara, (x0, y0) = mascara_seta_afinada(coords, largura)
+    cor = tuple(rgb) + ((255,) if img.mode == "RGBA" else ())
+    img.paste(Image.new(img.mode, mascara.size, cor), (x0, y0), mascara)
+
+
+def raio_desfoque(intensidade):
+    """Raio do desfoque do Borrar para a intensidade do controle (2 a 14)."""
+    return 3 + 2 * max(1, int(intensidade))
+
+
+def desfocar_regiao(img, box, intensidade):
+    """Desfoque forte na região (in-place) — o Borrar dos prints novos.
+
+    Duas passadas de gaussiano: uma só, mesmo com raio grande, ainda deixa
+    a silhueta das letras. O recorte leva uma margem em volta para a borda
+    do borrão não sair clara (o gaussiano completaria com a própria borda).
+    Para dado sensível de verdade a Tarja continua sendo a indicada.
+    """
+    x1, y1, x2, y2 = [int(round(v)) for v in box]
+    x1, x2 = sorted((max(0, x1), max(0, x2)))
+    y1, y2 = sorted((max(0, y1), max(0, y2)))
+    x2 = min(x2, img.width)
+    y2 = min(y2, img.height)
+    if x2 - x1 < 2 or y2 - y1 < 2:
+        return
+    raio = raio_desfoque(intensidade)
+    margem = raio * 2
+    ma, mb = max(0, x1 - margem), max(0, y1 - margem)
+    mc, md = min(img.width, x2 + margem), min(img.height, y2 + margem)
+    recorte = img.crop((ma, mb, mc, md))
+    for _ in range(2):
+        recorte = recorte.filter(ImageFilter.GaussianBlur(raio))
+    img.paste(recorte.crop((x1 - ma, y1 - mb, x2 - ma, y2 - mb)), (x1, y1))
 
 
 def pixelate_region(img, box, block=12):

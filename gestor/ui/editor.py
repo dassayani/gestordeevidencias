@@ -152,6 +152,24 @@ FERRAMENTAS_COLUNA = [
 # semitransparente) pareceria destaque, e a função dela é esconder.
 COR_TARJA = (20, 20, 20)
 
+# Marca gravada nas setas e borrões feitos a partir desta versão. Sem ela a
+# forma é antiga e continua saindo como sempre saiu (seta de linha reta,
+# Borrar pixelado), mesmo gravando o print de novo: o que já foi entregue
+# como evidência não muda de aparência ao ser reaberto.
+ESTILO_SETA = "afinada"
+ESTILO_BORRAO = "desfoque"
+ESTILOS_NOVOS = {"seta": ESTILO_SETA, "borrao": ESTILO_BORRAO}
+
+# Cursor sobre a imagem conforme a ferramenta: com a ferramenta continuando
+# ativa depois de desenhar, o ponteiro é o lembrete do que o clique vai fazer.
+CURSOR_FERRAMENTA = {
+    "mover": "fleur",
+    "apagar": "X_cursor",
+    "texto": "xterm",
+    "emoji": "hand2",
+    "passo": "hand2",
+}
+
 
 def _ordenado(c):
     x1, y1, x2, y2 = c
@@ -201,7 +219,10 @@ def render_composite(raw_img, shapes):
             else:
                 draw_nm.ellipse(_ordenado(c), outline=rgb, width=w)
         elif tool == "seta":
-            utils.draw_arrow(draw_nm, c, rgb, w)
+            if shp.get("estilo") == ESTILO_SETA:
+                utils.desenhar_seta_afinada(img, c, rgb, w)
+            else:
+                utils.draw_arrow(draw_nm, c, rgb, w)
         elif tool == "marcador":
             draw_ov.rectangle(_ordenado(c), fill=rgb + (128,))
         elif tool == "texto":
@@ -219,7 +240,10 @@ def render_composite(raw_img, shapes):
             draw_nm.text((cx, cy), str(shp.get("step_n", 1)),
                          font=font_step, fill=(255, 255, 255), anchor="mm")
         elif tool == "borrao":
-            utils.pixelate_region(img, c)
+            if shp.get("estilo") == ESTILO_BORRAO:
+                utils.desfocar_regiao(img, c, w)
+            else:
+                utils.pixelate_region(img, c)
         elif tool == "tarja":
             # Opaca, desenhada na própria imagem. A pixelização do Borrar pode
             # ser revertida em texto pequeno (há ferramentas públicas para
@@ -292,6 +316,7 @@ class EditorImagem(Toplevel):
         self._drag_coords_ini = None
         self._editor_texto = None
         self._bbox_texto = {}
+        self._sob_o_apagar = None
 
         self._montar_ui(t)
 
@@ -300,6 +325,7 @@ class EditorImagem(Toplevel):
         self.canvas.bind("<B1-Motion>", self.on_drag)
         self.canvas.bind("<ButtonRelease-1>", self.on_release)
         self.canvas.bind("<Motion>", self._on_mouse_move)
+        self.canvas.bind("<Leave>", lambda e: self._marcar_sob_o_apagar(None))
         # Ligados na janela para valerem com o foco em qualquer parte da
         # imagem, mas filtrados por `_atalho_da_imagem`: dentro da legenda ou
         # do caso essas teclas pertencem ao campo.
@@ -308,9 +334,16 @@ class EditorImagem(Toplevel):
         self.bind("<Control-c>", self._atalho_da_imagem(self.copiar))
         self.bind("<Delete>", self._atalho_da_imagem(self._apagar_selecionado_tecla,
                                                       passa_evento=True))
+        # Esc volta para o Mover: com as ferramentas que continuam ativas
+        # depois de desenhar, é a saída rápida para ajustar o que foi feito.
+        # (Na caixa de texto aberta o Esc dela cancela o texto, e o filtro de
+        # campo de texto não deixa este rodar junto.)
+        self.bind("<Escape>", self._atalho_da_imagem(
+            lambda: self._selecionar_ferramenta("mover")))
         self.protocol("WM_DELETE_WINDOW", self.fechar_e_voltar)
 
         self._definir_ferramenta_ativa("seta")
+        self.canvas.config(cursor="crosshair")
         self._atualizar_lista_camadas()
         if legenda_divergente:
             self.sujo = True
@@ -603,9 +636,14 @@ class EditorImagem(Toplevel):
             # saber qual emoji seria inserido
             self._abrir_seletor_emoji()
             return
+        self._ativar_ferramenta(nome)
+
+    def _ativar_ferramenta(self, nome):
         self.ferramenta = nome
         self.selected_id = None
+        self._sob_o_apagar = None
         self._definir_ferramenta_ativa(nome)
+        self.canvas.config(cursor=CURSOR_FERRAMENTA.get(nome, "crosshair"))
         self._atualizar_status()
         self._redraw_canvas()
 
@@ -613,11 +651,7 @@ class EditorImagem(Toplevel):
         def escolhido(caractere, tamanho):
             self.emoji_atual = caractere
             self.tamanho_emoji = tamanho
-            self.ferramenta = "emoji"
-            self.selected_id = None
-            self._definir_ferramenta_ativa("emoji")
-            self._atualizar_status()
-            self._redraw_canvas()
+            self._ativar_ferramenta("emoji")
 
         self._pausar_timer(True)
         try:
@@ -654,15 +688,17 @@ class EditorImagem(Toplevel):
         valor = int(float(val))
         shp = self._get_shape(self.selected_id) if self.selected_id is not None else None
 
-        if shp and shp["tool"] == "emoji":
-            # com emoji selecionado o mesmo controle regula o TAMANHO dele:
-            # 2..14 do slider vira 20..104px, que cobre do discreto ao grande
+        if self._regula_tamanho_emoji(shp):
+            # com emoji o mesmo controle regula o TAMANHO dele: 2..14 do
+            # slider vira 20..104px, que cobre do discreto ao grande. Sem
+            # emoji selecionado (ferramenta Emoji ativa), vale para os próximos.
             tamanho = 20 + (valor - 2) * 7
-            shp["tamanho"] = tamanho
             self.tamanho_emoji = tamanho
-            self._marcar_sujo()
             self._atualizar_rotulo_espessura()
-            self._redraw_canvas()
+            if shp:
+                shp["tamanho"] = tamanho
+                self._marcar_sujo()
+                self._redraw_canvas()
             return
 
         self.espessura = valor
@@ -673,18 +709,36 @@ class EditorImagem(Toplevel):
             self._redraw_canvas()
 
     def _atualizar_rotulo_espessura(self):
-        """Mostra 'Tamanho' e o valor em px do emoji quando há um selecionado."""
+        """O controle muda de nome conforme o que ele regula.
+
+        'Tamanho' (px do emoji) com emoji selecionado ou a ferramenta Emoji
+        ativa; 'Intensidade' do desfoque no Borrar; 'Espessura' no resto.
+        """
         shp = self._get_shape(self.selected_id) if self.selected_id is not None else None
-        if shp and shp["tool"] == "emoji":
+        if self._regula_tamanho_emoji(shp):
+            tamanho = shp.get("tamanho", TAMANHO_EMOJI_PADRAO) if shp else self.tamanho_emoji
             self.lbl_rotulo_espessura.config(text="Tamanho")
-            self.lbl_espessura.config(text=f"{int(shp.get('tamanho', TAMANHO_EMOJI_PADRAO))} px")
-            valor_slider = max(2,
-                min(14, round((shp.get("tamanho", TAMANHO_EMOJI_PADRAO) - 20) / 7) + 2))
-            self.slider_espessura.definir(valor_slider)
+            self.lbl_espessura.config(text=f"{int(tamanho)} px")
+            self.slider_espessura.definir(max(2, min(14, round((tamanho - 20) / 7) + 2)))
+            return
+        if shp:
+            desfoque = shp["tool"] == "borrao" and shp.get("estilo") == ESTILO_BORRAO
         else:
+            desfoque = self.ferramenta == "borrao"
+        if desfoque:
+            valor = int(shp.get("width", self.espessura)) if shp else self.espessura
+            self.lbl_rotulo_espessura.config(text="Intensidade")
+            self.lbl_espessura.config(text=str(valor))
+        else:
+            valor = int(shp.get("width", self.espessura)) if shp else self.espessura
             self.lbl_rotulo_espessura.config(text="Espessura")
-            self.lbl_espessura.config(text=f"{self.espessura} px")
-            self.slider_espessura.definir(self.espessura)
+            self.lbl_espessura.config(text=f"{valor} px")
+        self.slider_espessura.definir(valor)
+
+    def _regula_tamanho_emoji(self, shp):
+        if shp is not None:
+            return shp["tool"] == "emoji"
+        return self.ferramenta == "emoji"
 
     def _definir_estilo(self, tracejado):
         self.tracejado = tracejado
@@ -823,6 +877,7 @@ class EditorImagem(Toplevel):
     def _selecionar_camada(self, sid):
         self.ferramenta = "mover"
         self._definir_ferramenta_ativa("mover")
+        self.canvas.config(cursor=CURSOR_FERRAMENTA["mover"])
         self.selected_id = sid
         self._atualizar_status()
         self._redraw_canvas()
@@ -857,6 +912,39 @@ class EditorImagem(Toplevel):
     def _on_mouse_move(self, e):
         ix, iy = self._canvas_to_img(e.x, e.y)
         self.lbl_status_pos.config(text=f"x {int(ix)} · y {int(iy)}")
+        if self.ferramenta == "apagar":
+            self._marcar_sob_o_apagar(self._hit_test(ix, iy, interior=True))
+
+    def _marcar_sob_o_apagar(self, sid):
+        """Contorno vermelho na forma que o próximo clique do Apagar remove.
+
+        Fica num item próprio do canvas, e não num redesenho completo: o
+        <Motion> dispara dezenas de vezes por segundo e redesenhar a imagem
+        inteira a cada uma travaria o ponteiro.
+        """
+        if sid == getattr(self, "_sob_o_apagar", None) and self.canvas.find_withtag("sob_apagar"):
+            return
+        self._sob_o_apagar = sid
+        self.canvas.delete("sob_apagar")
+        shp = self._get_shape(sid) if sid is not None else None
+        if not shp:
+            return
+        xa, ya, xb, yb = self._caixa_da_forma(shp)
+        ca, cb = self._img_to_canvas(xa, ya)
+        cc, cd = self._img_to_canvas(xb, yb)
+        t = theme.get(self.modo_escuro)
+        self.canvas.create_rectangle(ca - 5, cb - 5, cc + 5, cd + 5, outline=t["danger_text"],
+                                     width=2, dash=(4, 3), tags="sob_apagar")
+
+    def _caixa_da_forma(self, shp):
+        """Caixa (em coordenadas da imagem) que a forma ocupa na tela."""
+        x1, y1, x2, y2 = shp["coords"]
+        if shp["tool"] in ("texto", "emoji") and shp["id"] in self._bbox_texto:
+            return self._bbox_texto[shp["id"]]
+        if shp["tool"] == "passo":
+            r = 14
+            return x1 - r, y1 - r, x1 + r, y1 + r
+        return tuple(_ordenado([x1, y1, x2, y2]))
 
     def _on_legenda_change(self, event=None):
         if self.txt_legenda.edit_modified():
@@ -919,6 +1007,16 @@ class EditorImagem(Toplevel):
             self.canvas.create_rectangle(cx1, cy1, cx2, cy2, outline=cor, width=largura, dash=dash)
         elif tool == "elipse":
             self.canvas.create_oval(cx1, cy1, cx2, cy2, outline=cor, width=largura, dash=dash)
+        elif tool == "seta" and shp.get("estilo") == ESTILO_SETA:
+            # A mesma máscara do PNG gravado, na escala da tela: o create_line
+            # do Tk não faz o corpo afinado, e a prévia mostraria outra seta.
+            mascara, (mx, my) = utils.mascara_seta_afinada(
+                [cx1, cy1, cx2, cy2], max(0.5, shp.get("width", 4) * self.escala))
+            camada = Image.new("RGBA", mascara.size, utils.hex_to_rgb(cor) + (255,))
+            camada.putalpha(mascara)
+            foto = ImageTk.PhotoImage(camada)
+            self._imagens_borrao.append(foto)
+            self.canvas.create_image(mx, my, image=foto, anchor="nw")
         elif tool == "seta":
             self.canvas.create_line(cx1, cy1, cx2, cy2, fill=cor, width=largura, arrow=tk.LAST,
                                      arrowshape=(18, 22, 10))
@@ -958,14 +1056,25 @@ class EditorImagem(Toplevel):
         elif tool == "borrao":
             xa, xb = sorted((x1, x2))
             ya, yb = sorted((y1, y2))
+            if shp.get("estilo") == ESTILO_BORRAO:
+                # só a parte dentro da imagem, que é a que o desfoque devolve
+                xa, ya = max(0, xa), max(0, ya)
+                xb, yb = min(self.img_raw.width, xb), min(self.img_raw.height, yb)
             mostrado = False
             if xb - xa >= 2 and yb - ya >= 2:
                 try:
-                    recorte = self.img_raw.crop((int(xa), int(ya), int(xb), int(yb))).convert("RGB")
-                    utils.pixelate_region(recorte, [0, 0, recorte.width, recorte.height], block=10)
                     largura_view = max(1, int((xb - xa) * self.escala))
                     altura_view = max(1, int((yb - ya) * self.escala))
-                    recorte_view = recorte.resize((largura_view, altura_view), Image.NEAREST)
+                    if shp.get("estilo") == ESTILO_BORRAO:
+                        # mesma função do PNG gravado, aplicada na imagem
+                        # inteira para a margem do desfoque pegar o entorno
+                        recorte = self._desfoque_da_previa(shp)
+                        recorte_view = recorte.resize((largura_view, altura_view),
+                                                      Image.BILINEAR)
+                    else:
+                        recorte = self.img_raw.crop((int(xa), int(ya), int(xb), int(yb))).convert("RGB")
+                        utils.pixelate_region(recorte, [0, 0, recorte.width, recorte.height], block=10)
+                        recorte_view = recorte.resize((largura_view, altura_view), Image.NEAREST)
                     img_tk_borrao = ImageTk.PhotoImage(recorte_view)
                     self._imagens_borrao.append(img_tk_borrao)
                     xc1, yc1 = self._img_to_canvas(xa, ya)
@@ -991,9 +1100,53 @@ class EditorImagem(Toplevel):
             self.canvas.create_rectangle(xa - 4, ya - 4, xb + 4, yb + 4,
                                          outline=t["accent"], dash=(2, 2))
 
+    def _desfoque_da_previa(self, shp):
+        """Região já desfocada, como vai sair no PNG, para mostrar na tela.
+
+        Guardada por posição e intensidade: a tela é redesenhada a cada
+        movimento do mouse durante um arraste, e desfocar de novo todos os
+        borrões parados a cada quadro deixaria o arraste pesado.
+        """
+        xa, ya, xb, yb = [int(round(v)) for v in _ordenado(shp["coords"])]
+        intensidade = max(1, int(shp.get("width", 4)))
+        chave = (xa, ya, xb, yb, intensidade, id(self.img_raw))
+        cache = self.__dict__.setdefault("_cache_desfoque", {})
+        if chave not in cache:
+            margem = utils.raio_desfoque(intensidade) * 2
+            ma, mb = max(0, xa - margem), max(0, ya - margem)
+            mc = min(self.img_raw.width, xb + margem)
+            md = min(self.img_raw.height, yb + margem)
+            pedaco = self.img_raw.crop((ma, mb, mc, md)).convert("RGB")
+            utils.desfocar_regiao(pedaco, [xa - ma, ya - mb, xb - ma, yb - mb], intensidade)
+            if len(cache) > 40:
+                cache.clear()
+            cache[chave] = pedaco.crop((max(0, xa - ma), max(0, ya - mb),
+                                        min(pedaco.width, xb - ma), min(pedaco.height, yb - mb)))
+        return cache[chave]
+
     # ---------- hit test (mover / apagar) ----------
 
-    def _hit_test(self, ix, iy):
+    def _hit_test(self, ix, iy, interior=False):
+        """Id da forma no ponto (a de cima primeiro), ou None.
+
+        Quadro e elipse respondem só perto do contorno, para que o clique
+        dentro deles alcance o que foi marcado lá dentro (uma seta, um texto).
+        Com `interior=True` (Mover e Apagar), se nada responder assim, vale
+        também clicar no meio do quadro ou da elipse — apagar um quadro
+        mirando a linha fina de 2px era o que fazia o Apagar parecer falhar.
+        """
+        sid = self._hit_test_contorno(ix, iy)
+        if sid is not None or not interior:
+            return sid
+        for shp in reversed(self.shapes):
+            if not shp.get("visible", True) or shp["tool"] not in ("retangulo", "elipse"):
+                continue
+            xa, ya, xb, yb = _ordenado(shp["coords"])
+            if xa <= ix <= xb and ya <= iy <= yb:
+                return shp["id"]
+        return None
+
+    def _hit_test_contorno(self, ix, iy):
         tol_img = 8 / max(self.escala, 0.01)
         for shp in reversed(self.shapes):
             if not shp.get("visible", True):
@@ -1065,7 +1218,9 @@ class EditorImagem(Toplevel):
         entrada.focus_set()
         entrada.select_range(0, "end")
         entrada.bind("<Return>", lambda e: self._encerrar_editor_texto(gravar=True))
-        entrada.bind("<Escape>", lambda e: self._encerrar_editor_texto(gravar=False))
+        # "break": sem ele o Esc seguia para a janela e, além de cancelar o
+        # texto, trocava a ferramenta para o Mover
+        entrada.bind("<Escape>", lambda e: (self._encerrar_editor_texto(gravar=False), "break")[1])
         entrada.bind("<FocusOut>", lambda e: self._encerrar_editor_texto(gravar=True))
         self._editor_texto = {"widget": entrada, "ix": ix, "iy": iy, "sid": sid}
 
@@ -1119,12 +1274,15 @@ class EditorImagem(Toplevel):
             self._abrir_editor_texto(shp["coords"][0], shp["coords"][1], sid=sid)
 
     def _concluir_criacao(self, sid):
-        """Depois de criar uma forma nova, já deixa ela selecionada com a
-        ferramenta Mover ativa — dá pra ajustar a posição na hora, sem
-        precisar trocar de ferramenta manualmente antes de gravar."""
-        self.selected_id = sid
-        self.ferramenta = "mover"
-        self._definir_ferramenta_ativa("mover")
+        """Depois de criar uma forma, a ferramenta continua a mesma.
+
+        Antes o editor trocava sozinho para Mover e selecionava a forma nova:
+        para pôr três setas era preciso clicar três vezes no botão Seta. Agora
+        se desenha em sequência até trocar de ferramenta; para ajustar uma
+        forma já feita (posição, cor, espessura) usa-se o Mover. Nada fica
+        selecionado, então mudar a cor vale para as PRÓXIMAS formas.
+        """
+        self.selected_id = None
         self._atualizar_status()
 
     def _apagar_selecionado_tecla(self, event=None):
@@ -1150,22 +1308,26 @@ class EditorImagem(Toplevel):
         ferramenta = self.ferramenta
 
         if ferramenta == "mover":
-            sid = self._hit_test(ix, iy)
+            sid = self._hit_test(ix, iy, interior=True)
             self.selected_id = sid
             if sid is not None:
                 self._push_undo()
                 self._drag_origem = (ix, iy)
                 self._drag_coords_ini = list(self._get_shape(sid)["coords"])
+            # o controle de espessura passa a mostrar (e regular) a forma clicada
+            self._atualizar_rotulo_espessura()
             self._redraw_canvas()
             self._atualizar_lista_camadas()
             return
 
         if ferramenta == "apagar":
-            sid = self._hit_test(ix, iy)
+            # continua no Apagar: dá para apagar uma forma atrás da outra
+            sid = self._hit_test(ix, iy, interior=True)
             if sid is not None:
                 self._push_undo()
                 self.shapes = [s for s in self.shapes if s["id"] != sid]
                 self.selected_id = None
+                self._sob_o_apagar = None
                 self._marcar_sujo()
                 self._redraw_canvas()
                 self._atualizar_lista_camadas()
@@ -1195,7 +1357,14 @@ class EditorImagem(Toplevel):
             return
 
         if ferramenta == "texto":
-            self._abrir_editor_texto(ix, iy)
+            # com a ferramenta Texto ativa, clicar num texto existente edita
+            # esse texto em vez de abrir outro por cima dele
+            sid = self._hit_test(ix, iy)
+            shp = self._get_shape(sid) if sid is not None else None
+            if shp and shp["tool"] == "texto":
+                self._abrir_editor_texto(shp["coords"][0], shp["coords"][1], sid=sid)
+            else:
+                self._abrir_editor_texto(ix, iy)
             return
 
         if ferramenta == "emoji":
@@ -1222,6 +1391,8 @@ class EditorImagem(Toplevel):
             "color": self.cor_selecionada, "width": self.espessura,
             "dash": self.tracejado, "visible": True,
         }
+        if ferramenta in ESTILOS_NOVOS:
+            novo["estilo"] = ESTILOS_NOVOS[ferramenta]
         self.shapes.append(novo)
         self._shape_em_progresso = novo["id"]
         self._redraw_canvas()
@@ -1324,11 +1495,12 @@ class EditorImagem(Toplevel):
             novas_formas.append(nova)
         self.shapes = novas_formas
 
-        self.selected_id = None
         self._shape_em_progresso = None
         self.zoom_mode = "fit"
         self._marcar_sujo()
-        self._redraw_canvas()
+        # Recortar duas vezes seguidas é raro; depois do recorte o editor
+        # volta ao Mover (que também redesenha) em vez de ficar armado.
+        self._ativar_ferramenta("mover")
         self._atualizar_lista_camadas()
 
     # ---------- ações do rodapé ----------

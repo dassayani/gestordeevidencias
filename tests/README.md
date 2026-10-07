@@ -41,7 +41,7 @@ As suítes:
   de área e atalho com o painel escondido.
 - **sistema** — Lixeira, menu Iniciar, pasta de dados em `%APPDATA%`.
 
-São 42 casos ao todo.
+São 43 casos ao todo.
 
 ## Ao escrever um cenário novo
 

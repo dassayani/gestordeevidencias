@@ -26,6 +26,7 @@ from gestor.dados import capture_store
 from gestor.dados import config
 from gestor.ui import configuracoes
 from gestor.ui import document_builder
+from gestor.ui import editor
 from gestor.ui.workspace import AppEvidencias
 
 DESTINO = os.path.join(RAIZ, "docs", "images")
@@ -71,11 +72,31 @@ os.makedirs(capturas)
 amostras = [("Tela de login do sistema", (11, 114, 133)),
             ("Cadastro de competencia", (232, 89, 12)),
             ("Confirmacao do fechamento", (12, 133, 90))]
+# Anotações do print aberto no editor, para a imagem do README mostrar as
+# ferramentas como saem hoje (seta afinada, passo, quadro e desfoque).
+ANOTACOES = [
+    {"id": 1, "tool": "retangulo", "coords": [36, 206, 1164, 284], "color": "#E8590C",
+     "width": 4, "dash": False, "visible": True},
+    {"id": 2, "tool": "seta", "coords": [640, 420, 900, 268], "color": "#E8590C",
+     "width": 5, "dash": False, "visible": True, "estilo": editor.ESTILO_SETA},
+    {"id": 3, "tool": "passo", "coords": [1120, 245, 1120, 245], "color": "#E8590C",
+     "width": 4, "dash": False, "visible": True, "step_n": 1},
+    {"id": 4, "tool": "borrao", "coords": [16, 14, 300, 58], "color": "#E8590C",
+     "width": 5, "dash": False, "visible": True, "estilo": editor.ESTILO_BORRAO},
+]
+
 for i, (titulo, cor) in enumerate(amostras):
     caminho = os.path.join(capturas, "print_15%02d00.png" % i)
     captura_sintetica(caminho, titulo, cor)
+    formas = ANOTACOES if i == len(amostras) - 1 else []
+    if formas:
+        # original limpo no .raw.png e as anotações aplicadas no .png, como o
+        # editor grava
+        original = Image.open(caminho).convert("RGB")
+        original.save(caminho[:-4] + ".raw.png")
+        editor.render_composite(original, formas).save(caminho)
     capture_store.save_meta(caminho, {"caption": titulo, "caso": "CT-100%d" % i,
-                                      "shapes": []})
+                                      "shapes": formas})
 
 cfg = config.load(tmp)
 cfg["pasta_capturas"] = capturas

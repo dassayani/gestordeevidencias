@@ -300,6 +300,71 @@ try:
     checar(galeria[0] == "print_000200.png",
            "ja na galeria (mtime) ele sobe para o topo: e por isso o mtime nao serve para ordenar")
 
+    # ---- coluna espremida ao maximo: botoes e aviso continuam inteiros ----
+    j._paineis.sash_place(0, 1, 300)          # divisoria arrastada ate a esquerda
+    j.update()
+    root.update()
+    largura_col = j._col_sequencia.winfo_width()
+    checar(largura_col >= 170, "a coluna para no minimo, nao some (%d px)" % largura_col)
+    cartao = j._cards[0]
+    botoes = [w for w in j._cartoes[j.passos[0]["caminho"]]["topo"].winfo_children()[0].winfo_children()]
+    direita = cartao.winfo_rootx() + cartao.winfo_width()
+    checar(len(botoes) == 4 and all(b.winfo_width() >= b.winfo_reqwidth()
+                                    and b.winfo_rootx() + b.winfo_width() <= direita
+                                    for b in botoes),
+           "com a coluna no minimo, os 4 botoes (inclusive o ✕) aparecem inteiros: %s"
+           % [(b.cget("text"), b.winfo_width(), b.winfo_reqwidth()) for b in botoes])
+    larguras = {b.winfo_width() for b in botoes}
+    checar(len(larguras) == 1, "e todos com o mesmo tamanho (%s)" % sorted(larguras))
+    j._esconder_aviso()
+    clicar(j._pill_rec)
+    j.update()
+    rotulo_aviso = j._lbl_aviso_seq
+    desfazer = [w for w in j._aviso_seq.winfo_children() if w is not rotulo_aviso][0]
+    checar(bool(j._aviso_seq.winfo_ismapped())
+           and rotulo_aviso.winfo_reqwidth() <= rotulo_aviso.winfo_width() + 2,
+           "o aviso 'Mais novos primeiro' cabe inteiro (%d de %d px; mapeado=%s, modo=%s, texto=%r)"
+           % (rotulo_aviso.winfo_reqwidth(), rotulo_aviso.winfo_width(),
+              j._aviso_seq.winfo_ismapped(), j._modo_ordem, rotulo_aviso.cget("text")))
+    # uma mensagem mais comprida que a coluna tem de quebrar linha, nao cortar
+    j._registrar_movimento([p["caminho"] for p in j.passos], None, "cronologica",
+                           texto="Um aviso bem mais comprido do que cabe na coluna estreita")
+    j.update()
+    j.update()
+    checar(rotulo_aviso.winfo_reqwidth() <= rotulo_aviso.winfo_width() + 2
+           and rotulo_aviso.winfo_height() >= rotulo_aviso.winfo_reqheight(),
+           "um aviso comprido quebra linha em vez de sair cortado (%d de %d px)"
+           % (rotulo_aviso.winfo_reqwidth(), rotulo_aviso.winfo_width()))
+    checar(desfazer.winfo_width() >= desfazer.winfo_reqwidth()
+           and desfazer.winfo_rootx() + desfazer.winfo_width()
+           <= j._aviso_seq.winfo_rootx() + j._aviso_seq.winfo_width(),
+           "e o 'Desfazer' aparece inteiro")
+    clicar(j._pill_cron)
+
+    # ---- o temporizador de um aviso antigo nao esconde o aviso novo ----
+    # mover -> Desfazer -> mover de novo, tudo antes de o primeiro aviso vencer:
+    # o temporizador do primeiro continuava agendado e sumia com o segundo
+    # (e com o "Desfazer" dele) antes da hora.
+    aviso_ms = document_builder._AVISO_MS
+    document_builder._AVISO_MS = 900
+    try:
+        inicio = time.time()
+        j._mover(0, 1)                   # aviso 1: venceria em 0,9 s
+        root.update()
+        j._desfazer_movimento()          # esconde o aviso 1
+        root.update()
+        time.sleep(0.4)
+        j._mover(1, -1)                  # aviso 2: vence em ~1,3 s desde o inicio
+        root.update()
+        while time.time() - inicio < 1.05:   # passa do prazo do aviso 1
+            root.update()
+            time.sleep(0.02)
+        checar(bool(j._aviso_seq.winfo_ismapped()) and j._ordem_antes_mover is not None,
+               "o aviso novo (e o Desfazer dele) continua na tela depois do prazo do antigo")
+    finally:
+        document_builder._AVISO_MS = aviso_ms
+    j._esconder_aviso()
+
     j.destroy()
     root.update()
 

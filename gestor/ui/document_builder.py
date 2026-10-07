@@ -247,6 +247,7 @@ class MontarDocumento(Toplevel):
     def _montar_coluna_sequencia(self, corpo, t):
         col = tk.Frame(corpo, bg=t["bg_footer"])
         corpo.add(col, minsize=170, width=230, stretch="never")
+        self._paineis, self._col_sequencia = corpo, col
         tk.Label(col, text="SEQUÊNCIA", bg=t["bg_footer"], fg=t["text_muted"],
                  font=(theme.FONT, theme.FS_EYEBROW, "bold")).pack(
                      anchor="w", padx=14, pady=(14, 0))
@@ -279,14 +280,15 @@ class MontarDocumento(Toplevel):
 
         # Aviso de movimento com "Desfazer", preso embaixo da coluna. Só é
         # mostrado depois de uma reordenação e some sozinho.
+        # "Desfazer" vem primeiro, para ter o seu espaço garantido; o texto
+        # quebra linha no que sobra, em vez de sair cortado na coluna estreita.
         self._aviso_seq = tk.Frame(col, bg=t["accent_bg"])
-        self._lbl_aviso_seq = tk.Label(self._aviso_seq, text="", bg=t["accent_bg"],
-                                       fg=t["text_primary"], anchor="w",
-                                       font=(theme.FONT, theme.FS_CAPTION))
-        self._lbl_aviso_seq.pack(side="left", padx=(10, 4), pady=7)
         desfazer = tk.Label(self._aviso_seq, text="Desfazer", bg=t["accent_bg"], fg=t["accent"],
                             font=(theme.FONT, theme.FS_CAPTION, "bold"), cursor="hand2")
-        desfazer.pack(side="right", padx=10)
+        desfazer.pack(side="right", padx=(4, 10), pady=7, anchor="n")
+        self._lbl_aviso_seq = widgets.texto_fluido(self._aviso_seq, "", self.parent_app.modo_escuro,
+                                                    bg=t["accent_bg"], cor="text_primary")
+        self._lbl_aviso_seq.pack(side="left", fill="x", expand=True, padx=(10, 0), pady=7)
         desfazer.bind("<Button-1>", lambda e: self._desfazer_movimento())
 
         wrap = tk.Frame(col, bg=t["bg_footer"])
@@ -354,7 +356,33 @@ class MontarDocumento(Toplevel):
         self._empacotar_sequencia()
         self._sincronizar_fotos_seq()
         self._restaurar_rolagem(self._canvas_sequencia, rolagem)
+        self._garantir_largura_sequencia()
         self._atualizar_paginas()
+
+    def _garantir_largura_sequencia(self):
+        """A divisória não deixa a coluna ficar mais estreita que os botões.
+
+        Arrastar a divisa para a esquerda espremia a linha de controles do
+        cartão até o ✕ sumir. O mínimo é a largura que a linha pede mais as
+        margens do cartão, da coluna e a barra de rolagem.
+        """
+        recs = [r for r in self._cartoes.values() if r.get("topo") is not None]
+        if not recs:
+            return
+        try:
+            self.update_idletasks()
+            topo = recs[0]["topo"]
+            barra = self._canvas_sequencia.master.winfo_children()[-1]
+            precisa = (topo.winfo_reqwidth() + 2 * 6      # padx do topo no cartão
+                       + 2 * 2                            # borda do cartão
+                       + 10 + 12                          # padx do cartão e do canvas
+                       + barra.winfo_reqwidth() + 4)
+            minimo = max(170, precisa)
+            self._paineis.paneconfigure(self._col_sequencia, minsize=minimo)
+            if self._col_sequencia.winfo_width() < minimo:
+                self._paineis.paneconfigure(self._col_sequencia, width=minimo)
+        except (tk.TclError, AttributeError, IndexError):
+            pass
 
     def _criar_cartao_seq(self, passo, numero, t):
         caminho = passo["caminho"]
@@ -369,15 +397,13 @@ class MontarDocumento(Toplevel):
         topo = tk.Frame(linha, bg=t["bg_input"])
         topo.pack(fill="x", padx=6, pady=(4, 0))
 
-        # Alça de arraste: o cartão inteiro arrasta, mas sem ela ninguém
-        # descobre que dá.
-        alca = tk.Label(topo, text="⋮⋮", bg=t["bg_input"], fg=t["text_muted"],
-                        font=(theme.FONT, theme.FS_SUBTITLE), cursor="fleur", padx=4)
-        alca.pack(side="left")
-
         # Área de clique maior nos controles: eram 5px de padding e ficavam
         # difíceis de acertar. O arraste do card é o caminho principal;
         # estes seguem como ajuste fino de uma posição por vez.
+        #
+        # Os botões são empacotados ANTES da alça e com largura fixa: o pack
+        # tira espaço de quem veio por último, e com a alça primeiro, numa
+        # coluna estreita, era o ✕ que encolhia até sumir.
         controles = tk.Frame(topo, bg=t["bg_input"])
         controles.pack(side="right")
         for rotulo, acao in (
@@ -388,11 +414,18 @@ class MontarDocumento(Toplevel):
             alvo = tk.Label(controles, text=rotulo, bg=t["bg_input"],
                              fg=t["danger_text"] if rotulo == "✕" else t["text_tertiary"],
                              font=(theme.FONT, theme.FS_SUBTITLE), cursor="hand2",
-                             padx=9, pady=4)
+                             width=2, padx=4, pady=4)
             alvo.pack(side="left")
             alvo.bind("<Button-1>", lambda e, a=acao: a())
             alvo.bind("<Enter>", lambda e, w=alvo: w.config(bg=t["pill_bg"]))
             alvo.bind("<Leave>", lambda e, w=alvo: w.config(bg=t["bg_input"]))
+
+        # Alça de arraste: o cartão inteiro arrasta, mas sem ela ninguém
+        # descobre que dá. Vem depois dos botões: se faltar espaço, é ela que cede.
+        alca = tk.Label(topo, text="⋮⋮", bg=t["bg_input"], fg=t["text_muted"],
+                        font=(theme.FONT, theme.FS_SUBTITLE), cursor="fleur", padx=4)
+        alca.pack(side="left")
+        rec["topo"] = topo
 
         arrastaveis = [linha, topo, alca]
         # A moldura abraça a imagem em vez de ocupar a largura toda:
@@ -798,7 +831,16 @@ class MontarDocumento(Toplevel):
     def _esconder_aviso(self):
         """O desfazer vale enquanto o aviso está na tela: sem ele, um Ctrl+Z
         minutos depois desfaria um movimento antigo sem ninguém ver."""
-        self._aviso_job = None
+        # Cancela o temporizador quando o aviso some antes da hora (Desfazer,
+        # Ctrl+Z, remover um passo). Sem isso ele continuava agendado e, se o
+        # usuário movesse outro passo nesses segundos, escondia o aviso NOVO —
+        # e o "Desfazer" dele junto.
+        job, self._aviso_job = self._aviso_job, None
+        if job:
+            try:
+                self.after_cancel(job)
+            except tk.TclError:
+                pass
         self._ordem_antes_mover = None
         try:
             self._aviso_seq.pack_forget()
@@ -824,8 +866,7 @@ class MontarDocumento(Toplevel):
         modo = "recentes" if decrescente else "cronologica"
         nova = capture_store.ordenar_instantes(
             [(p["caminho"], p["instante"]) for p in self.passos], decrescente)
-        texto = ("Ordenado do mais novo ao mais antigo" if decrescente
-                 else "Ordenado do início ao fim")
+        texto = "Mais novos primeiro" if decrescente else "Do início ao fim"
         self._aplicar_ordem(nova, None, True, modo, texto)
 
     def _atualizar_pills_ordem(self):

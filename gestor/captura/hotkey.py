@@ -202,10 +202,24 @@ class HotkeyManager:
         hotkey_id = self._proximo_id
         self._proximo_id += 1
         self._comandos.put(("registrar", (hotkey_id, vk, modifiers)))
-        try:
-            respondido, erro = self._respostas.get(timeout=timeout)
-        except queue.Empty:
-            raise RuntimeError("o serviço de atalhos não respondeu")
+        # Só vale a resposta DESTE pedido. Um registro anterior que estourou o
+        # prazo responde atrasado, e sem este filtro a resposta velha seria lida
+        # aqui — o atalho novo ficaria ligado ao id do outro.
+        limite = time.monotonic() + timeout
+        while True:
+            restante = limite - time.monotonic()
+            if restante <= 0:
+                raise RuntimeError("o serviço de atalhos não respondeu")
+            try:
+                respondido, erro = self._respostas.get(timeout=restante)
+            except queue.Empty:
+                raise RuntimeError("o serviço de atalhos não respondeu")
+            if respondido == hotkey_id:
+                break
+            # resposta de um pedido que já desistiu: se ele chegou a registrar
+            # a tecla, solta, para não ficar presa sem ninguém escutando
+            if erro is None:
+                self._comandos.put(("remover", respondido))
         if erro is not None:
             raise RuntimeError("combinação já em uso por outro programa")
         self._registros[nome] = (respondido, vk, modifiers)

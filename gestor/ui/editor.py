@@ -33,6 +33,7 @@ TOOL_LABELS = {
     "emoji": "Emoji",
     "passo": "Passo",
     "borrao": "Borrar",
+    "tarja": "Tarja",
     "recorte": "Recorte",
     "apagar": "Apagar",
 }
@@ -115,6 +116,11 @@ def _ic_borrao(d, cx, cy, r, cor, lw):
                         fill=cor)
 
 
+def _ic_tarja(d, cx, cy, r, cor, lw):
+    """Faixa sólida, como a tarja preta de um documento redigido."""
+    d.rectangle([cx - r, cy - r * 0.42, cx + r, cy + r * 0.42], fill=cor)
+
+
 def _ic_recorte(d, cx, cy, r, cor, lw):
     """Marcas de corte em L, como no ícone clássico de crop."""
     d.line([cx - r * 0.45, cy - r, cx - r * 0.45, cy + r * 0.62], fill=cor, width=lw)
@@ -138,8 +144,13 @@ FERRAMENTAS_COLUNA = [
     ("emoji", _ic_emoji, "Emoji"),
     ("passo", _ic_passo, "Passo"),
     ("borrao", _ic_borrao, "Borrar"),
+    ("tarja", _ic_tarja, "Tarja"),
     ("recorte", _ic_recorte, "Recorte"),
 ]
+
+# Cor da tarja: fixa, e não a cor escolhida na barra. Tarja de outra cor (ou
+# semitransparente) pareceria destaque, e a função dela é esconder.
+COR_TARJA = (20, 20, 20)
 
 
 def _ordenado(c):
@@ -209,6 +220,11 @@ def render_composite(raw_img, shapes):
                          font=font_step, fill=(255, 255, 255), anchor="mm")
         elif tool == "borrao":
             utils.pixelate_region(img, c)
+        elif tool == "tarja":
+            # Opaca, desenhada na própria imagem. A pixelização do Borrar pode
+            # ser revertida em texto pequeno (há ferramentas públicas para
+            # isso); para CPF, token e afins, só a tarja não deixa resto.
+            draw_nm.rectangle(_ordenado(c), fill=COR_TARJA)
 
     return Image.alpha_composite(img, overlay).convert("RGB")
 
@@ -963,6 +979,10 @@ class EditorImagem(Toplevel):
                                               fill="#B8C4CB", stipple="gray25")
             self.canvas.create_rectangle(cx1, cy1, cx2, cy2,
                                          outline="#8EA2AD", width=1, dash=(3, 2))
+        elif tool == "tarja":
+            # a mesma cor sólida que vai para a imagem gravada
+            self.canvas.create_rectangle(cx1, cy1, cx2, cy2, outline="",
+                                         fill="#%02x%02x%02x" % COR_TARJA)
 
         if destaque:
             t = theme.get(self.modo_escuro)
@@ -1014,7 +1034,7 @@ class EditorImagem(Toplevel):
             dentro = (xa - tol_img <= ix <= xb + tol_img) and (ya - tol_img <= iy <= yb + tol_img)
             if not dentro:
                 continue
-            if shp["tool"] in ("marcador", "borrao"):
+            if shp["tool"] in ("marcador", "borrao", "tarja"):
                 return shp["id"]
             borda = not (xa + tol_img < ix < xb - tol_img and ya + tol_img < iy < yb - tol_img)
             if borda:

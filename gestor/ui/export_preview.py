@@ -16,6 +16,7 @@ import tkinter as tk
 from PIL import Image, ImageTk
 
 from gestor.dados import config
+from gestor.ui import editor
 from gestor.exportacao import docx_export
 from gestor.exportacao import pdf_export
 from gestor.ui import theme
@@ -55,6 +56,9 @@ class PreVisualizarExportar(Toplevel):
         self._documento = None
         self._arquivo_previa = None
         self.total_paginas = 1
+        self._mapa = []              # onde cada imagem está em cada página
+        self._editor = None          # editor aberto a partir da página
+        self._montar_bloqueado = False
 
         self.title("Pré-visualização e exportação")
         self.state("zoomed")
@@ -110,6 +114,9 @@ class PreVisualizarExportar(Toplevel):
         self.lbl_pagina.pack(side="left", padx=6)
         widgets.Botao(nav, "Próxima ›", self._proxima_pagina, self.parent_app.modo_escuro,
                        variante="ghost", tamanho="sm", bg=t["bg_content"]).pack(side="left", padx=6)
+        tk.Label(centro, text="duplo clique numa imagem da página para editá-la",
+                 bg=t["bg_content"], fg=t["text_muted"],
+                 font=(theme.FONT, theme.FS_CAPTION)).pack()
 
         self._render_pagina()
 
@@ -145,6 +152,7 @@ class PreVisualizarExportar(Toplevel):
                                "ge_previa_%d_%d.pdf" % (os.getpid(), id(self)))
         pdf_export.exportar(self.modelo, destino, self.capa, self.passos,
                             self.opcoes)
+        self._mapa = pdf_export.mapa_imagens()
         self._arquivo_previa = destino
         self._documento = pymupdf.open(destino)
         self.total_paginas = self._documento.page_count
@@ -206,8 +214,122 @@ class PreVisualizarExportar(Toplevel):
         img = self.imagem_da_pagina(self.pagina_atual)
         tk_img = ImageTk.PhotoImage(img)
         self.imagens_tk.append(tk_img)
-        tk.Label(self.moldura, image=tk_img, bg="#ffffff",
-                 borderwidth=0).pack(expand=True)
+        pagina = tk.Label(self.moldura, image=tk_img, bg="#ffffff", borderwidth=0,
+                          padx=0, pady=0)
+        pagina.pack(expand=True)
+        self.lbl_imagem_pagina = pagina
+        # Duplo clique numa imagem da página abre o editor dela; o cursor vira
+        # mãozinha só em cima das imagens, que é onde o duplo clique faz algo.
+        pagina.bind("<Double-Button-1>", lambda e: self._editar_na_pagina(e.x, e.y))
+        pagina.bind("<Motion>", lambda e: pagina.config(
+            cursor="hand2" if self._imagem_em(e.x, e.y) else ""))
+
+    # ---------- editar a imagem direto na página ----------
+
+    def _imagem_em(self, x, y):
+        """O caminho da imagem sob o ponto (pixels do rótulo da página), ou None.
+
+        Converte o clique para milímetros da página e procura no mapa que o
+        próprio PDF registrou ao posicionar as imagens.
+        """
+        rotulo = getattr(self, "lbl_imagem_pagina", None)
+        if rotulo is None or not self._mapa:
+            return None
+        largura = getattr(self, "pagina_w", PAGINA_W)
+        altura = getattr(self, "pagina_h", PAGINA_H)
+        try:
+            dx = (rotulo.winfo_width() - largura) / 2
+            dy = (rotulo.winfo_height() - altura) / 2
+        except tk.TclError:
+            return None
+        mm_x = (x - dx) * pdf_export.PAGE_W / largura
+        mm_y = (y - dy) * pdf_export.PAGE_H / altura
+        for pagina, ix, iy, iw, ih, caminho in self._mapa:
+            if pagina == self.pagina_atual and ix <= mm_x <= ix + iw and iy <= mm_y <= iy + ih:
+                return caminho
+        return None
+
+    def _editar_na_pagina(self, x, y):
+        caminho = self._imagem_em(x, y)
+        if caminho is None:
+            return
+        # Um editor por vez, como no Montar: dois sobre a mesma imagem e o
+        # último a gravar apagaria o trabalho do outro.
+        if self._editor is not None and self._editor.winfo_exists():
+            self._editor.deiconify()
+            self._editor.lift()
+            self._editor.focus_force()
+            return
+        if not os.path.exists(caminho):
+            messagebox.showwarning(
+                "Editar imagem",
+                "O arquivo desta captura não foi encontrado — ele pode ter sido "
+                "movido ou apagado.", parent=self)
+            return
+        passo = next((p for p in self.passos if p["caminho"] == caminho), None)
+        try:
+            ed = editor.EditorImagem(
+                self, caminho, lambda c=caminho: self._ao_gravar(c),
+                self.parent_app.modo_escuro, app=self.parent_app, janela_retorno=self,
+                legenda_inicial=passo["legenda"] if passo else None)
+        except Exception as e:
+            messagebox.showerror("Editar imagem",
+                                 f"Não foi possível abrir o editor:\n{e}", parent=self)
+            return
+        self._editor = ed
+        # Bloqueia a prévia e o Montar por trás dela (sem grab_set, que travaria
+        # também o overlay do Print Screen). O Montar só é bloqueado aqui se
+        # estava livre — se ele mesmo tem um editor aberto, não é nosso soltar.
+        self.attributes("-disabled", True)
+        self._montar_bloqueado = False
+        montar = self.janela_anterior
+        try:
+            if montar is not None and montar.winfo_exists() and not int(montar.attributes("-disabled")):
+                montar.attributes("-disabled", True)
+                self._montar_bloqueado = True
+        except (tk.TclError, AttributeError):
+            pass
+        # o desbloqueio vem do <Destroy> do editor, e não dos botões dele
+        ed.bind("<Destroy>", lambda e, w=ed: self._editor_fechado(w, e), add="+")
+        ed.lift()
+        ed.focus_force()
+
+    def _editor_fechado(self, ed, evento):
+        if str(evento.widget) != str(ed):
+            return            # <Destroy> de um widget interno do editor
+        if self._editor is ed:
+            self._editor = None
+        if self._montar_bloqueado:
+            self._montar_bloqueado = False
+            try:
+                self.janela_anterior.attributes("-disabled", False)
+            except (tk.TclError, AttributeError):
+                pass
+        try:
+            self.attributes("-disabled", False)
+            self.deiconify()
+            self.focus_force()
+        except tk.TclError:
+            pass              # a prévia também foi fechada
+
+    def _ao_gravar(self, caminho):
+        """O editor gravou: o Montar e esta prévia passam a mostrar a imagem nova."""
+        montar = self.janela_anterior
+        if montar is not None and hasattr(montar, "_ao_gravar"):
+            try:
+                if montar.winfo_exists():
+                    # o Montar relê a legenda, refaz as miniaturas, atualiza a
+                    # galeria e regera as prévias abertas — esta inclusive
+                    montar._ao_gravar(caminho)
+                    return
+            except tk.TclError:
+                pass
+        from gestor.dados import capture_store
+        for passo in self.passos:
+            if passo["caminho"] == caminho:
+                passo["legenda"] = capture_store.load_meta(caminho).get("caption", "")
+        self.regerar()
+        self.parent_app.atualizar_galeria()
 
     def imagem_da_pagina(self, indice):
         """A página `indice` do documento, no tamanho em que é exibida."""

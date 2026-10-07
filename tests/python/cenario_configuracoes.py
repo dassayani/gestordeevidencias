@@ -95,7 +95,7 @@ cfg.update({"pasta_capturas": capturas,
             "copiar_apos_captura": False,
             "atalho_captura_area": "ctrl_shift_s",
             "atalho_janela_ativa": "ctrl_alt_w",
-            "padrao_nome": "data_hora",
+            "padrao_nome": "hora",          # o padrao de fabrica passou a ser data_hora
             "retencao_dias": 45,
             "borda_ativada": True,
             "fonte_legenda": "Times",

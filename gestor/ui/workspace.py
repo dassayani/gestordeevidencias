@@ -1,6 +1,7 @@
 """Painel/área de trabalho principal (tela '1a' do design): busca, filtros,
 lista de capturas, seleção para documento e disparo da captura de tela."""
 import os
+import queue
 import threading
 from datetime import datetime
 from tkinter import messagebox
@@ -52,6 +53,8 @@ MESES_PT = [
 
 # de quanto em quanto tempo insistir num atalho que estava ocupado
 _INTERVALO_RETENTATIVA_MS = 20000
+# de quanto em quanto tempo o Tk atende os pedidos do menu da bandeja
+_INTERVALO_BANDEJA_MS = 150
 # quantas vezes insistir no posicionamento da grade enquanto o canvas nao tem
 # largura util (25 ms cada: o suficiente para o Tk realizar os widgets)
 MAX_TENTATIVAS_GRADE = 40
@@ -286,12 +289,35 @@ class AppEvidencias:
 
     # ---------- construção da UI ----------
 
+    def _ajustar_titulo_painel(self):
+        """Reduz a fonte do título até caber no espaço que os ícones deixam.
+
+        Com o painel estreito (ou a fonte da interface aumentada) o título
+        cortava no meio da palavra; uma fonte menor inteira lê melhor.
+        """
+        titulo = getattr(self, "_titulo_painel", None)
+        if titulo is None:
+            return
+        try:
+            disponivel = titulo.winfo_width() - 6     # a borda interna do rótulo
+        except tk.TclError:
+            return
+        if disponivel <= 1:
+            return
+        for tamanho in (theme.FS_TITLE, theme.FS_SUBTITLE, theme.FS_BODY):
+            fonte = tkfont.Font(family=theme.FONT, size=tamanho, weight="bold")
+            if fonte.measure(titulo.cget("text")) <= disponivel:
+                break
+        if titulo.cget("font") != str((theme.FONT, tamanho, "bold")):
+            titulo.config(font=(theme.FONT, tamanho, "bold"))
+
     def _montar_ui(self, t):
         header = tk.Frame(self.root, bg=t["bg_header"], height=52)
         header.pack(fill="x")
         header.pack_propagate(False)
-        tk.Label(header, text="Área de Trabalho", bg=t["bg_header"], fg=t["text_primary"],
-                 font=(theme.FONT, theme.FS_TITLE, "bold")).pack(side="left", padx=(14, 0))
+        # Os ícones são empacotados ANTES do título: o pack dá espaço na ordem
+        # de empacotamento, e com o título primeiro, num painel estreito, eram
+        # os botões (o que se clica) que saíam cortados.
         widgets.IconButton(header, widgets.icone_configuracoes, self.abrir_configuracoes,
                             self.modo_escuro, bg=t["bg_header"]).pack(side="right", padx=(4, 14))
         widgets.IconButton(
@@ -310,6 +336,15 @@ class AppEvidencias:
                                         ativo=(chave == self.modo_visualizacao))
             botao.pack(side="right", padx=2)
             self.botoes_visao[chave] = botao
+
+        titulo = tk.Label(header, text="Área de Trabalho", bg=t["bg_header"],
+                          fg=t["text_primary"], anchor="w",
+                          font=(theme.FONT, theme.FS_TITLE, "bold"))
+        titulo.pack(side="left", fill="x", expand=True, padx=(14, 6))
+        self._titulo_painel = titulo
+        # no próprio título: é o espaço dele que muda quando a janela muda de
+        # largura (o cabeçalho tem altura fixa e quase nunca dispara)
+        titulo.bind("<Configure>", lambda e: self._ajustar_titulo_painel(), add="+")
 
         busca_frame = tk.Frame(self.root, bg=t["bg_panel"])
         busca_frame.pack(fill="x", padx=14, pady=(12, 8))
@@ -525,30 +560,46 @@ class AppEvidencias:
         self.atualizar_galeria()
 
     def atualizar_galeria(self):
-        for w in self.frame_lista.winfo_children():
-            w.destroy()
+        """Mostra as capturas, reaproveitando os cartões que não mudaram.
+
+        Recriar todos os cartões a cada atualização (depois de cada captura,
+        edição ou clique no filtro "Marcadas") levava segundos com uma centena
+        de prints. Cada cartão guarda uma assinatura do que mostra; só o que
+        mudou é recriado, e o resto apenas troca de lugar.
+        """
+        t = theme.get(self.modo_escuro)
+        for w in getattr(self, "_efemeros", ()):
+            try:
+                w.destroy()            # cabeçalhos de data e o aviso de lista vazia
+            except tk.TclError:
+                pass
+        self._efemeros = []
         self.imagens_tk = []
         self.cards = {}
         self._celulas_grade = []
-        # As células saíram da tela junto com os widgets destruídos, então o
-        # número de colunas memorizado descreve um arranjo que não existe mais.
-        # Sem zerar aqui, o recolunamento seguinte saía por "continua com o
-        # mesmo número de colunas" e a lista ficava vazia.
+        # O número de colunas memorizado descreve o arranjo anterior. Sem zerar
+        # aqui, o recolunamento saía por "continua com o mesmo número de
+        # colunas" e a lista ficava vazia.
         self._colunas_grade = 0
-        t = theme.get(self.modo_escuro)
 
         # Uma listagem só por atualização: o contador do filtro "Hoje" listava a
         # pasta de novo (lendo cada .json), dobrando o custo.
         todos = capture_store.list_captures(self.pasta_capturas)
         itens = self._itens_filtrados(todos)
+        if self.modo_visualizacao != "detalhes" and itens:
+            self._medir_celula(itens)
+        cartoes = self._cartoes_reaproveitados(itens, t)
 
         if not itens:
-            tk.Label(self.frame_lista, text="Nenhuma captura encontrada.", bg=t["bg_panel"],
-                     fg=t["text_muted"], font=(theme.FONT, theme.FS_BODY)).pack(pady=30)
+            vazio = tk.Label(self.frame_lista, text="Nenhuma captura encontrada.",
+                             bg=t["bg_panel"], fg=t["text_muted"],
+                             font=(theme.FONT, theme.FS_BODY))
+            vazio.pack(pady=30)
+            self._efemeros.append(vazio)
         elif self.modo_visualizacao == "detalhes":
-            self._montar_detalhes(itens, t)
+            self._montar_detalhes(itens, t, cartoes)
         else:
-            self._montar_grade(itens, t)
+            self._montar_grade(itens, t, cartoes)
 
         self.frame_lista.update_idletasks()
         self.canvas_lista.config(scrollregion=self.canvas_lista.bbox("all"))
@@ -556,10 +607,87 @@ class AppEvidencias:
         if hasattr(self, "botoes_filtro"):
             self._atualizar_botoes_filtro(todos)
 
+    def _assinatura_card(self, item):
+        """O que o cartão mostra. Mudou, recria; igual, reaproveita."""
+        celula = ((getattr(self, "_larg_celula", 0), getattr(self, "_alt_celula", 0))
+                  if self.modo_visualizacao != "detalhes" else None)
+        return (item["mtime"], item["caption"], item.get("caso", ""), item["shape_count"],
+                item["edited"], tuple(item["dims"]), celula, theme.FS_BODY, theme.FS_CAPTION)
+
+    def _cartoes_reaproveitados(self, itens, t):
+        """Os cartões dos itens, recriando só os que mudaram. Devolve {nome: cartão}."""
+        visao = (self.modo_visualizacao, self.modo_escuro, str(self.frame_lista))
+        cache = self.__dict__.setdefault("_cache_cards", {})
+        if getattr(self, "_visao_cache", None) != visao:
+            # Outra visão (ou o painel foi remontado): nada serve. Destruir
+            # ANTES de criar, porque detalhes usa pack e as grades usam grid, e
+            # o Tk não admite os dois no mesmo contêiner.
+            for _, card, _ in cache.values():
+                try:
+                    card.destroy()
+                except tk.TclError:
+                    pass
+            cache.clear()
+            self._visao_cache = visao
+        criar = {"detalhes": self._criar_card, "blocos": self._criar_bloco}.get(
+            self.modo_visualizacao, self._criar_icone)
+        novos, reaproveitados = {}, []
+        for captura in itens:
+            nome = captura["name"]
+            assinatura = self._assinatura_card(captura)
+            guardado = cache.pop(nome, None)
+            if guardado and guardado[0] == assinatura and guardado[1].winfo_exists():
+                self.cards[nome] = guardado[2]
+                novos[nome] = guardado
+                reaproveitados.append(nome)
+                continue
+            if guardado:
+                try:
+                    guardado[1].destroy()
+                except tk.TclError:
+                    pass
+            card = criar(captura, t)
+            novos[nome] = (assinatura, card, self.cards[nome])
+        for _, card, _ in cache.values():       # o que saiu da lista
+            try:
+                card.destroy()
+            except tk.TclError:
+                pass
+        self._cache_cards = novos
+        for nome in reaproveitados:
+            # a seleção pode ter mudado desde que o cartão foi criado
+            self._atualizar_aparencia_card(nome)
+        return {nome: entrada[1] for nome, entrada in novos.items()}
+
+    def _empacotar_em_ordem(self, sequencia):
+        """Põe os widgets (com as opções de pack de cada um) na ordem dada,
+        movendo os que já estão na lista em vez de desmontá-los — desmapear e
+        remapear a subárvore de cada cartão custava mais que criá-lo."""
+        anterior = None
+        for w, opcoes in sequencia:
+            escravos = self.frame_lista.pack_slaves()
+            if w.winfo_manager() != "pack":
+                if anterior is not None:
+                    w.pack(after=anterior, **opcoes)
+                elif escravos:
+                    w.pack(before=escravos[0], **opcoes)
+                else:
+                    w.pack(**opcoes)
+            elif anterior is None:
+                if escravos[0] is not w:
+                    w.pack_configure(before=escravos[0], **opcoes)
+            else:
+                i = escravos.index(anterior)
+                if i + 1 >= len(escravos) or escravos[i + 1] is not w:
+                    w.pack_configure(after=anterior, **opcoes)
+            anterior = w
+
     def _cabecalho_data(self, texto, t):
-        return tk.Label(self.frame_lista, text=texto.upper(), bg=t["bg_panel"],
-                        fg=t["text_muted"], anchor="w",
-                        font=(theme.FONT, theme.FS_CAPTION, "bold"))
+        rotulo = tk.Label(self.frame_lista, text=texto.upper(), bg=t["bg_panel"],
+                          fg=t["text_muted"], anchor="w",
+                          font=(theme.FONT, theme.FS_CAPTION, "bold"))
+        self._efemeros.append(rotulo)
+        return rotulo
 
     def _agrupado_por_data(self, itens):
         """Percorre os itens avisando quando vira o dia."""
@@ -570,25 +698,26 @@ class AppEvidencias:
             grupo = data_item
             yield i, (data_item if virou else None)
 
-    def _montar_detalhes(self, itens, t):
+    def _montar_detalhes(self, itens, t, cartoes):
+        sequencia = []
         for i, cabecalho in self._agrupado_por_data(itens):
             if cabecalho:
-                self._cabecalho_data(cabecalho, t).pack(anchor="w", padx=4, pady=(10, 4))
-            self._criar_card(i, t).pack(fill="x", pady=4, padx=(0, 12))
+                sequencia.append((self._cabecalho_data(cabecalho, t),
+                                  {"anchor": "w", "padx": 4, "pady": (10, 4)}))
+            sequencia.append((cartoes[i["name"]], {"fill": "x", "pady": 4, "padx": (0, 12)}))
+        self._empacotar_em_ordem(sequencia)
 
-    def _montar_grade(self, itens, t):
-        """Monta as celulas e deixa o posicionamento com o recolunador.
+    def _montar_grade(self, itens, t, cartoes):
+        """Junta as celulas e deixa o posicionamento com o recolunador.
 
         As celulas ficam guardadas em `_celulas_grade` porque mudar a largura
         da janela so reposiciona: refazer as miniaturas a cada arrasto de borda
         deixaria o redimensionamento travado.
         """
-        self._medir_celula(itens)
-        criar = self._criar_bloco if self.modo_visualizacao == "blocos" else self._criar_icone
         for i, cabecalho in self._agrupado_por_data(itens):
             if cabecalho:
                 self._celulas_grade.append(("cabecalho", self._cabecalho_data(cabecalho, t)))
-            self._celulas_grade.append(("celula", criar(i, t)))
+            self._celulas_grade.append(("celula", cartoes[i["name"]]))
         self._reposicionar_grade(forcar=True)
 
     def _reposicionar_grade(self, forcar=False):
@@ -713,8 +842,10 @@ class AppEvidencias:
             # do cache: decodificar o PNG inteiro a cada atualização congelava
             # a lista por segundos quando havia muitas capturas
             img_tk = ImageTk.PhotoImage(capture_store.miniatura(item["path"], tamanho))
-            self.imagens_tk.append(img_tk)
             lbl = tk.Label(pai, image=img_tk, bg=t["bg_input"])
+            # a referência mora no rótulo: o cartão é reaproveitado entre
+            # atualizações, e a imagem precisa viver enquanto ele viver
+            lbl.image = img_tk
         except Exception:
             lbl = tk.Label(pai, text="?", bg=t["bg_input"], fg=t["text_muted"])
         lbl.pack(expand=True)
@@ -737,6 +868,7 @@ class AppEvidencias:
 
     def _finalizar_card(self, nome, item, card, clicaveis, arrastaveis, refs):
         """Liga selecao, edicao, copia e arrasto - igual nas tres visoes."""
+        refs["selecionada"] = nome in self.arquivos_selecionados   # como foi pintado
         self.cards[nome] = refs
         for widget in clicaveis:
             widget.bind("<Button-1>", lambda e, n=nome: self._alternar_selecao(n))
@@ -859,6 +991,9 @@ class AppEvidencias:
             return
         t = theme.get(self.modo_escuro)
         selecionada = nome in self.arquivos_selecionados
+        if ref.get("selecionada") == selecionada:
+            return            # já está pintado assim (cartão reaproveitado)
+        ref["selecionada"] = selecionada
         bg = t["accent_bg"] if selecionada else t["bg_panel"]
         ref["card"].config(bg=bg,
                            highlightbackground=t["accent"] if selecionada else t["border_soft"])
@@ -1009,7 +1144,7 @@ class AppEvidencias:
 
     def _salvar_captura(self, imagem):
         nome = captura_utils.nome_livre(self.pasta_capturas,
-                                        self.config.get("padrao_nome", "hora"))
+                                        self.config.get("padrao_nome", "data_hora"))
         caminho = os.path.join(self.pasta_capturas, nome)
         imagem.save(caminho)
         try:
@@ -1113,10 +1248,33 @@ class AppEvidencias:
             img_bandeja = Image.open(caminho_ico)
         else:
             img_bandeja = Image.new("RGB", (64, 64), (11, 114, 133))
-        menu = (item("Abrir Gestor", self.mostrar_janela, default=True),
-                item("Sair", self.sair_total))
+        # O pystray chama o menu na thread DELE, e o Tkinter só pode ser usado
+        # da thread do Tk — a mesma regra que o hotkey.py segue. O menu apenas
+        # enfileira o pedido; quem executa é a drenagem, na thread do Tk.
+        self._pedidos_bandeja = queue.Queue()
+        menu = (item("Abrir Gestor",
+                     lambda icone, it: self._pedidos_bandeja.put(self.mostrar_janela),
+                     default=True),
+                item("Sair", lambda icone, it: self._pedidos_bandeja.put(self.sair_total)))
         self.icon = pystray.Icon("GestorEvidencias", img_bandeja, "Gestor de Evidências", menu)
         threading.Thread(target=self.icon.run, daemon=True).start()
+        self.root.after(_INTERVALO_BANDEJA_MS, self._drenar_bandeja)
+
+    def _drenar_bandeja(self):
+        """Executa, na thread do Tk, o que foi pedido pelo menu da bandeja."""
+        while True:
+            try:
+                pedido = self._pedidos_bandeja.get_nowait()
+            except queue.Empty:
+                break
+            try:
+                pedido()
+            except Exception as e:
+                print(f"[bandeja] falha ao executar o pedido: {e}")
+        try:
+            self.root.after(_INTERVALO_BANDEJA_MS, self._drenar_bandeja)
+        except Exception:
+            pass          # a janela já foi encerrada
 
     def resetar_timer(self, event=None):
         if self.job_inatividade:
@@ -1152,7 +1310,7 @@ class AppEvidencias:
         self.root.focus_set()
         self.resetar_timer()
 
-    def sair_total(self, icon, item):
+    def sair_total(self, icon=None, item=None):
         if self.hotkeys:
             self.hotkeys.parar()
         self.icon.stop()

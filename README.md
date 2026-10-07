@@ -32,8 +32,9 @@ de nada para fora da máquina.
 - 🪟 Captura da janela ativa, com detecção automática da borda real
 - 🎯 Sugestão da área de captura por detecção de bordas
 - ✏️ Editor de anotação: seta, quadro, elipse, marcador, texto, emoji, passo
-  numerado, borrão e recorte
-- 🖍️ Borrão para ocultar dado sensível antes de a evidência sair da máquina
+  numerado, borrão, tarja e recorte
+- ⬛ Tarja sólida para dado sensível (CPF, token, senha) antes de a evidência
+  sair da máquina; o Borrar pixeliza, para o que só precisa ficar ilegível
 - 🏷️ Legenda e Caso/Projeto por captura
 - 🔎 Busca por nome do arquivo, legenda ou caso/projeto
 - 🗂️ Filtros: Hoje, Marcadas (as selecionadas para o documento), Editadas, Tudo
@@ -41,7 +42,8 @@ de nada para fora da máquina.
 - 📄 Três modelos de documento: Passo a passo, Ficha e Relatório (cada um com o seu título padrão na capa)
 - 👀 Pré-visualização que é a página do documento de verdade, não uma amostra
 - ✏️ Ao montar o documento, duplo clique na miniatura (ou ✎) abre o editor da
-  imagem e, ao gravar, o documento volta com tudo atualizado
+  imagem e, ao gravar, o documento volta com tudo atualizado. Na
+  pré-visualização, o duplo clique vale na própria imagem da página
 - ↕️ Reordenar a sequência arrastando: o cartão abre um vão onde vai entrar, a lista
   rola sozinha perto das bordas, Esc cancela, e dá para desfazer (Alt+↑/↓ também)
 - 🕐 O documento nasce do início ao fim do processo (o primeiro print tirado é o
@@ -247,7 +249,7 @@ salva na pasta padrão enquanto isso.
 | `copiar_apos_captura` | Já deixa a captura na área de transferência | `true` |
 | `incluir_cursor` | Desenha o cursor do mouse na captura | `false` |
 | `som_captura` | Som ao capturar | `true` |
-| `padrao_nome` | `hora` ou `data_hora` no nome do arquivo | `hora` |
+| `padrao_nome` | `hora` ou `data_hora` no nome do arquivo | `data_hora` (instalações antigas mantêm o que já tinham) |
 | `retencao_dias` | Manda para a Lixeira capturas antigas que ninguém usou (sem edição, legenda, caso ou anotação); `0` desliga | `0` |
 | `tempo_inatividade_ms` | Tempo até o painel se esconder | `10000` |
 | `modo_visualizacao` | `detalhes`, `blocos` ou `grade` | `detalhes` |
@@ -294,7 +296,7 @@ tests/
 └── python/                  cenários, executáveis também sem o Robot
 ```
 
-São 41 casos. Duas decisões do desenho estão explicadas em
+São 42 casos. Duas decisões do desenho estão explicadas em
 [tests/README.md](tests/README.md), e vale conhecê-las antes de escrever mais
 testes:
 
@@ -365,9 +367,13 @@ querer: CPF, nome, valor, e-mail, token na URL.
 **O que a aplicação faz:**
 
 - Nada sai da máquina: sem upload, sem telemetria, sem conta.
-- A ferramenta **Borrar** pixeliza a região antes de o documento ser gerado, e
-  a pixelização é aplicada na imagem — não é uma tarja por cima que alguém
-  possa remover.
+- A ferramenta **Tarja** cobre a região com um retângulo sólido, gravado na
+  própria imagem — não é uma camada por cima que alguém possa remover. É a
+  que deve ser usada para dado sensível.
+- A ferramenta **Borrar** pixeliza a região, também na imagem. Atenção: em
+  texto pequeno, pixelização pode ser revertida por ferramentas públicas
+  (reconstrução por blocos). Serve para o que só precisa ficar ilegível; para
+  CPF, token ou senha, use a Tarja.
 - Exclusão vai para a Lixeira, então um clique errado tem volta.
 - Falha silenciosa vira registro em `%APPDATA%\GestorEvidencias\erros.log`.
 
@@ -396,7 +402,7 @@ querer: CPF, nome, valor, e-mail, token na URL.
 - [x] Três visualizações da lista
 - [x] Tamanho de fonte ajustável
 - [x] Empacotamento em executável
-- [x] Suíte de teste automatizada (41 casos)
+- [x] Suíte de teste automatizada (42 casos)
 - [x] Editar a imagem direto do Montar documento, sem perder o que já foi preenchido
 - [x] Tela de Configurações extraída do `workspace.py` para módulo próprio
 - [x] Projeto sob Git
@@ -406,11 +412,13 @@ querer: CPF, nome, valor, e-mail, token na URL.
 - [x] Nomes e título padrão da capa por modelo (Passo a passo, Ficha, Relatório)
 - [x] Documento em ordem cronológica, com seletor de ordem e `captured_at`
 - [x] Arrastar a sequência com vão, rolagem automática e desfazer
+- [x] Duplo clique na página da pré-visualização para editar a imagem
+- [x] Ferramenta Tarja, galeria que reaproveita os cartões, nome com data por padrão
 
 ### Próximo
 
-- [ ] Duplo clique na página da pré-visualização para editar a imagem (hoje o
-      duplo clique vale na tela de montar o documento)
+- [ ] Opção de não guardar o original (`.raw.png`) depois de aplicar uma tarja,
+      para o dado sensível não ficar na pasta de capturas
 
 ### Mais adiante
 
@@ -434,7 +442,7 @@ Antes de qualquer entrega, duas coisas:
 
 ```bat
 venv\Scripts\python.exe -m pyflakes gestor main.py tests\python tests\biblioteca   :: precisa sair limpo
-tests\executar.bat                                                                 :: precisa fechar 41/41
+tests\executar.bat                                                                 :: precisa fechar 42/42
 ```
 
 E, para mudança de interface: **rode o app e olhe a tela**. Vários defeitos

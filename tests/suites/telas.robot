@@ -78,6 +78,15 @@ Arrastar a Sequência mostra o destino e solta onde mostrou
     [Tags]    regressao
     Executar cenário de tela    cenario_arraste_sequencia    tempo_limite=420
 
+Pendências da revisão: bandeja, atalho, tarja, galeria e prévia
+    [Documentation]    Menu da bandeja executado na thread do Tk; resposta atrasada de
+    ...                atalho não confundida; nome com data em instalação nova;
+    ...                título do painel inteiro e ícones sem corte; Tarja sólida na
+    ...                imagem; galeria reaproveitando cartões com a miniatura viva;
+    ...                duplo clique na imagem da página da prévia abre o editor.
+    [Tags]    regressao
+    Executar cenário de tela    cenario_pendencias_revisao    tempo_limite=300
+
 Nenhuma evidência é sobrescrita nem some em silêncio
     [Documentation]    Com o app de verdade: captura com o mesmo nome de outra (padrão
     ...                hora) ganha sufixo em vez de sobrescrever; "Limpar pasta" leva só

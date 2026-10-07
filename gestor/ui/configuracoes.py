@@ -218,7 +218,7 @@ def _secao_nomeacao(app, conteudo, t, secao):
     tk.Label(conteudo, text="Padrão de nome do arquivo", bg=t["bg_panel"],
              fg=t["text_tertiary"],
              font=(theme.FONT, theme.FS_CAPTION)).pack(anchor="w", pady=(0, 4))
-    var_padrao_nome = tk.StringVar(value=app.config.get("padrao_nome", "hora"))
+    var_padrao_nome = tk.StringVar(value=app.config.get("padrao_nome", "data_hora"))
 
     def salvar_padrao_nome(valor):
         app.config["padrao_nome"] = valor

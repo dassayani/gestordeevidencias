@@ -80,6 +80,7 @@ cfg["pasta_capturas"] = capturas
 cfg["copiar_apos_captura"] = False
 cfg["som_captura"] = False
 cfg["abrir_apos_captura"] = False
+cfg["padrao_nome"] = "hora"          # o padrao em que o nome so tem HHMMSS e colide
 config.save(tmp, cfg)
 
 root = TkinterDnD.Tk()

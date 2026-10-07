@@ -16,7 +16,10 @@ PADRAO = {
     # deixa a captura recém-feita pronta pra colar com Ctrl+V
     "copiar_apos_captura": True,
     "som_captura": True,
-    "padrao_nome": "hora",
+    # Com data no nome: só a hora (HHMMSS) repete todo dia, e prints de dias
+    # diferentes se misturavam. Vale para instalações novas — quem já tem um
+    # config.json continua com o padrão que está gravado nele.
+    "padrao_nome": "data_hora",
     # detalhes | blocos | grade
     "modo_visualizacao": "detalhes",
     "retencao_dias": 0,

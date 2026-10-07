@@ -322,30 +322,67 @@ def delete_capture(png_path):
     return utils.mover_para_lixeira(alvos)
 
 
+_INFO_CAPTURAS = {}     # caminho -> (assinatura do png e do json, item)
+
+
+def _assinatura_arquivos(caminho, st_png):
+    """Data e tamanho do PNG e do .json (e se há .txt): mudou, relê."""
+    try:
+        st_json = os.stat(json_path(caminho))
+        do_json = (st_json.st_mtime_ns, st_json.st_size)
+    except OSError:
+        do_json = None
+    return (st_png.st_mtime_ns, st_png.st_size, do_json, os.path.exists(txt_path(caminho)))
+
+
 def list_captures(pasta):
+    """As capturas da pasta, da mais nova para a mais antiga.
+
+    A galeria chama isto a cada atualização. Abrir cada PNG para saber as
+    dimensões e reler cada .json custava mais de um segundo com uma centena
+    de prints; o resultado de cada arquivo fica guardado e só é relido quando
+    o PNG ou o .json mudam.
+    """
     itens = []
     if not os.path.isdir(pasta):
         return itens
-    for nome in os.listdir(pasta):
-        baixo = nome.lower()
-        if not baixo.endswith(".png") or baixo.endswith(".raw.png"):
-            continue
-        caminho = os.path.join(pasta, nome)
-        try:
-            meta = load_meta(caminho)
-            with Image.open(caminho) as im:
-                dims = im.size
-            itens.append({
-                "name": nome,
-                "path": caminho,
-                "mtime": os.path.getmtime(caminho),
-                "dims": dims,
-                "caption": meta.get("caption", ""),
-                "caso": meta.get("caso", ""),
-                "edited": bool(meta.get("edited_at")),
-                "shape_count": len(meta.get("shapes", [])),
-            })
-        except Exception:
-            continue
+    vistos = set()
+    with os.scandir(pasta) as entradas:
+        for entrada in entradas:
+            nome = entrada.name
+            baixo = nome.lower()
+            if not baixo.endswith(".png") or baixo.endswith(".raw.png"):
+                continue
+            caminho = os.path.join(pasta, nome)
+            vistos.add(caminho)
+            try:
+                st = entrada.stat()
+                assinatura = _assinatura_arquivos(caminho, st)
+                guardado = _INFO_CAPTURAS.get(caminho)
+                if guardado and guardado[0] == assinatura:
+                    itens.append(dict(guardado[1]))
+                    continue
+                meta = load_meta(caminho)
+                with Image.open(caminho) as im:
+                    dims = im.size
+                item = {
+                    "name": nome,
+                    "path": caminho,
+                    "mtime": st.st_mtime,
+                    "dims": dims,
+                    "caption": meta.get("caption", ""),
+                    "caso": meta.get("caso", ""),
+                    "edited": bool(meta.get("edited_at")),
+                    "shape_count": len(meta.get("shapes", [])),
+                }
+                # a assinatura é tirada de novo: load_meta pode ter migrado o
+                # .txt para .json agora mesmo
+                _INFO_CAPTURAS[caminho] = (_assinatura_arquivos(caminho, os.stat(caminho)), item)
+                itens.append(dict(item))
+            except Exception:
+                continue
+    for caminho in [c for c in _INFO_CAPTURAS
+                    if os.path.dirname(c) == pasta and c not in vistos]:
+        del _INFO_CAPTURAS[caminho]          # apagado ou renomeado
     itens.sort(key=lambda i: i["mtime"], reverse=True)
     return itens

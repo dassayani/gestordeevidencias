@@ -127,6 +127,15 @@ def _capa_dados(capa):
 # Passos que saíram sem imagem na última exportação. Antes a falha era engolida
 # e o passo saía em branco — num documento de evidência, sem ninguém perceber.
 _sem_imagem = []
+# Onde cada imagem ficou na última exportação: (página, x, y, w, h em mm,
+# caminho). A prévia usa isto para saber em que imagem o usuário clicou; vem do
+# mesmo código que posiciona as imagens, então não há o que divergir.
+_mapa = []
+
+
+def mapa_imagens():
+    """Lista (página 0-based, x, y, w, h em mm, caminho) da última exportação."""
+    return list(_mapa)
 
 
 def _inserir_imagem(pdf, caminho, x, y, w, h):
@@ -176,6 +185,9 @@ def _inserir_imagem(pdf, caminho, x, y, w, h):
 
 
 def _imagem_ajustada(pdf, caminho, x, y, w, h, borda=False, cor_borda=TEAL):
+    # a caixa inteira, e não só a imagem: o espaço reservado de uma imagem que
+    # faltou também abre o editor (que explica o que houve)
+    _mapa.append((pdf.page_no() - 1, x, y, w, h, caminho))
     if not (caminho and os.path.exists(caminho) and _inserir_imagem(pdf, caminho, x, y, w, h)):
         # Lacuna visível no lugar de um branco: quem lê o documento precisa
         # saber que ali faltou a evidência.
@@ -552,5 +564,6 @@ def exportar(modelo, destino, capa, passos, opcoes=None):
     """Gera o PDF. Devolve os nomes dos passos que ficaram sem imagem."""
     _, funcao = MODELOS.get(modelo, MODELOS["passo"])
     del _sem_imagem[:]
+    del _mapa[:]
     funcao(destino, capa, passos, opcoes)
     return list(_sem_imagem)

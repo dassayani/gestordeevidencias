@@ -226,8 +226,28 @@ venv\Scripts\python.exe main.py
 compilar.bat
 ```
 
-O resultado fica em `dist\GestorEvidencias\`. Para usar em outra máquina, basta
-copiar essa pasta inteira — não precisa de Python instalado do outro lado.
+O resultado fica em `dist\GestorEvidencias\`. Com o [Inno Setup](https://jrsoftware.org/isinfo.php)
+instalado (`winget install JRSoftware.InnoSetup`), o mesmo comando gera também
+`dist\GestorEvidencias-Setup.exe`, a partir de `instalador.iss`.
+
+### Instalar em outro PC
+
+Leve só o `GestorEvidencias-Setup.exe` e execute. Não precisa de Python nem de
+administrador: instala para o usuário em `%LOCALAPPDATA%\Programs\GestorEvidencias`,
+cria o atalho no menu Iniciar (o mesmo que Configurações liga e desliga) e
+oferece iniciar com o Windows e atalho na Área de Trabalho.
+
+- **Atualizar:** rode o Setup mais novo por cima. Com o app aberto, ele pede
+  para fechar antes.
+- **Desinstalar:** Configurações do Windows → Aplicativos. Remove também o
+  início automático.
+- Capturas e `config.json` (em `%APPDATA%\GestorEvidencias`) ficam intactos
+  nos dois casos.
+- O executável não é assinado: na primeira vez o Windows mostra "O Windows
+  protegeu o computador" → **Mais informações → Executar assim mesmo**.
+
+Sem o Inno Setup, também dá para copiar a pasta `dist\GestorEvidencias` inteira
+(compactada em zip, por exemplo) e abrir o `GestorEvidencias.exe` de lá.
 
 ---
 

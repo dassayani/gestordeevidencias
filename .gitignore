@@ -29,3 +29,6 @@ Capturas/
 PDF/
 DOCX/
 *.raw.png
+
+# Pacotes para levar a outro PC (gerados a partir de dist)
+*.zip

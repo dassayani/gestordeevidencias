@@ -84,10 +84,35 @@ if errorlevel 1 (
     exit /b 1
 )
 
+rem Instalador (Inno Setup): um unico GestorEvidencias-Setup.exe para levar a
+rem outro PC. Opcional: sem o Inno Setup instalado, fica so a pasta do app.
+set "ISCC="
+for %%I in ("%LOCALAPPDATA%\Programs\Inno Setup 6\ISCC.exe" "%ProgramFiles(x86)%\Inno Setup 6\ISCC.exe" "%ProgramFiles%\Inno Setup 6\ISCC.exe") do (
+    if not defined ISCC if exist "%%~I" set "ISCC=%%~I"
+)
+set "SETUP_OK="
+if defined ISCC (
+    echo.
+    echo =====================================================
+    echo    Gerando o instalador ^(Inno Setup^)...
+    echo =====================================================
+    "%ISCC%" /Q instalador.iss
+    if errorlevel 1 (
+        echo  AVISO: o instalador nao foi gerado. A pasta do app continua valida.
+    ) else (
+        set "SETUP_OK=1"
+    )
+) else (
+    echo.
+    echo  Inno Setup nao encontrado: o instalador nao foi gerado.
+    echo  Para gerar:  winget install JRSoftware.InnoSetup
+)
+
 echo.
 echo =====================================================
 echo    CONCLUIDO
 echo    O aplicativo esta em: %CD%\dist\GestorEvidencias\
 echo    Execute por: dist\GestorEvidencias\GestorEvidencias.exe
+if defined SETUP_OK echo    Instalador para outro PC: %CD%\dist\GestorEvidencias-Setup.exe
 echo =====================================================
 pause

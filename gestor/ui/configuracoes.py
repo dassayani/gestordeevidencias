@@ -19,6 +19,33 @@ from gestor.ui import widgets
 FONTES_PDF = [("Arial", "Arial / Helvetica"), ("Times", "Times"), ("Courier", "Courier")]
 
 
+# A tela de Configurações usa o texto um ponto menor que o resto do app: é
+# uma lista longa de opções, e no tamanho do painel ela ocupava duas telas
+# de rolagem. Acompanha a escala de fonte escolhida em Aparência.
+def _fs():
+    return max(8, theme.FS_BODY - 1)
+
+
+def _linha_checkbox(*args, **kwargs):
+    kwargs.setdefault("fonte_pt", _fs())
+    return widgets.linha_checkbox(*args, **kwargs)
+
+
+def _escolha_checkbox(*args, **kwargs):
+    kwargs.setdefault("fonte_pt", _fs())
+    return widgets.escolha_checkbox(*args, **kwargs)
+
+
+def _campo_rotulado(*args, **kwargs):
+    kwargs.setdefault("fonte_pt", _fs())
+    return widgets.campo_rotulado(*args, **kwargs)
+
+
+def _campo_com_botao(*args, **kwargs):
+    kwargs.setdefault("fonte_pt", _fs())
+    return widgets.campo_com_botao(*args, **kwargs)
+
+
 def abrir(app):
     """Abre a janela de Configurações do `app`."""
     app.pausar_timer = True
@@ -31,7 +58,13 @@ def abrir(app):
     win.geometry("780x800")
     win.minsize(620, 520)
 
+    # campos de texto que gravam ao sair do campo; fechar a janela com o
+    # cursor ainda dentro de um deles não dispara o <FocusOut>
+    ao_fechar_campos = []
+
     def ao_fechar():
+        for gravar in ao_fechar_campos:
+            gravar()
         app.pausar_timer = False
         app.resetar_timer()
         win.destroy()
@@ -74,10 +107,10 @@ def abrir(app):
         widgets.titulo_secao(conteudo, titulo, app.modo_escuro,
                              pady=(18 if not primeira else 0, 12))
     _secao_captura(app, conteudo, t, secao, win)
-    _secao_nomeacao(app, conteudo, t, secao)
-    _secao_janela(app, conteudo, t, secao, win)
+    _secao_nomeacao(app, conteudo, t, secao, ao_fechar_campos)
+    _secao_janela(app, conteudo, t, secao, win, ao_fechar_campos)
     _secao_aparencia(app, conteudo, t, secao)
-    _secao_documento(app, conteudo, t, secao, ao_fechar)
+    _secao_documento(app, conteudo, t, secao, ao_fechar, ao_fechar_campos)
 
 
 def _secao_captura(app, conteudo, t, secao, win):
@@ -90,7 +123,7 @@ def _secao_captura(app, conteudo, t, secao, win):
         app.config["abrir_apos_captura"] = valor
         config.save(app.data_dir, app.config)
 
-    widgets.linha_checkbox(conteudo, "Abrir automaticamente após capturar", var_abrir,
+    _linha_checkbox(conteudo, "Abrir automaticamente após capturar", var_abrir,
                            app.modo_escuro,
                            subtitulo="Quando desligado, a captura só fica salva; você abre "
                                      "o painel manualmente pelo ícone da bandeja.",
@@ -113,7 +146,7 @@ def _secao_captura(app, conteudo, t, secao, win):
         app.config["atalho_captura_area"] = valor
         _aplicar_atalhos()
 
-    widgets.escolha_checkbox(conteudo, [(c[0], c[1]) for c in hotkey.COMBOS_CAPTURA_AREA],
+    _escolha_checkbox(conteudo, [(c[0], c[1]) for c in hotkey.COMBOS_CAPTURA_AREA],
                              var_atalho_area, app.modo_escuro,
                              on_change=salvar_atalho_area).pack(fill="x", pady=(0, 10))
 
@@ -126,7 +159,7 @@ def _secao_captura(app, conteudo, t, secao, win):
         app.config["atalho_janela_ativa"] = valor
         _aplicar_atalhos()
 
-    widgets.escolha_checkbox(conteudo, [(c[0], c[1]) for c in hotkey.COMBOS_JANELA_ATIVA],
+    _escolha_checkbox(conteudo, [(c[0], c[1]) for c in hotkey.COMBOS_JANELA_ATIVA],
                              var_atalho_janela, app.modo_escuro,
                              on_change=salvar_atalho_janela).pack(fill="x", pady=(0, 6))
 
@@ -168,7 +201,7 @@ def _secao_captura(app, conteudo, t, secao, win):
         app.config["incluir_cursor"] = valor
         config.save(app.data_dir, app.config)
 
-    widgets.linha_checkbox(conteudo, "Incluir cursor do mouse", var_cursor, app.modo_escuro,
+    _linha_checkbox(conteudo, "Incluir cursor do mouse", var_cursor, app.modo_escuro,
                            on_change=salvar_cursor)
 
     var_copiar = tk.BooleanVar(value=app.config.get("copiar_apos_captura", True))
@@ -177,7 +210,7 @@ def _secao_captura(app, conteudo, t, secao, win):
         app.config["copiar_apos_captura"] = valor
         config.save(app.data_dir, app.config)
 
-    widgets.linha_checkbox(conteudo, "Copiar a captura para a área de transferência",
+    _linha_checkbox(conteudo, "Copiar a captura para a área de transferência",
                            var_copiar, app.modo_escuro,
                            subtitulo="Assim que a captura é feita, ela já pode ser colada "
                                      "com Ctrl+V em qualquer programa.",
@@ -189,7 +222,7 @@ def _secao_captura(app, conteudo, t, secao, win):
         app.config["som_captura"] = valor
         config.save(app.data_dir, app.config)
 
-    widgets.linha_checkbox(conteudo, "Som ao capturar", var_som, app.modo_escuro,
+    _linha_checkbox(conteudo, "Som ao capturar", var_som, app.modo_escuro,
                            on_change=salvar_som)
 
     def alterar_pasta():
@@ -206,12 +239,12 @@ def _secao_captura(app, conteudo, t, secao, win):
         entry_pasta.config(state="readonly")
         app.atualizar_galeria()
 
-    _, entry_pasta = widgets.campo_com_botao(conteudo, "Pasta onde salvar os prints",
+    _, entry_pasta = _campo_com_botao(conteudo, "Pasta onde salvar os prints",
                                              app.modo_escuro, app.pasta_capturas,
                                              "Alterar…", alterar_pasta)
 
 
-def _secao_nomeacao(app, conteudo, t, secao):
+def _secao_nomeacao(app, conteudo, t, secao, ao_fechar_campos):
     """Seção Nomeação e retenção da tela de Configurações."""
     secao("Nomeação e retenção")
 
@@ -224,7 +257,7 @@ def _secao_nomeacao(app, conteudo, t, secao):
         app.config["padrao_nome"] = valor
         config.save(app.data_dir, app.config)
 
-    widgets.escolha_checkbox(conteudo, captura_utils.PADROES_NOME_UI, var_padrao_nome,
+    _escolha_checkbox(conteudo, captura_utils.PADROES_NOME_UI, var_padrao_nome,
                              app.modo_escuro,
                              on_change=salvar_padrao_nome).pack(fill="x", pady=(0, 12))
 
@@ -248,23 +281,24 @@ def _secao_nomeacao(app, conteudo, t, secao):
         app.config["retencao_dias"] = int(entry_retencao.get() or 30) if ativa else 0
         config.save(app.data_dir, app.config)
 
-    widgets.linha_checkbox(conteudo, "Limpar prints automaticamente", var_retencao_ativa,
+    _linha_checkbox(conteudo, "Limpar prints automaticamente", var_retencao_ativa,
                            app.modo_escuro,
                            subtitulo="Ao abrir o app, apaga capturas mais antigas que o prazo "
                                      "abaixo e que nunca foram editadas (mantém as que têm "
                                      "legenda ou anotação) — ajuda a economizar espaço.",
                            on_change=salvar_retencao_ativa)
 
-    _, entry_retencao = widgets.campo_rotulado(conteudo, "Apagar depois de quantos dias",
+    _, entry_retencao = _campo_rotulado(conteudo, "Apagar depois de quantos dias",
                                                app.modo_escuro,
                                                valor_inicial=str(dias_atuais or 30))
     entry_retencao.bind("<FocusOut>", salvar_dias_retencao)
     entry_retencao.bind("<Return>", salvar_dias_retencao)
+    ao_fechar_campos.append(salvar_dias_retencao)
     if not var_retencao_ativa.get():
         entry_retencao.config(state="disabled")
 
 
-def _secao_janela(app, conteudo, t, secao, win):
+def _secao_janela(app, conteudo, t, secao, win, ao_fechar_campos):
     """Seção Janela da tela de Configurações."""
     secao("Janela")
 
@@ -281,7 +315,7 @@ def _secao_janela(app, conteudo, t, secao, win):
                                  parent=win)
             var_iniciar.set(startup.esta_habilitado())
 
-    widgets.linha_checkbox(conteudo, "Iniciar com o Windows", var_iniciar, app.modo_escuro,
+    _linha_checkbox(conteudo, "Iniciar com o Windows", var_iniciar, app.modo_escuro,
                            on_change=salvar_iniciar)
 
     var_menu = tk.BooleanVar(value=startup.no_menu_iniciar())
@@ -296,7 +330,7 @@ def _secao_janela(app, conteudo, t, secao, win):
             messagebox.showerror("Menu Iniciar", f"Não foi possível alterar: {e}", parent=win)
             var_menu.set(startup.no_menu_iniciar())
 
-    widgets.linha_checkbox(
+    _linha_checkbox(
         conteudo, "Adicionar ao menu Iniciar", var_menu, app.modo_escuro,
         subtitulo="Cria um atalho para o app aparecer na pesquisa do Windows.",
         on_change=salvar_menu)
@@ -315,11 +349,12 @@ def _secao_janela(app, conteudo, t, secao, win):
         if not app.pausar_timer:
             app.resetar_timer()
 
-    _, entry_tempo = widgets.campo_rotulado(
+    _, entry_tempo = _campo_rotulado(
         conteudo, "Tempo de inatividade até esconder o painel (segundos)", app.modo_escuro,
         valor_inicial=str(app.tempo_limite // 1000))
     entry_tempo.bind("<FocusOut>", salvar_tempo)
     entry_tempo.bind("<Return>", salvar_tempo)
+    ao_fechar_campos.append(salvar_tempo)
 
 
 def _secao_aparencia(app, conteudo, t, secao):
@@ -341,7 +376,7 @@ def _secao_aparencia(app, conteudo, t, secao):
              fg=t["text_tertiary"],
              font=(theme.FONT, theme.FS_CAPTION)).pack(anchor="w", pady=(0, 4))
     var_escala = tk.StringVar(value=app.config.get("escala_fonte", "padrao"))
-    widgets.escolha_checkbox(conteudo, opcoes_escala, var_escala, app.modo_escuro,
+    _escolha_checkbox(conteudo, opcoes_escala, var_escala, app.modo_escuro,
                              on_change=lambda v: salvar_escala("escala_fonte", v)).pack(
         fill="x", pady=(0, 10))
 
@@ -349,7 +384,7 @@ def _secao_aparencia(app, conteudo, t, secao):
              fg=t["text_tertiary"],
              font=(theme.FONT, theme.FS_CAPTION)).pack(anchor="w", pady=(0, 4))
     var_escala_botao = tk.StringVar(value=app.config.get("escala_fonte_botao", "padrao"))
-    widgets.escolha_checkbox(conteudo, opcoes_escala, var_escala_botao, app.modo_escuro,
+    _escolha_checkbox(conteudo, opcoes_escala, var_escala_botao, app.modo_escuro,
                              on_change=lambda v: salvar_escala("escala_fonte_botao", v)).pack(
         fill="x", pady=(0, 6))
 
@@ -358,9 +393,31 @@ def _secao_aparencia(app, conteudo, t, secao):
                          app.modo_escuro).pack(fill="x")
 
 
-def _secao_documento(app, conteudo, t, secao, ao_fechar):
+def _secao_documento(app, conteudo, t, secao, ao_fechar, ao_fechar_campos):
     """Seção Documento da tela de Configurações."""
     secao("Documento")
+
+    # Autor da capa. Antes não havia onde definir: o app guardava o último
+    # autor digitado no Montar documento e repetia em todos os seguintes.
+    _, entry_autor = _campo_rotulado(conteudo, "Autor (vai na capa de cada documento)",
+                                     app.modo_escuro,
+                                     valor_inicial=app.config.get("autor_padrao", ""))
+    widgets.texto_fluido(conteudo, "Preenche o campo Autor ao montar um documento. "
+                                   "Dá para trocar no próprio documento; aqui fica o "
+                                   "padrão.", app.modo_escuro).pack(fill="x", pady=(0, 8))
+
+    def salvar_autor(event=None):
+        try:
+            autor = entry_autor.get().strip()
+        except tk.TclError:
+            return
+        if autor != app.config.get("autor_padrao", ""):
+            app.config["autor_padrao"] = autor
+            config.save(app.data_dir, app.config)
+
+    entry_autor.bind("<FocusOut>", salvar_autor)
+    entry_autor.bind("<Return>", salvar_autor)
+    ao_fechar_campos.append(salvar_autor)
 
     var_borda = tk.BooleanVar(value=app.config.get("borda_ativada", False))
 
@@ -368,7 +425,7 @@ def _secao_documento(app, conteudo, t, secao, ao_fechar):
         app.config["borda_ativada"] = valor
         config.save(app.data_dir, app.config)
 
-    widgets.linha_checkbox(conteudo, "Adicionar borda nas imagens do documento", var_borda,
+    _linha_checkbox(conteudo, "Adicionar borda nas imagens do documento", var_borda,
                            app.modo_escuro,
                            subtitulo="Aplicada só na hora de gerar o documento, não altera "
                                      "a captura original.",
@@ -383,7 +440,7 @@ def _secao_documento(app, conteudo, t, secao, ao_fechar):
         app.config["fonte_legenda"] = valor
         config.save(app.data_dir, app.config)
 
-    widgets.escolha_checkbox(conteudo, FONTES_PDF, var_fonte, app.modo_escuro,
+    _escolha_checkbox(conteudo, FONTES_PDF, var_fonte, app.modo_escuro,
                              on_change=salvar_fonte).pack(fill="x", pady=(0, 4))
 
     widgets.botao_secundario(conteudo, "Limpar pasta de capturas",

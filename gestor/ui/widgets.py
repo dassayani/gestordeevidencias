@@ -351,12 +351,13 @@ class Checkbox(tk.Frame):
     do resto da interface (em vez do tk.Checkbutton nativo)."""
 
     def __init__(self, parent, variable, dark=False, bg=None, on_change=None, tamanho=18,
-                 altura_linha=None):
-        """`altura_linha` faz o canvas ter a altura de uma linha de texto, com
-        o quadrado centrado dentro dela. Assim, alinhando o topo do controle
-        com o topo do rótulo, o quadrado cai na altura visual das letras — os
-        glifos ficam baixos dentro da caixa de linha, então deslocar só o
-        controle pra baixo nunca acertava o alinhamento."""
+                 altura_linha=None, centro_y=None):
+        """`centro_y` é a altura, a partir do topo do rótulo ao lado, onde
+        fica o meio das letras (ver `_centro_texto`): o quadrado é centrado
+        ali, e com o topo do controle alinhado ao topo do rótulo ele cai na
+        altura visual do texto. `altura_linha` (o meio da linha inteira) é o
+        jeito antigo, que deixava o quadrado ~3px alto: ignorava a margem
+        interna do Label e que as letras ficam abaixo do meio da linha."""
         t = theme.get(dark)
         bg = bg or t["bg_panel"]
         super().__init__(parent, bg=bg)
@@ -364,7 +365,12 @@ class Checkbox(tk.Frame):
         self.variable = variable
         self.on_change = on_change
         self.tamanho = tamanho
-        self.altura = max(tamanho, altura_linha or tamanho)
+        if centro_y is not None:
+            self.altura = max(tamanho, int(round(centro_y + tamanho / 2)) + 1)
+            self._dy = max(0, int(round(centro_y - tamanho / 2)))
+        else:
+            self.altura = max(tamanho, altura_linha or tamanho)
+            self._dy = (self.altura - tamanho) / 2
         self.canvas = tk.Canvas(self, width=tamanho, height=self.altura, bg=bg,
                                  highlightthickness=0, cursor="hand2")
         self.canvas.pack()
@@ -381,7 +387,7 @@ class Checkbox(tk.Frame):
         self.canvas.delete("all")
         marcado = bool(self.variable.get())
         s = self.tamanho
-        dy = (self.altura - s) / 2  # centra o quadrado na altura da linha
+        dy = self._dy
         if marcado:
             self.canvas.create_rectangle(1, dy + 1, s - 1, dy + s - 1,
                                           fill=self.t["accent"], outline=self.t["accent"])
@@ -402,20 +408,48 @@ def _altura_linha(fonte_pt=None):
         return int((fonte_pt or theme.FS_BODY) * 1.8)
 
 
-def linha_checkbox(parent, texto, variable, dark=False, subtitulo=None, on_change=None):
+_CENTROS_TEXTO = {}
+
+
+def _centro_texto(fonte_pt=None):
+    """Distância do topo de um tk.Label até o meio das letras maiúsculas.
+
+    É onde o olho espera o meio da caixinha. Soma a margem interna do Label
+    (borda + realce + pady) com a ascendente da fonte menos meia altura de
+    maiúscula — que na Segoe UI é 0,70 do corpo, e o corpo é a ascendente
+    dividida por 1,08 (a ascendente da Segoe inclui o espaço dos acentos).
+    """
+    fonte_pt = fonte_pt or theme.FS_BODY
+    if fonte_pt not in _CENTROS_TEXTO:
+        try:
+            ascendente = tkfont.Font(family=theme.FONT, size=fonte_pt).metrics("ascent")
+            amostra = tk.Label()
+            margem = sum(int(float(amostra.cget(k)))
+                         for k in ("borderwidth", "highlightthickness", "pady"))
+            amostra.destroy()
+            corpo = ascendente / 1.08
+            _CENTROS_TEXTO[fonte_pt] = margem + ascendente - 0.35 * corpo
+        except Exception:
+            return _altura_linha(fonte_pt) * 0.55
+    return _CENTROS_TEXTO[fonte_pt]
+
+
+def linha_checkbox(parent, texto, variable, dark=False, subtitulo=None, on_change=None,
+                   fonte_pt=None):
     t = theme.get(dark)
+    fonte_pt = fonte_pt or theme.FS_BODY
     linha = tk.Frame(parent, bg=t["bg_panel"])
     linha.pack(fill="x", pady=6)
-    # A caixa é centrada na PRIMEIRA LINHA do rótulo, não no topo da linha
-    # inteira: ancorada só no topo ela ficava opticamente alta (18px de caixa
-    # contra ~10px de altura de maiúscula), e centrada na linha inteira ia
-    # parar ao lado do subtítulo nos itens que têm um.
+    # A caixa é centrada no meio das letras da PRIMEIRA LINHA do rótulo:
+    # centrada na linha inteira ia parar ao lado do subtítulo nos itens que
+    # têm um.
     cb = Checkbox(linha, variable, dark=dark, bg=t["bg_panel"], on_change=on_change,
-                  altura_linha=_altura_linha())
+                  tamanho=16 if fonte_pt < theme.FS_BODY else 18,
+                  centro_y=_centro_texto(fonte_pt))
     cb.pack(side="left", padx=(0, 10), anchor="n")
     info = tk.Frame(linha, bg=t["bg_panel"])
     info.pack(side="left", fill="x", expand=True)
-    lbl = texto_fluido(info, texto, dark, cor="text_primary", fonte=(theme.FONT, theme.FS_BODY))
+    lbl = texto_fluido(info, texto, dark, cor="text_primary", fonte=(theme.FONT, fonte_pt))
     lbl.config(cursor="hand2")
     lbl.pack(fill="x")
     lbl.bind("<Button-1>", lambda e: cb._alternar())
@@ -430,7 +464,8 @@ def titulo_secao(parent, texto, dark=False, pady=(18, 8)):
              font=(theme.FONT, theme.FS_EYEBROW, "bold")).pack(anchor="w", pady=pady)
 
 
-def campo_rotulado(parent, rotulo, dark=False, valor_inicial="", **entry_kwargs):
+def campo_rotulado(parent, rotulo, dark=False, valor_inicial="", fonte_pt=None,
+                   **entry_kwargs):
     t = theme.get(dark)
     bloco = tk.Frame(parent, bg=t["bg_panel"])
     bloco.pack(fill="x", pady=6)
@@ -444,7 +479,7 @@ def campo_rotulado(parent, rotulo, dark=False, valor_inicial="", **entry_kwargs)
     entry = tk.Entry(caixa, bg=t["bg_input"], fg=t["text_primary"], relief="flat",
                        insertbackground=t["text_primary"],
                        readonlybackground=t["bg_input"], disabledbackground=t["bg_input"],
-                       font=(theme.FONT, theme.FS_BODY), **entry_kwargs)
+                       font=(theme.FONT, fonte_pt or theme.FS_BODY), **entry_kwargs)
     entry.pack(fill="x", padx=10, pady=8)
     if valor_inicial:
         entry.insert(0, valor_inicial)
@@ -640,11 +675,12 @@ def botao_secundario(parent, texto, comando, dark=False, bg=None):
     return Botao(parent, texto, comando, dark, variante="secundario", bg=bg)
 
 
-def escolha_checkbox(parent, opcoes, variable, dark=False, on_change=None):
+def escolha_checkbox(parent, opcoes, variable, dark=False, on_change=None, fonte_pt=None):
     """Lista vertical de opções com caixa de seleção quadrada, escolha única
     (marcar uma desmarca as outras) — usada nas Configurações em vez das
     pílulas, que pareciam radio button."""
     t = theme.get(dark)
+    fonte_pt = fonte_pt or theme.FS_BODY
     container = tk.Frame(parent, bg=t["bg_panel"])
     linhas = {}
 
@@ -663,12 +699,15 @@ def escolha_checkbox(parent, opcoes, variable, dark=False, on_change=None):
         linha = tk.Frame(container, bg=t["bg_panel"])
         linha.pack(fill="x", anchor="w", pady=2)
         var_local = tk.BooleanVar(value=(v == variable.get()))
-        cb = Checkbox(linha, var_local, dark=dark, bg=t["bg_panel"], tamanho=16,
-                      altura_linha=_altura_linha(),
+        # mesmo tamanho de caixa da linha_checkbox: com caixas de 16 e 18 px
+        # lado a lado, o texto das opções começava 2px antes dos outros itens
+        cb = Checkbox(linha, var_local, dark=dark, bg=t["bg_panel"],
+                      tamanho=16 if fonte_pt < theme.FS_BODY else 18,
+                      centro_y=_centro_texto(fonte_pt),
                       on_change=lambda marcado, vv=v: selecionar(vv) if marcado else atualizar())
-        cb.pack(side="left", padx=(0, 8), anchor="n")
+        cb.pack(side="left", padx=(0, 10), anchor="n")
         lbl = tk.Label(linha, text=rotulo, bg=t["bg_panel"], fg=t["text_primary"],
-                       font=(theme.FONT, theme.FS_BODY), cursor="hand2", anchor="w")
+                       font=(theme.FONT, fonte_pt), cursor="hand2", anchor="w")
         lbl.pack(side="left", fill="x", expand=True)
         lbl.bind("<Button-1>", lambda e, vv=v: selecionar(vv))
         linhas[v] = (cb, lbl)
@@ -677,7 +716,8 @@ def escolha_checkbox(parent, opcoes, variable, dark=False, on_change=None):
     return container
 
 
-def campo_com_botao(parent, rotulo, dark, valor_inicial, texto_botao, comando_botao):
+def campo_com_botao(parent, rotulo, dark, valor_inicial, texto_botao, comando_botao,
+                    fonte_pt=None):
     """Campo somente-leitura + botão de ação na mesma linha, alinhados
     (ex.: caminho de pasta + "Alterar…")."""
     t = theme.get(dark)
@@ -692,7 +732,7 @@ def campo_com_botao(parent, rotulo, dark, valor_inicial, texto_botao, comando_bo
     caixa.pack(side="left", fill="x", expand=True, padx=(0, 8))
     entry = tk.Entry(caixa, bg=t["bg_input"], fg=t["text_primary"], relief="flat",
                       insertbackground=t["text_primary"],
-                      font=(theme.FONT, theme.FS_BODY))
+                      font=(theme.FONT, fonte_pt or theme.FS_BODY))
     entry.pack(fill="both", expand=True, padx=10, pady=8)
     if valor_inicial:
         entry.insert(0, valor_inicial)

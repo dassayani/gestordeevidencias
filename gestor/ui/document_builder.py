@@ -9,7 +9,6 @@ import tkinter as tk
 from PIL import Image, ImageDraw, ImageFont, ImageOps, ImageTk
 
 from gestor.dados import capture_store
-from gestor.dados import config
 from gestor.ui import editor
 from gestor.ui import theme
 from gestor.ui import widgets
@@ -1069,7 +1068,7 @@ class MontarDocumento(Toplevel):
         if chave == "data":
             return datetime.now().strftime("%d/%m/%Y")
         if chave == "autor":
-            # último autor usado, pra não ter que redigitar a cada documento
+            # autor de Configurações → Documento, pra não redigitar a cada vez
             return self.parent_app.config.get("autor_padrao", "")
         return ""
 
@@ -1301,11 +1300,10 @@ class MontarDocumento(Toplevel):
             return
         self._sincronizar_legendas()
         self._gravar_legendas()
+        # O autor digitado aqui vale só para este documento. Antes ele virava
+        # o padrão dos próximos sem aviso — um nome usado uma vez passava a
+        # sair em todos; o padrão agora vem só de Configurações.
         capa = {chave: entry.get().strip() for chave, entry in self.entries_capa.items()}
-        # guarda o autor pro próximo documento já vir preenchido
-        if capa.get("autor") != self.parent_app.config.get("autor_padrao", ""):
-            self.parent_app.config["autor_padrao"] = capa.get("autor", "")
-            config.save(self.parent_app.data_dir, self.parent_app.config)
         opcoes = {
             "cor_destaque": self.var_cor.get(),
             "numerar_passos": self.var_numerar.get(),

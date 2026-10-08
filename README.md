@@ -279,7 +279,7 @@ salva na pasta padrão enquanto isso.
 | `escala_fonte` / `escala_fonte_botao` | `pequena`, `padrao`, `grande`, `muito_grande` | `padrao` |
 | `borda_ativada` / `borda_cor` | Borda nas imagens do documento | `false` / `#0B7285` |
 | `fonte_legenda` | Fonte do documento: `Arial`, `Times`, `Courier` | `Arial` |
-| `autor_padrao` | Autor sugerido na capa | vazio |
+| `autor_padrao` | Autor da capa, definido em Configurações → Documento (trocar o autor num documento vale só para ele) | vazio |
 
 Os documentos gerados vão para `PDF\` e `DOCX\` dentro da pasta de capturas
 vigente — se você mudar a pasta, as subpastas acompanham.
@@ -319,7 +319,7 @@ tests/
 └── python/                  cenários, executáveis também sem o Robot
 ```
 
-São 43 casos. Duas decisões do desenho estão explicadas em
+São 44 casos. Duas decisões do desenho estão explicadas em
 [tests/README.md](tests/README.md), e vale conhecê-las antes de escrever mais
 testes:
 
@@ -432,7 +432,7 @@ querer: CPF, nome, valor, e-mail, token na URL.
 - [x] Três visualizações da lista
 - [x] Tamanho de fonte ajustável
 - [x] Empacotamento em executável
-- [x] Suíte de teste automatizada (43 casos)
+- [x] Suíte de teste automatizada (44 casos)
 - [x] Editar a imagem direto do Montar documento, sem perder o que já foi preenchido
 - [x] Tela de Configurações extraída do `workspace.py` para módulo próprio
 - [x] Projeto sob Git
@@ -472,7 +472,7 @@ Antes de qualquer entrega, duas coisas:
 
 ```bat
 venv\Scripts\python.exe -m pyflakes gestor main.py tests\python tests\biblioteca   :: precisa sair limpo
-tests\executar.bat                                                                 :: precisa fechar 43/43
+tests\executar.bat                                                                 :: precisa fechar 44/44
 ```
 
 E, para mudança de interface: **rode o app e olhe a tela**. Vários defeitos

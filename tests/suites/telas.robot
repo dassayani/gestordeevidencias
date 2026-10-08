@@ -204,3 +204,12 @@ Ferramenta do editor continua ativa, seta afinada e Borrar com desfoque
     ...                a intensidade, e prints antigos regravados não mudam.
     [Tags]    regressao
     Executar cenário de tela    cenario_ferramentas_fixas
+
+Cada opção das Configurações muda o que o app faz
+    [Documentation]    Clica nas opções como o usuário e confere o efeito: atalho
+    ...                registrado no Windows (e o anterior liberado), nome do
+    ...                arquivo, cursor, cópia, som, abrir após capturar, autor na
+    ...                capa, fonte e borda na exportação, campos que gravam ao
+    ...                fechar pelo X, e as caixinhas na altura do texto.
+    [Tags]    regressao
+    Executar cenário de tela    cenario_configuracoes_efeito

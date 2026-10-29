@@ -191,6 +191,7 @@ try:
               for c in (bom, corrompido, ausente, dezesseis)]
     import pymupdf
     import docx as _docx
+    from docx.table import _Cell
     for modelo in ("passo", "ficha", "qa"):
         destino = os.path.join(pasta, "doc_%s.pdf" % modelo)
         sem = pdf_export.exportar(modelo, destino, {"titulo": "T"}, passos, {})
@@ -214,8 +215,10 @@ try:
         textos = [p.text for p in documento.paragraphs]
         for tabela in documento.tables:
             for linha in tabela.rows:
-                for celula in linha.cells:
-                    textos.extend(p.text for p in celula.paragraphs)
+                # célula mesclada (a da imagem na Ficha) vem uma vez por
+                # coluna da grade; o XML da linha tem cada célula uma vez só
+                for tc in linha._tr.tc_lst:
+                    textos.extend(p.text for p in _Cell(tc, tabela).paragraphs)
         checar(sum("imagem indisponível" in t for t in textos) == 2,
                "[docx/%s] com a lacuna marcada no texto" % modelo)
     checar(pdf_export.exportar("passo", os.path.join(pasta, "ok.pdf"), {}, passos[:1], {}) == [],
